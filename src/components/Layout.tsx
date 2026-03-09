@@ -37,7 +37,7 @@ export function Layout() {
       <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-container">
           <Link to="/" className="brand-link">
-            <Dice />
+            <img src="/dist/assets/Icon-2.svg" width={64} height={48} alt="Al Madmoon Logo" />
             <span className="brand-text">Al Madmoon</span>
           </Link>
 
