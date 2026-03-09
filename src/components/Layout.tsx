@@ -3,7 +3,7 @@ import { Button } from './ui/Button';
 import { MessageCircle, Menu, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Dice } from './ui/dice';
+import { Dice } from './ui/Dice';
 import './Layout.css';
 
 const navLinks = [
