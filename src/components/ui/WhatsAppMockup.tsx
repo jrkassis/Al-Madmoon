@@ -11,8 +11,7 @@ interface Message {
 
 const mockMessages: Message[] = [
     { id: '1', text: 'Arsenal vs Chelsea tonight', sender: 'user', time: '10:00 AM' },
-    { id: '2', text: 'Analyzing match...', sender: 'bot', time: '10:00 AM' },
-    { id: '3', text: 'Prediction\n\nArsenal Win Probability: 61%\n\nBest Bet:\nArsenal Draw No Bet @ 1.58\n\nConfidence:\nHigh (79%)\n\nKey Insights:\n• Arsenal unbeaten in last 7 home matches\n• Chelsea missing key defenders\n• Model probability higher than bookmaker implied odds', sender: 'bot', time: '10:02 AM' }
+    { id: '2', text: 'Prediction\nArsenal Win Probability: 61%\n\nBest Bet:\nArsenal Draw No Bet @ 1.58\n\nConfidence:\nHigh (79%)\n\nKey Insights:\n• Arsenal unbeaten in last 7 home matches\n• Chelsea missing key defenders\n• Model probability higher than bookmaker implied odds', sender: 'bot', time: '10:02 AM' }
 ];
 
 export function WhatsAppMockup() {
@@ -29,7 +28,7 @@ export function WhatsAppMockup() {
                     <div className="wa-header">
                         <div className="wa-header-left">
                             <div className="wa-avatar">
-                                <div className="wa-avatar-inner">AI</div>
+                                <div className="wa-avatar-inner"><img src="../../dist/assets/Main.png" alt="Logo" width='32' height='32'/></div>
                             </div>
                             <div className="wa-contact-info">
                                 <div className="wa-contact-name">Al Madmoon</div>

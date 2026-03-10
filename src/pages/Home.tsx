@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../components/ui/Button';
-import { MessageCircle, ArrowRight, CheckCircle2, Trophy, Activity, Zap, Star, BarChart3, Info, Shield, TrendingUp, Target, Globe } from 'lucide-react';
+import { MessageCircle, ArrowRight, CheckCircle2, Trophy, Activity, Zap, Star, BarChart3, Info, Shield, TrendingUp, Target, Globe, Flag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { WhatsAppMockup } from '../components/ui/WhatsAppMockup';
 import { HeroVisual } from '../components/ui/HeroVisual';
@@ -98,26 +98,26 @@ export default function Home() {
           <div className="hero-content">
             <motion.div variants={itemVariants} className="hero-badge">
               <span className="pulse-dot" />
-              AI-Powered Betting Assistant
+              AI-Powered Sports Analyst
             </motion.div>
 
             <motion.h1 variants={itemVariants} className="hero-title">
-              AI Betting Insights Powered by <span className="text-gradient">Real-Time Data</span>
+              Your Personal <span className="text-gradient">Sports Analyst</span>
             </motion.h1>
 
             <motion.p variants={itemVariants} className="hero-subtitle">
-              Analyze football, basketball, and Formula 1 matches using real-time odds, historical statistics, and AI prediction models — directly through WhatsApp.
+              Analyze any sport using real-time data, historical statistics, and AI prediction models directly through WhatsApp.
             </motion.p>
 
             <motion.div variants={itemVariants} className="hero-actions">
               <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="lg" className="btn-icon btn-shadow w-full">
+                <Button variant="secondary" size="lg" className="btn-icon btn-shadow w-75">
                   <MessageCircle size={20} />
                   Start on WhatsApp
                 </Button>
               </a>
               <Link to="/how-it-works">
-                <Button variant="outline" size="lg" className="btn-icon w-full">
+                <Button variant="outline" size="lg" className="btn-icon w-75">
                   See How It Works
                   <ArrowRight size={16} />
                 </Button>
@@ -151,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* Today's AI Picks Section */}
-      <section className="section-base picks-section testimonials-section">
+      <section className="section-base picks-section">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -192,7 +192,7 @@ export default function Home() {
       </section>
 
       {/* AI Example Section */}
-      <section className="section-base" style={{ position: 'relative' }}>
+      <section className="section-base whatsapp-section" style={{ position: 'relative' }}>
         {/* Background Decorators */}
         <div className="glow-orb primary orb-tl" style={{ opacity: 0.3 }} />
         <div className="glow-orb secondary orb-br" style={{ opacity: 0.25 }} />
@@ -209,8 +209,7 @@ export default function Home() {
           <motion.div variants={itemVariants}>
             <h2 className="section-title">Your Personal AI Betting Analyst</h2>
             <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0 0 32px 0' }}>
-              Simply send a match through WhatsApp and the AI instantly analyzes team form, odds movement, historical matchups, and statistical models to identify the best betting opportunities.<br /><br />
-              No dashboards. No spreadsheets. Just text a match and get instant insights.
+              Simply send a match through WhatsApp and the AI instantly analyzes team form, odds movement, historical matchups, and statistical models to identify the best betting opportunities.
             </p>
             <ul className="ai-features-list">
               {[
@@ -225,12 +224,14 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
             <Link to="/features">
               <Button variant="outline" className="btn-icon">
                 View All Capabilities
                 <ArrowRight size={16} />
               </Button>
             </Link>
+            </div>
           </motion.div>
 
           <motion.div variants={itemVariants} className="ai-mockup-showcase">
@@ -285,14 +286,14 @@ export default function Home() {
           {[
             {
               step: '01',
-              title: 'Text a match',
+              title: 'Text Al Madmoon',
               desc: 'Simply send the match you want to analyze via WhatsApp.',
-              example: '"Arsenal vs Chelsea tonight"'
+              example: '"Who wins Arsenal vs Chelsea tonight ?"'
             },
             {
               step: '02',
               title: 'AI analyzes the match',
-              desc: 'The engine evaluates form, historical data, odds movement, and models.',
+              desc: 'Our solution analyzes form, historical data, odds movement, and models.',
               evaluates: ['Team Form', 'Historical Performance', 'Odds Movement', 'Statistical Models']
             },
             {
@@ -327,102 +328,102 @@ export default function Home() {
       </section>
 
       {/* Example Match Analysis Section */}
-      <section className="section-base match-analysis-section">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="section-header"
-        >
-          <motion.h2 variants={itemVariants} className="section-title">Example AI Match Analysis</motion.h2>
-          <motion.p variants={itemVariants} className="section-desc">Our models identify value where bookmakers fail to price risk correctly.</motion.p>
-        </motion.div>
+        {/* <section className="section-base match-analysis-section">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="section-header"
+          >
+            <motion.h2 variants={itemVariants} className="section-title">Example AI Match Analysis</motion.h2>
+            <motion.p variants={itemVariants} className="section-desc">Our models identify value where bookmakers fail to price risk correctly.</motion.p>
+          </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="analysis-showcase"
-        >
-          <motion.div variants={itemVariants} className="prediction-card static-card">
-            <div className="pc-header">
-              <div className="pc-match-info">
-                <span className="pc-live-tag"><span className="live-dot" /> COMPLETED ANALYSIS</span>
-                <h3 className="pc-match-title">Arsenal vs Chelsea</h3>
-                <p className="pc-league">Premier League</p>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={containerVariants}
+            className="analysis-showcase"
+          >
+            <motion.div variants={itemVariants} className="prediction-card static-card">
+              <div className="pc-header">
+                <div className="pc-match-info">
+                  <span className="pc-live-tag"><span className="live-dot" /> COMPLETED ANALYSIS</span>
+                  <h3 className="pc-match-title">Arsenal vs Chelsea</h3>
+                  <p className="pc-league">Premier League</p>
+                </div>
+                <div className="pc-engine-badge">
+                  <Activity size={14} />
+                  AI Engine 4.0
+                </div>
               </div>
-              <div className="pc-engine-badge">
-                <Activity size={14} />
-                AI Engine 4.0
-              </div>
-            </div>
 
-            <div className="pc-content">
-              <div className="pc-grid-row">
+              <div className="pc-content">
+                <div className="pc-grid-row">
+                  <div className="pc-section">
+                    <div className="pc-section-header">
+                      <BarChart3 size={16} />
+                      <span>Win Probability</span>
+                    </div>
+                    <div className="pc-prob-bars">
+                      <div className="pc-prob-item">
+                        <div className="pc-prob-labels">
+                          <span>Arsenal</span>
+                          <span className="pc-prob-val highlight">61%</span>
+                        </div>
+                        <div className="pc-prob-track">
+                          <div className="pc-prob-fill warriors" style={{ width: '61%' }} />
+                        </div>
+                      </div>
+                      <div className="pc-prob-item">
+                        <div className="pc-prob-labels">
+                          <span>Chelsea</span>
+                          <span className="pc-prob-val">39%</span>
+                        </div>
+                        <div className="pc-prob-track">
+                          <div className="pc-prob-fill lakers" style={{ width: '39%' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pc-mini-grid">
+                    <div className="pc-mini-card">
+                      <div className="pc-mini-label">BEST BET</div>
+                      <div className="pc-mini-value highlight">Arsenal DNB</div>
+                      <div className="pc-mini-sub">@ 1.58 Odds</div>
+                    </div>
+                    <div className="pc-mini-card">
+                      <div className="pc-mini-label">CONFIDENCE</div>
+                      <div className="pc-mini-value">High (79%)</div>
+                      <div className="pc-confidence-bar">
+                        <div className="pc-confidence-fill" style={{ width: '79%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="pc-section">
                   <div className="pc-section-header">
-                    <BarChart3 size={16} />
-                    <span>Win Probability</span>
+                    <Info size={16} />
+                    <span>Why the AI recommends this bet</span>
                   </div>
-                  <div className="pc-prob-bars">
-                    <div className="pc-prob-item">
-                      <div className="pc-prob-labels">
-                        <span>Arsenal</span>
-                        <span className="pc-prob-val highlight">61%</span>
-                      </div>
-                      <div className="pc-prob-track">
-                        <div className="pc-prob-fill warriors" style={{ width: '61%' }} />
-                      </div>
-                    </div>
-                    <div className="pc-prob-item">
-                      <div className="pc-prob-labels">
-                        <span>Chelsea</span>
-                        <span className="pc-prob-val">39%</span>
-                      </div>
-                      <div className="pc-prob-track">
-                        <div className="pc-prob-fill lakers" style={{ width: '39%' }} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pc-mini-grid">
-                  <div className="pc-mini-card">
-                    <div className="pc-mini-label">BEST BET</div>
-                    <div className="pc-mini-value highlight">Arsenal DNB</div>
-                    <div className="pc-mini-sub">@ 1.58 Odds</div>
-                  </div>
-                  <div className="pc-mini-card">
-                    <div className="pc-mini-label">CONFIDENCE</div>
-                    <div className="pc-mini-value">High (79%)</div>
-                    <div className="pc-confidence-bar">
-                      <div className="pc-confidence-fill" style={{ width: '79%' }} />
-                    </div>
-                  </div>
+                  <ul className="pc-factors-list">
+                    <li><Shield size={12} className="text-brand" /> Arsenal strong home performance</li>
+                    <li><TrendingUp size={12} className="text-brand" /> Chelsea defensive injuries</li>
+                    <li><Target size={12} className="text-brand" /> Historical head-to-head advantage</li>
+                    <li><BarChart3 size={12} className="text-brand" /> AI model probability higher than bookmaker implied odds</li>
+                  </ul>
                 </div>
               </div>
-
-              <div className="pc-section">
-                <div className="pc-section-header">
-                  <Info size={16} />
-                  <span>Why the AI recommends this bet</span>
-                </div>
-                <ul className="pc-factors-list">
-                  <li><Shield size={12} className="text-brand" /> Arsenal strong home performance</li>
-                  <li><TrendingUp size={12} className="text-brand" /> Chelsea defensive injuries</li>
-                  <li><Target size={12} className="text-brand" /> Historical head-to-head advantage</li>
-                  <li><BarChart3 size={12} className="text-brand" /> AI model probability higher than bookmaker implied odds</li>
-                </ul>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </section>
+        </section> */}
 
       {/* Supported Sports / Leagues Section */}
-      <section className="section-base leagues-section">
+      <section className="section-base">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -430,7 +431,7 @@ export default function Home() {
           variants={containerVariants}
           className="section-header"
         >
-          <motion.h2 variants={itemVariants} className="section-title">Supported Sports & Leagues</motion.h2>
+          <motion.h2 variants={itemVariants} className="section-title">Ask about any sport</motion.h2>
           <motion.p variants={itemVariants} className="section-desc">We cover all major global sports with deep analytical models for every league.</motion.p>
         </motion.div>
 
@@ -442,14 +443,14 @@ export default function Home() {
           className="leagues-grid"
         >
           {[
-            { name: 'Premier League', icon: <Trophy size={18} /> },
-            { name: 'La Liga', icon: <Trophy size={18} /> },
-            { name: 'Champions League', icon: <Trophy size={18} /> },
-            { name: 'NBA', icon: <Activity size={18} /> },
-            { name: 'NFL', icon: <Activity size={18} /> },
-            { name: 'UFC', icon: <Zap size={18} /> },
-            { name: 'Formula 1', icon: <Zap size={18} /> },
-            { name: 'Internationals', icon: <Globe size={18} /> }
+            { name: 'Football', icon: <Flag size={18} /> },
+            { name: 'Basketball', icon: <div style={{fontSize:18,lineHeight:1}}>🏀</div> },
+            { name: 'MMA', icon: <div style={{fontSize:18,lineHeight:1}}>🥊</div> },
+            { name: 'F1', icon: <div style={{fontSize:18,lineHeight:1}}>🏁</div> },
+            { name: 'Tennis', icon: <div style={{fontSize:18,lineHeight:1}}>🎾</div> },
+            { name: 'Baseball', icon: <div style={{fontSize:18,lineHeight:1}}>⚾</div> },
+            { name: 'Golf', icon: <div style={{fontSize:18,lineHeight:1}}>⛳</div> },
+            { name: 'Rugby', icon: <div style={{fontSize:18,lineHeight:1}}>🏉</div> }
           ].map((league, i) => (
             <motion.div key={i} variants={itemVariants} className="league-card">
               <div className="league-icon">{league.icon}</div>
@@ -458,42 +459,6 @@ export default function Home() {
           ))}
         </motion.div>
       </section>
-
-      {/* Finding Value Bets Section */}
-      {/* <section className="section-base value-betting-section">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="value-layout"
-        >
-          <motion.div variants={itemVariants} className="value-content">
-            <h2 className="section-title">Finding Value Bets with AI</h2>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0 0 24px 0' }}>
-              Bookmakers set odds to balance risk and ensure profit. Our AI calculates the <strong>true probability</strong> of match outcomes using historical data, live statistics, and machine learning models.
-            </p>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0' }}>
-              When the AI model probability is higher than the bookmaker implied probability, the system flags a <strong>value betting opportunity</strong>.
-            </p>
-          </motion.div>
-
-          <motion.div variants={itemVariants} className="value-visual">
-            <div className="value-compare-card">
-              <div className="vc-item">
-                <div className="vc-label">MODEL PROBABILITY</div>
-                <div className="vc-value highlight">62%</div>
-              </div>
-              <div className="vc-divider">VS</div>
-              <div className="vc-item">
-                <div className="vc-label">BOOKMAKER PROBABILITY</div>
-                <div className="vc-value">54%</div>
-              </div>
-              <div className="vc-badge">VALUE DETECTED</div>
-            </div>
-          </motion.div>
-        </motion.div>
-      </section> */}
 
       {/* Testimonials Section */}
       <section className="testimonials-section" style={{ position: 'relative', overflow: 'hidden' }}>
