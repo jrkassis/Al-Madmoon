@@ -28,7 +28,7 @@ export function WhatsAppMockup() {
                     <div className="wa-header">
                         <div className="wa-header-left">
                             <div className="wa-avatar">
-                                <div className="wa-avatar-inner"><img src="../../dist/assets/Main.png" alt="Logo" width='32' height='32'/></div>
+                                <div className="wa-avatar-inner"><img src="/Icon-3.svg" alt="Logo" width='32' height='32'/></div>
                             </div>
                             <div className="wa-contact-info">
                                 <div className="wa-contact-name">Al Madmoon</div>
