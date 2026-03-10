@@ -10,8 +10,7 @@ import HowItWorks from './pages/HowItWorks';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
-
-// <Layout />
+import ErrorPage from './pages/ErrorPage';
 
 export default function App() {
   return (
@@ -23,6 +22,7 @@ export default function App() {
           <Route path="features" element={<Features />} />
           <Route path="pricing" element={<Pricing />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="*" element={<ErrorPage />} />
         </Route>
       </Routes>
     </Router>

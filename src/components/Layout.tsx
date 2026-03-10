@@ -37,7 +37,7 @@ export function Layout() {
       <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-container">
           <Link to="/" className="brand-link">
-          <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
+            <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
             <span className="brand-text">Al Madmoon</span>
           </Link>
 
@@ -116,7 +116,7 @@ export function Layout() {
           <div className="footer-grid">
             <div className="footer-brand">
               <Link to="/" className="brand-link">
-                <Dice />
+                <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
                 <span className="brand-text" style={{ color: 'var(--color-text-primary)' }}>Al Madmoon</span>
               </Link>
               <p className="footer-desc">
