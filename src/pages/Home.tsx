@@ -79,76 +79,80 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="home-container">
-      {/* Hero Section */}
-      <section className="section-base hero-section" style={{ position: 'relative' }}>
-        {/* Background Decorators */}
-        <div className="glow-orb primary orb-tl" />
-        <div className="glow-orb secondary orb-br" />
-        <div className="detail-dots dots-1" />
+    <div className="home-container" >
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="hero-layout"
-          style={{ position: 'relative', zIndex: 10 }}
-        >
-          {/* Hero Content (Left Column) */}
-          <div className="hero-content">
-            <motion.div variants={itemVariants} className="hero-badge">
-              <span className="pulse-dot" />
-              AI-Powered Sports Analyst
-            </motion.div>
+      <div className="hero-background">
+        {/* Hero Section */}
+        <section
+          className="section-base hero-section">
+          {/* Background Decorators */}
+          <div className="glow-orb primary orb-tl" />
+          <div className="glow-orb secondary orb-br" />
+          <div className="detail-dots dots-1" />
 
-            <motion.h1 variants={itemVariants} className="hero-title">
-              Your Personal <span className="text-gradient">Sports Analyst</span>
-            </motion.h1>
-
-            <motion.p variants={itemVariants} className="hero-subtitle">
-              Analyze any sport using real-time data, historical statistics, and AI prediction models directly through WhatsApp.
-            </motion.p>
-
-            <motion.div variants={itemVariants} className="hero-actions">
-              <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="lg" className="btn-icon btn-shadow w-75">
-                  <MessageCircle size={20} />
-                  Start on WhatsApp
-                </Button>
-              </a>
-              <Link to="/how-it-works">
-                <Button variant="outline" size="lg" className="btn-icon w-75">
-                  See How It Works
-                  <ArrowRight size={16} />
-                </Button>
-              </Link>
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="check-features">
-              <div className="feature-pill">
-                <CheckCircle2 size={16} className="text-brand" />
-                Real-time analysis
-              </div>
-              <div className="feature-pill">
-                <CheckCircle2 size={16} className="text-brand" />
-                24/7 availability
-              </div>
-              <div className="feature-pill">
-                <CheckCircle2 size={16} className="text-brand" />
-                Data-driven
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Hero Mockup (Right Column) */}
           <motion.div
-            variants={itemVariants}
-            className="hero-mockup-container"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="hero-layout"
+            style={{ position: 'relative', zIndex: 10 }}
           >
-            <HeroVisual />
+            {/* Hero Content (Left Column) */}
+            <div className="hero-content">
+              <motion.div variants={itemVariants} className="hero-badge">
+                <span className="pulse-dot" />
+                AI-Powered Sports Analyst
+              </motion.div>
+
+              <motion.h1 variants={itemVariants} className="hero-title">
+                Your Personal <span className="text-gradient">Sports Analyst</span>
+              </motion.h1>
+
+              <motion.p variants={itemVariants} className="hero-subtitle">
+                Analyze any sport using real-time data, historical statistics, and AI prediction models directly through WhatsApp.
+              </motion.p>
+
+              <motion.div variants={itemVariants} className="hero-actions">
+                <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
+                  <Button variant="secondary" size="lg" className="btn-icon btn-shadow w-75">
+                    <MessageCircle size={20} />
+                    Start on WhatsApp
+                  </Button>
+                </a>
+                <Link to="/how-it-works">
+                  <Button variant="outline" size="lg" className="btn-icon w-75">
+                    See How It Works
+                    <ArrowRight size={16} />
+                  </Button>
+                </Link>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="check-features">
+                <div className="feature-pill">
+                  <CheckCircle2 size={16} className="text-brand" />
+                  Real-time analysis
+                </div>
+                <div className="feature-pill">
+                  <CheckCircle2 size={16} className="text-brand" />
+                  24/7 availability
+                </div>
+                <div className="feature-pill">
+                  <CheckCircle2 size={16} className="text-brand" />
+                  Data-driven
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Hero Mockup (Right Column) */}
+            <motion.div
+              variants={itemVariants}
+              className="hero-mockup-container"
+            >
+              {/* <HeroVisual /> */}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </section>
+        </section>
+      </div>
 
       {/* Today's AI Picks Section */}
       <section className="section-base picks-section">
@@ -208,7 +212,7 @@ export default function Home() {
         >
           <motion.div variants={itemVariants}>
             <h2 className="section-title">Your Personal AI Betting Analyst</h2>
-            <p className="hero-subtitle" style={{ textAlign: 'left', margin: '0 0 32px 0' }}>
+            <p className="hero-subtitle-2" style={{ textAlign: 'left', margin: '0 0 32px 0' }}>
               Simply send a match through WhatsApp and the AI instantly analyzes team form, odds movement, historical matchups, and statistical models to identify the best betting opportunities.
             </p>
             <ul className="ai-features-list">
@@ -225,12 +229,12 @@ export default function Home() {
               ))}
             </ul>
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
-            <Link to="/features">
-              <Button variant="outline" className="btn-icon">
-                View All Capabilities
-                <ArrowRight size={16} />
-              </Button>
-            </Link>
+              <Link to="/features">
+                <Button variant="outline" className="btn-icon">
+                  View All Capabilities
+                  <ArrowRight size={16} />
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -328,7 +332,7 @@ export default function Home() {
       </section>
 
       {/* Example Match Analysis Section */}
-        {/* <section className="section-base match-analysis-section">
+      {/* <section className="section-base match-analysis-section">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -444,13 +448,13 @@ export default function Home() {
         >
           {[
             { name: 'Football', icon: <Flag size={18} /> },
-            { name: 'Basketball', icon: <div style={{fontSize:18,lineHeight:1}}>🏀</div> },
-            { name: 'MMA', icon: <div style={{fontSize:18,lineHeight:1}}>🥊</div> },
-            { name: 'F1', icon: <div style={{fontSize:18,lineHeight:1}}>🏁</div> },
-            { name: 'Tennis', icon: <div style={{fontSize:18,lineHeight:1}}>🎾</div> },
-            { name: 'Baseball', icon: <div style={{fontSize:18,lineHeight:1}}>⚾</div> },
-            { name: 'Golf', icon: <div style={{fontSize:18,lineHeight:1}}>⛳</div> },
-            { name: 'Rugby', icon: <div style={{fontSize:18,lineHeight:1}}>🏉</div> }
+            { name: 'Basketball', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏀</div> },
+            { name: 'MMA', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🥊</div> },
+            { name: 'F1', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏁</div> },
+            { name: 'Tennis', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🎾</div> },
+            { name: 'Baseball', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>⚾</div> },
+            { name: 'Golf', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>⛳</div> },
+            { name: 'Rugby', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏉</div> }
           ].map((league, i) => (
             <motion.div key={i} variants={itemVariants} className="league-card">
               <div className="league-icon">{league.icon}</div>

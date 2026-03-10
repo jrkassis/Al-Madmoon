@@ -14,6 +14,27 @@
     }
 }
 
+.hero-background {
+    width: 100%;
+    height: 92vh;
+    background-image: url('/Background-Hero-2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 0;
+    margin: 8vh auto;
+}
+
+@media (min-width: 1280px) {
+    .hero-background {
+        position: relative;
+        width: calc(100% - 10vw);
+        height: 82vh;
+        border-radius: 32px;
+        margin: 9vh auto;
+    }
+}
+
 /* Sections Common */
 .section-base {
     max-width: 1280px;
@@ -117,7 +138,7 @@
     font-size: 48px;
     font-weight: 700;
     letter-spacing: -0.025em;
-    color: var(--color-text-primary);
+    color: #fff;
     margin-bottom: 24px;
     margin-bottom: 24px;
     max-width: 896px;
@@ -138,6 +159,16 @@
 }
 
 .hero-subtitle {
+    font-size: 18px;
+    /* color: var(--color-text-secondary); */
+    color: #ffffffc8;
+    margin-bottom: 40px;
+    margin-bottom: 40px;
+    max-width: 672px;
+    line-height: 1.6;
+}
+
+.hero-subtitle-2 {
     font-size: 18px;
     color: var(--color-text-secondary);
     margin-bottom: 40px;
@@ -1054,4 +1085,54 @@
     .value-layout {
         padding: 40px 24px;
     }
+}
+
+/* Hero-scoped overrides — dark background fixes */
+.hero-background .feature-pill {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.hero-background .text-brand {
+    color: var(--color-brand-300);
+}
+
+.hero-background .hero-badge {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.hero-background .pulse-dot {
+    background-color: var(--color-brand-300);
+}
+
+/* "See How It Works" outline button — make it visible on dark bg */
+.hero-background .btn-icon.w-75[class*="outline"],
+.hero-background .hero-actions a:last-child button {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.hero-background .hero-actions a:last-child button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Fix "Start on WhatsApp" button visibility in hero */
+.hero-background .hero-actions a:first-child button {
+    background-color: rgba(255, 255, 255, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    color: #fff !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: background 0.25s, border 0.25s, transform 0.15s;
+}
+
+.hero-background .hero-actions a:first-child button:hover {
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.7) !important;
+    transform: scale(1.02);
 }
