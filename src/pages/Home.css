@@ -16,13 +16,24 @@
 
 .hero-background {
     width: 100%;
-    height: 92vh;
+    min-height: 92vh;
     background-image: url('/Background-Image.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 0;
-    margin: 8vh auto;
+}
+
+@media (max-width: 1280px) {
+    .hero-background {
+        margin: 84px auto;
+    }
+}
+
+@media (max-width: 786px) {
+    .hero-background {
+        margin: 72px auto;
+    }
 }
 
 @media (min-width: 1280px) {
@@ -57,8 +68,6 @@
 
 /* Hero Section */
 .hero-section {
-    margin-top: 5%;
-    padding-top: 64px;
     padding-bottom: 0px;
 }
 

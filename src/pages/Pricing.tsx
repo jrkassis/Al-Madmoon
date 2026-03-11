@@ -26,7 +26,6 @@ export default function Pricing() {
       </div>
 
       <motion.div variants={fadeIn} className="pricing-card-wrapper">
-        <div className="pricing-glow-bg" />
         <div className="pricing-card">
           <div className="pricing-badge">
             Most Popular
