@@ -32,7 +32,7 @@ export function Layout() {
   }, [location.pathname]);
 
   return (
-    <div className="layout-wrapper animated-mesh-bg">
+    <div className="layout-wrapper">
       {/* Navbar */}
       <header className={`header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-container">

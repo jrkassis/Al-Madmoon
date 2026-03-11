@@ -173,7 +173,7 @@ export default function Features() {
         <div className="infra-bg-gradient" />
 
         <div className="infra-layout">
-          <div>
+          <div className="infra-text-content">
             <h2 className="infra-title">Professional-Grade Infrastructure</h2>
             <p className="infra-desc">
               Al Madmoon isn't just a simple chatbot. It's a fully automated backend system designed for speed, accuracy, and personalization.
@@ -185,8 +185,8 @@ export default function Features() {
                   <span>1</span>
                 </div>
                 <div>
-                  <h4 className="infra-item-title">User Database</h4>
-                  <p className="infra-item-desc">Securely stores your subscription status and preferences.</p>
+                  <h4 className="infra-item-title">Sports Database</h4>
+                  <p className="infra-item-desc">We have a huge database of sports data and a powerful AI model to analyze and predict matches.</p>
                 </div>
               </div>
               <div className="infra-item">
@@ -194,8 +194,8 @@ export default function Features() {
                   <span>2</span>
                 </div>
                 <div>
-                  <h4 className="infra-item-title">n8n Automation</h4>
-                  <p className="infra-item-desc">Routes messages, checks subscriptions, and triggers AI analysis instantly.</p>
+                  <h4 className="infra-item-title">Real-time Data and News</h4>
+                  <p className="infra-item-desc">We gather real-time data and news from various sources to provide you with the most up-to-date information.</p>
                 </div>
               </div>
               <div className="infra-item">
@@ -203,29 +203,11 @@ export default function Features() {
                   <span>3</span>
                 </div>
                 <div>
-                  <h4 className="infra-item-title">OpenAI Engine</h4>
-                  <p className="infra-item-desc">Processes complex sports data and generates human-like, actionable insights.</p>
+                  <h4 className="infra-item-title">AI Model</h4>
+                  <p className="infra-item-desc">Analyzes the data and generates predictions and recommendations.</p>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="infra-code">
-            <pre className="infra-pre">
-              <code>
-                {`{
-  "user": "Joe",
-  "status": "active",
-  "query": "Best odds for F1 Monaco GP?",
-  "processing": {
-    "engine": "OpenAI-GPT4",
-    "data_source": "Live Odds API",
-    "latency": "450ms"
-  },
-  "response": "Generated successfully"
-}`}
-              </code>
-            </pre>
           </div>
         </div>
       </motion.div>

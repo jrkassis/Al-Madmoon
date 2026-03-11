@@ -9,9 +9,6 @@
     font-family: inherit;
 }
 
-.btn:focus-visible {
-    box-shadow: 0 0 0 2px var(--color-brand-500);
-}
 
 .btn:disabled {
     pointer-events: none;
@@ -33,12 +30,11 @@
     color: rgb(0, 0, 0);
     backdrop-filter: blur(1px) saturate(10%) brightness(1.1);
     -webkit-backdrop-filter: blur(1px) saturate(10%) brightness(1.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), 0 1px 4px 0 rgba(255, 255, 255, 0.17);
     transition: 
       background 0.35s cubic-bezier(0.4,0,0.2,1),
       box-shadow 0.25s cubic-bezier(0.4,0,0.2,1),
       filter 0.2s;
-    filter: blur(0.3px) drop-shadow(0 0 4px rgba(39,176,221,0.1));
+    filter: blur(0.3px) drop-shadow(0 0 4px rgba(0, 0, 0, 0.1));
 }
 
 .btn-secondary:hover {
@@ -46,7 +42,6 @@
     color: rgb(0, 0, 0);
     backdrop-filter: blur(1px) saturate(10%) brightness(1.1);
     -webkit-backdrop-filter: blur(1px) saturate(10%) brightness(1.1);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07), 0 1px 4px 0 rgba(255, 255, 255, 0.17);
     filter: blur(0.3px) drop-shadow(0 0 4px rgba(0, 0, 0, 0.1));
 }
 

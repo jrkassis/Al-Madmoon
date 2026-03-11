@@ -146,17 +146,7 @@
     width: 100%;
 }
 
-.contact-glow-bg {
-    position: absolute;
-    inset: -30px;
-    background: radial-gradient(circle at 80% 20%, var(--color-brand-200), transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.3), transparent 50%);
-    filter: blur(40px);
-    opacity: 0.6;
-    z-index: 0;
-    pointer-events: none;
-    border-radius: 40px;
-}
+
 
 .contact-form-wrapper {
     background: rgba(255, 255, 255, 0.85);

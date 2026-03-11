@@ -298,7 +298,8 @@
     font-size: 30px;
     font-weight: 700;
     color: var(--color-text-primary);
-    margin-bottom: 24px;
+    margin-bottom: 48px;
+    text-align: center;
 }
 
 .arch-desc {

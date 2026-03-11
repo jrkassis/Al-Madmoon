@@ -50,8 +50,8 @@ export default function Contact() {
               <div className="contact-method-content">
                 <h3 className="contact-method-title">WhatsApp Support</h3>
                 <p className="contact-method-desc">Available 24/7 for AI betting insights and subscription help.</p>
-                <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer" className="contact-link">
-                  +961 79 027 611
+                <a href="https://wa.me/71844513" target="_blank" rel="noopener noreferrer" className="contact-link">
+                  +961 71 844 513
                 </a>
               </div>
             </div>
@@ -64,7 +64,7 @@ export default function Contact() {
                 <h3 className="contact-method-title">Email Us</h3>
                 <p className="contact-method-desc">For general inquiries and business partnerships.</p>
                 <a href="mailto:support@almadmoon.ai" className="contact-link">
-                  support@almadmoon.ai
+                  support@almadmoon.net
                 </a>
               </div>
             </div>
@@ -82,7 +82,6 @@ export default function Contact() {
         </motion.div>
 
         <motion.div variants={fadeIn} className="contact-form-container">
-          <div className="contact-glow-bg" />
           <div className="contact-form-wrapper">
             <h2 className="contact-form-title">Send us a message</h2>
             <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
@@ -112,7 +111,7 @@ export default function Contact() {
                 ></textarea>
                 <label htmlFor="message" className="form-label">Message</label>
               </div>
-              <Button variant="primary" size="lg" style={{ width: '100%', marginTop: '8px' }}>
+              <Button variant="outline" size="lg" style={{ width: '100%', marginTop: '8px' }}>
                 Send Message
               </Button>
             </form>

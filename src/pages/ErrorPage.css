@@ -3,7 +3,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f0f6ff;
     position: relative;
     overflow: hidden;
     padding: 0px;
@@ -51,10 +50,9 @@
     position: relative;
     z-index: 10;
     box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 40px 80px -20px rgba(0, 0, 0, 0.4),
-        0 0 60px -10px rgba(14, 165, 233, 0.08);
-}
+        0 0 0 1px rgba(255, 255, 255, 0.03),
+        0 40px 80px -20px rgba(0, 0, 0, 0.23),
+        0 0 60px -10px rgba(14, 165, 233, 0.05);
 
 .error-number {
     font-size: 120px;

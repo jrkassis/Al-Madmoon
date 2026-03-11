@@ -275,7 +275,7 @@
 .orb-1 {
     width: 250px;
     height: 250px;
-    background: var(--color-brand-400);
+    background: #fff;
     top: 10%;
     right: -50px;
     animation: pulse 4s infinite alternate;
@@ -284,7 +284,7 @@
 .orb-2 {
     width: 200px;
     height: 200px;
-    background: var(--color-brand-600);
+    background: #fff;
     bottom: 10%;
     left: -50px;
     animation: pulse 5s infinite alternate-reverse;

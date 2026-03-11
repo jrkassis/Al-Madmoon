@@ -128,7 +128,7 @@ export default function HowItWorks() {
         <div className="arch-text-content">
           <h2 className="arch-title">Powered by Advanced Automation</h2>
           <p className="arch-desc">
-            Behind the scenes, Al Madmoon uses n8n automation workflows connected directly to OpenAI's powerful language models. This ensures every response is data-driven, personalized, and delivered in milliseconds.
+            Behind the scenes, Al Madmoon uses a huge database of sports data and a powerful AI model to analyze and predict matches. This ensures every response is data-driven, personalized, and delivered in milliseconds.
           </p>
           <ul className="arch-features">
             {['Secure user database', 'Real-time odds processing', 'Personalized interaction history'].map((item, i) => (
@@ -139,20 +139,17 @@ export default function HowItWorks() {
             ))}
           </ul>
         </div>
-        <div className="arch-visual">
+        {/* <div className="arch-visual">
           <div className="arch-circle">
             <div className="arch-circle-bg" />
             <div className="arch-nodes">
-              <div className="arch-node-1">
-                <span>n8n</span>
-              </div>
-              <ArrowRight size={24} className="arch-arrow" />
+              
               <div className="arch-node-2">
                 <span>AI</span>
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </motion.div>
 
       <motion.div variants={fadeIn} className="hiw-cta">

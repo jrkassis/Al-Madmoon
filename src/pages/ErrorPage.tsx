@@ -8,9 +8,6 @@ import './ErrorPage.css';
 export default function ErrorPage() {
   return (
     <div className="error-page">
-      {/* Ambient background orbs matching hero style */}
-      <div className="error-orb error-orb-1" />
-      <div className="error-orb error-orb-2" />
 
       <motion.div
         className="error-card"
