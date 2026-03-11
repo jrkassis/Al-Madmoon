@@ -75,10 +75,6 @@ export default function ErrorPage() {
           </a>
         </motion.div>
       </motion.div>
-
-      <style>{`
-        
-      `}</style>
     </div>
   );
 }
