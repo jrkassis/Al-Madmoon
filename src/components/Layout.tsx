@@ -111,7 +111,8 @@ export function Layout() {
       </main>
 
       {/* Footer */}
-      <footer className="footer">
+      {location.pathname !== '/links' && (
+        <footer className="footer">
         <div className="footer-container">
           <div className="footer-grid">
             <div className="footer-brand">
@@ -153,6 +154,7 @@ export function Layout() {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 }

@@ -11,6 +11,7 @@ import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import Contact from './pages/Contact';
 import ErrorPage from './pages/ErrorPage';
+import Links from './pages/Links';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="features" element={<Features />} />
           <Route path="pricing" element={<Pricing />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="links" element={<Links />} />
           <Route path="*" element={<ErrorPage />} />
         </Route>
       </Routes>
