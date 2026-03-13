@@ -1,7 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ExternalLink, MessageCircle, Globe, ArrowRight, DollarSign } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebook, faInstagram } from '@fortawesome/free-brands-svg-icons';
 import './Links.css';
+
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -21,7 +24,8 @@ interface LinkItem {
   id: string;
   title: string;
   url: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | any;
+  iconType?: 'lucide' | 'fontawesome';
   description?: string;
 }
 
@@ -36,27 +40,43 @@ const whatsappLink: LinkItem = {
 const links: LinkItem[] = [
   {
     id: '2',
+    title: 'Facebook',
+    url: 'https://www.facebook.com/profile.php?id=61583902785796',
+    icon: faFacebook,
+    iconType: 'fontawesome',
+    description: 'Facebook Page'
+  },
+  {
+    id: '3',
+    title: 'Instagram',
+    url: 'https://www.instagram.com/almadmoonofficial',
+    icon: faInstagram,
+    iconType: 'fontawesome',
+    description: 'See our subscription plans'
+  },
+  {
+    id: '4',
     title: 'View Pricing',
     url: '/pricing',
     icon: DollarSign,
     description: 'See our subscription plans'
   },
   {
-    id: '3',
+    id: '5',
     title: 'Learn How It Works',
     url: '/how-it-works',
     icon: ArrowRight,
     description: 'Understand our process'
   },
   {
-    id: '4',
+    id: '6',
     title: 'Explore Features',
     url: '/features',
     icon: Globe,
     description: 'Discover what we offer'
   },
   {
-    id: '5',
+    id: '7',
     title: 'Contact Us',
     url: '/contact',
     icon: MessageCircle,
@@ -112,12 +132,14 @@ export default function Links() {
         <motion.div variants={stagger} className="links-list">
           {links.map((link) => {
             const IconComponent = link.icon || ExternalLink;
+            const isFontAwesome = link.iconType === 'fontawesome';
+            const isSocial = link.id === '2' || link.id === '3';
             return (
               <motion.a
                 key={link.id}
                 href={link.url}
                 variants={fadeIn}
-                className="links-card"
+                className={`links-card ${!isSocial ? 'links-card-ghost' : ''}`}
                 target={link.url.startsWith('http') ? '_blank' : undefined}
                 rel={link.url.startsWith('http') ? 'noopener noreferrer' : undefined}
                 whileHover={{ scale: 1.02, y: -2 }}
@@ -125,7 +147,11 @@ export default function Links() {
               >
                 <div className="links-card-content">
                   <div className="links-card-icon">
-                    <IconComponent size={28} />
+                    {isFontAwesome ? (
+                      <FontAwesomeIcon icon={IconComponent} size="lg" />
+                    ) : (
+                      <IconComponent size={28} />
+                    )}
                   </div>
                   <h3 className="links-card-title">{link.title}</h3>
                 </div>
