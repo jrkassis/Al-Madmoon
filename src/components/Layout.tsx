@@ -1,9 +1,8 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/Button';
 import { MessageCircle, Menu, X } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Dice } from './ui/Dice';
 import './Layout.css';
 
 const navLinks = [
@@ -13,10 +12,28 @@ const navLinks = [
   { name: 'Contact', path: '/contact' },
 ];
 
+// Paths where navbar and footer should be hidden
+const hiddenPaths = [
+  '/admin',
+  '/admin/clients',
+  '/admin/affiliates',
+  '/admin/settings',
+  '/affiliate',
+  '/affiliate/referrals',
+  '/affiliate/withdraw',
+  '/affiliate/settings',
+  '/logout',
+];
+
 export function Layout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  // Check if current path should hide navbar/footer
+  const shouldHideNavbar = hiddenPaths.some(
+    (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +47,11 @@ export function Layout() {
     setIsMobileMenuOpen(false);
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Don't render the layout structure at all on hidden pages
+  if (shouldHideNavbar) {
+    return <Outlet />;
+  }
 
   return (
     <div className="layout-wrapper">
@@ -55,7 +77,11 @@ export function Layout() {
           </nav>
 
           <div className="header-actions">
-            <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="secondary" className="icon-gap">
                 <MessageCircle size={16} />
                 Start on WhatsApp
@@ -94,7 +120,12 @@ export function Layout() {
               ))}
             </nav>
             <div className="mobile-menu-footer">
-              <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer" className="w-full">
+              <a
+                href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full"
+              >
                 <Button variant="secondary" size="lg" className="w-full icon-gap">
                   <MessageCircle size={20} />
                   Start on WhatsApp
@@ -113,49 +144,86 @@ export function Layout() {
       {/* Footer */}
       {location.pathname !== '/links' && (
         <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <Link to="/" className="brand-link">
-                <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
-                <span className="brand-text" style={{ color: 'var(--color-text-primary)' }}>Al Madmoon</span>
-              </Link>
-              <p className="footer-desc">
-                AI-powered betting assistant providing personalized insights and recommendations for football, basketball, Formula 1, and more.
-              </p>
+          <div className="footer-container">
+            <div className="footer-grid">
+              <div className="footer-brand">
+                <Link to="/" className="brand-link">
+                  <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
+                  <span className="brand-text" style={{ color: 'var(--color-text-primary)' }}>
+                    Al Madmoon
+                  </span>
+                </Link>
+                <p className="footer-desc">
+                  AI-powered betting assistant providing personalized insights and recommendations for
+                  football, basketball, Formula 1, and more.
+                </p>
+              </div>
+              <div>
+                <h4 className="footer-heading">Company</h4>
+                <ul className="footer-links">
+                  <li>
+                    <Link to="/" className="footer-link">
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/how-it-works" className="footer-link">
+                      How It Works
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/features" className="footer-link">
+                      Features
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/pricing" className="footer-link">
+                      Pricing
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="footer-heading">Support</h4>
+                <ul className="footer-links">
+                  <li>
+                    <Link to="/contact" className="footer-link">
+                      Contact Us
+                    </Link>
+                  </li>
+                  <li>
+                    <a href="#" className="footer-link">
+                      FAQ
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="footer-link">
+                      Terms of Service
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" className="footer-link">
+                      Privacy Policy
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <h4 className="footer-heading">Company</h4>
-              <ul className="footer-links">
-                <li><Link to="/" className="footer-link">Home</Link></li>
-                <li><Link to="/how-it-works" className="footer-link">How It Works</Link></li>
-                <li><Link to="/features" className="footer-link">Features</Link></li>
-                <li><Link to="/pricing" className="footer-link">Pricing</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="footer-heading">Support</h4>
-              <ul className="footer-links">
-                <li><Link to="/contact" className="footer-link">Contact Us</Link></li>
-                <li><a href="#" className="footer-link">FAQ</a></li>
-                <li><a href="#" className="footer-link">Terms of Service</a></li>
-                <li><a href="#" className="footer-link">Privacy Policy</a></li>
-              </ul>
+            <div className="footer-bottom">
+              <p>&copy; {new Date().getFullYear()} Al Madmoon. All rights reserved.</p>
+              <div className="footer-support">
+                <a
+                  href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
+                  className="support-link"
+                >
+                  <MessageCircle size={16} />
+                  WhatsApp Support
+                </a>
+              </div>
             </div>
           </div>
-          <div className="footer-bottom">
-            <p>&copy; {new Date().getFullYear()} Al Madmoon. All rights reserved.</p>
-            <div className="footer-support">
-              <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" className="support-link">
-                <MessageCircle size={16} />
-                WhatsApp Support
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+        </footer>
       )}
     </div>
   );
 }
-
