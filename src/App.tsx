@@ -25,6 +25,7 @@ import AffiliateReferrals from "./pages/affiliate/Referrals";
 import AffiliateWithdraw from "./pages/affiliate/Withdraw";
 import AffiliateSettings from "./pages/affiliate/Settings";
 import Logout from "../src/pages/auth/Logout";
+import BecomeAffiliate from "../src/pages/onboarding-affiliate/BecomeAffiliate";
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="pricing" element={<Pricing />} />
           <Route path="contact" element={<Contact />} />
           <Route path="links" element={<Links />} />
+          <Route path="become-an-affiliate" element={<BecomeAffiliate />} /> 
           <Route path="*" element={<ErrorPage />} />
         </Route>
 

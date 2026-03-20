@@ -1,5 +1,7 @@
+import { motion } from 'motion/react';
 import { Button } from '../../components/ui/Button';
 import { OnboardingFormData } from './types';
+import {  MessageCircle } from 'lucide-react';
 
 type Props = {
   formData: OnboardingFormData;
@@ -40,10 +42,19 @@ export function StepFinish({ formData, onComplete }: Props) {
           ))}
         </div>
       </div>
-
-      <Button variant="primary" size="lg" onClick={onComplete}>
-        Go to Dashboard
-      </Button>
+          
+            
+        <motion.div>
+          <a
+            href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="error-btn-whatsapp"
+          >
+            <MessageCircle size={18} />
+            Start on WhatsApp
+          </a>
+        </motion.div>
     </div>
   );
 }

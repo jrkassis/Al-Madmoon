@@ -62,7 +62,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="animated-mesh-bg min-h-screen flex items-center justify-center p-4">
+    <div className="animated-mesh-bg min-h-screen flex items-center justify-center p-4 patternbg">
       <div className="glass-panel w-full max-w-3xl p-8 md:p-12">
         <Stepper currentStep={currentStep} />
 

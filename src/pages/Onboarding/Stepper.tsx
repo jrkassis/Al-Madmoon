@@ -18,7 +18,7 @@ export function Stepper({ currentStep }: Props) {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                   isActive
-                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-200'
+                    ? 'bg-brand-600 text-black shadow-lg shadow-brand-200'
                     : 'bg-slate-200 text-slate-400'
                 }`}
               >

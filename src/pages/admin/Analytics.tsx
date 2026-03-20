@@ -3,10 +3,10 @@ import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
 // If you don't have a Card component, just use a div with glass-panel class
 export default function AdminAnalytics() {
   const metrics = [
-    { label: 'MRR', value: '$12,450', change: '+12%', icon: '💰' },
-    { label: 'Active Users', value: '1,234', change: '+8%', icon: '👥' },
-    { label: 'API Cost', value: '$342', change: '+5%', icon: '⚙️' },
-    { label: 'Queries (24h)', value: '45.2K', change: '+23%', icon: '📊' },
+    { label: 'MRR', value: '$12,450', change: '+12%', icon: '' },
+    { label: 'Active Users', value: '1,234', change: '+8%', icon: '' },
+    { label: 'API Cost', value: '$342', change: '+5%', icon: '' },
+    { label: 'Queries (24h)', value: '45.2K', change: '+23%', icon: '' },
   ];
 
   return (

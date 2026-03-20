@@ -36,7 +36,7 @@ export function StepDetails({ formData, updateForm }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Phone (optional)</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
         <input
           type="tel"
           value={formData.phone}
