@@ -114,7 +114,7 @@ export default function Home() {
 
               <motion.div variants={itemVariants} className="hero-actions">
                 <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-                  <Button variant="primary" size="lg" className="btn-icon btn-shadow w-75">
+                  <Button variant="ghost" size="lg" className="btn-icon btn-shadow w-75">
                     <MessageCircle size={20} />
                     Start on WhatsApp
                   </Button>
@@ -573,7 +573,7 @@ export default function Home() {
             </motion.p>
             <motion.div variants={itemVariants}>
               <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-                <Button variant="secondary" size="lg" className="btn-icon cta-btn">
+                <Button variant="ghost" size="lg" className="btn-icon cta-btn">
                   <MessageCircle size={20} />
                   Start on WhatsApp
                 </Button>

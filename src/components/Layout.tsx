@@ -56,7 +56,7 @@ export function Layout() {
 
           <div className="header-actions">
             <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-              <Button variant="secondary" className="icon-gap">
+              <Button variant="ghost" className="icon-gap">
                 <MessageCircle size={16} />
                 Start on WhatsApp
               </Button>

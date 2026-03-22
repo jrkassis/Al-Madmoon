@@ -44,7 +44,7 @@ export default function Contact() {
 
           <div className="contact-methods">
             <div className="contact-method-item">
-              <div className="contact-icon-wrapper brand">
+              <div className="contact-icon-wrapper slate">
                 <MessageCircle size={24} />
               </div>
               <div className="contact-method-content">
@@ -129,7 +129,7 @@ export default function Contact() {
           If you couldn't find the answer you were looking for in our Pricing FAQ, feel free to reach out to us directly on WhatsApp.
         </p>
         <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-          <Button variant="secondary" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
+          <Button variant="ghost" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
             <MessageCircle size={20} />
             Chat with Support
           </Button>

@@ -215,7 +215,7 @@ export default function Features() {
       <motion.div variants={fadeIn} className="features-cta">
         <h2 className="features-cta-title">Experience the difference today.</h2>
         <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-          <Button variant="secondary" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
+          <Button variant="ghost" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
             <MessageCircle size={20} />
             Start on WhatsApp
           </Button>
