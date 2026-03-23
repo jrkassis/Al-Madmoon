@@ -50,6 +50,7 @@ export default function ErrorPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.45 }}
         >
+          Lost? Don’t worry it happens to the best of us.
           The page you're looking for may have been moved, deleted, or never existed.
           Let's get you back to the action.
         </motion.p>
