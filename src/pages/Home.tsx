@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Star,
-  LogIn,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { WhatsAppMockup } from "../components/ui/WhatsAppMockup";

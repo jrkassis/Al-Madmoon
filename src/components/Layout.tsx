@@ -40,7 +40,9 @@ export function Layout() {
             <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
             <span className="brand-text hidden sm:block">Al Madmoon</span>
           </Link>
-
+          <Link to="/" className="brand-link flex items-center ">
+            <span className="brand-text hidden sm:block"></span>
+          </Link>
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
@@ -57,7 +59,7 @@ export function Layout() {
           </nav>
 
           {/* DESKTOP ACTIONS */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             <a href="/auth/signin">
               <Button variant="ghost" className="icon-gap">
                 <User size={16} />
@@ -90,7 +92,7 @@ export function Layout() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[64px] left-0 w-full bg-white z-50 shadow-lg lg:hidden"
+            className="fixed top-[64px] h-full left-0 w-full bg-white z-50 shadow-lg lg:hidden"
           >
             <div className="p-4 flex flex-col gap-4">
 
@@ -110,7 +112,7 @@ export function Layout() {
               </nav>
 
               {/* ACTIONS */}
-              <div className="flex flex-col gap-2 pt-3 border-t">
+              <div className="flex flex-col gap-2 pt-3 ">
                 <a href="/auth/signin">
                   <Button variant="ghost" className="w-full icon-gap">
                     <User size={18} />

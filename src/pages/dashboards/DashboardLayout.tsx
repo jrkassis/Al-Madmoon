@@ -199,9 +199,16 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0  pt-10 h-full w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`
+    fixed top-0 right-0 h-full 
+    w-[80%] max-w-[320px] 
+    bg-white border-l border-slate-100 z-50
+    transition-transform duration-300 ease-in-out
+
+    ${sidebarOpen ? "translate-x-0" : "translate-x-full"}
+
+    lg:left-0 lg:right-auto lg:w-64 lg:border-r lg:border-l-0 lg:translate-x-0
+  `}
       >
         <div className="flex items-center justify-between p-4  border-slate-100">
           <button
@@ -243,34 +250,38 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
               </Link>
             );
           })}
-            <button
+          <button
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 w-full mt-8"
             onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                window.location.href = "/auth/signin";
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              window.location.href = "/auth/signin";
             }}
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
+              <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
+              />
             </svg>
             Sign out
-            </button>
+          </button>
         </nav>
       </aside>
 
       {/* Main content */}
       <div className="lg:pl-64">
-          <div className="flex items-center justify-between px-4 py-3">
-         
-            <div className="flex-1" />
-            <div className="w-8 h-8 rounded-full bg-brand-100" />
-          </div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex-1" />
+          <div className="w-8 h-8 rounded-full bg-brand-100" />
+        </div>
         <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>
