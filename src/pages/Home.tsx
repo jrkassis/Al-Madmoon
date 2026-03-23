@@ -1,18 +1,32 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Button } from '../components/ui/Button';
-import { MessageCircle, ArrowRight, CheckCircle2, Trophy, Activity, Zap, Star, BarChart3, Info, Shield, TrendingUp, Target, Globe, Flag } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { WhatsAppMockup } from '../components/ui/WhatsAppMockup';
-import { HeroVisual } from '../components/ui/HeroVisual';
-import './Home.css';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "../components/ui/Button";
+import {
+  MessageCircle,
+  ArrowRight,
+  CheckCircle2,
+  Star,
+  LogIn,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { WhatsAppMockup } from "../components/ui/WhatsAppMockup";
+import "./Home.css";
+import { IoIosTennisball } from "react-icons/io";
+import { GiBoxingGlove } from "react-icons/gi";
+import { GiDart } from "react-icons/gi";
+import { FiMoreHorizontal } from "react-icons/fi";
+import { SiF1 } from "react-icons/si";
+import { IoIosBaseball } from "react-icons/io";
 
+import { FaFutbol, FaBasketballBall } from "react-icons/fa";
+
+// Then use them similarly as in the previous answer
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15 }
-  }
+    transition: { staggerChildren: 0.15 },
+  },
 };
 
 const itemVariants = {
@@ -20,52 +34,60 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-  }
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+  },
 };
 
 const testimonials = [
   {
-    quote: "Al Madmoon completely changed how I bet on football. The insights are incredibly accurate and easy to understand.",
+    quote:
+      "Al Madmoon completely changed how I bet on football. The insights are incredibly accurate and easy to understand.",
     author: "Ahmed S.",
     role: "Football Bettor",
-    avatar: "A"
+    avatar: "A",
   },
   {
-    quote: "The F1 predictions are spot on. It's like having a race strategist directly on my WhatsApp.",
+    quote:
+      "The F1 predictions are spot on. It's like having a race strategist directly on my WhatsApp.",
     author: "Michael T.",
     role: "F1 Enthusiast",
-    avatar: "M"
+    avatar: "M",
   },
   {
-    quote: "Fast, reliable, and super easy to use. I just ask a question and get data-backed answers instantly.",
+    quote:
+      "Fast, reliable, and super easy to use. I just ask a question and get data-backed answers instantly.",
     author: "Sarah L.",
     role: "Casual Bettor",
-    avatar: "S"
-  }
+    avatar: "S",
+  },
 ];
 
 const faqs = [
   {
     question: "How accurate are the AI predictions?",
-    answer: "Our AI analyzes vast amounts of historical data, current news, and real-time odds to provide highly accurate probabilities. While no bet is guaranteed, our insights give you a significant data-driven edge."
+    answer:
+      "Our AI analyzes vast amounts of historical data, real‑time odds, and the latest sports news to generate probability‑based insights. While no prediction is guaranteed, our data‑driven approach gives you a significant edge.",
   },
   {
     question: "Which betting platforms do you support?",
-    answer: "We provide insights that can be used on any major platform."
+    answer:
+      "Al Madmoon is platform‑agnostic. Our insights work seamlessly with any major betting platform  including Betarabia, 1xBet, Bet365, and others. We handle the analysis; you choose where to place your bets.",
   },
   {
     question: "Do I need to download an app?",
-    answer: "No! Al Madmoon operates entirely through WhatsApp. Just save our number and start chatting."
+    answer:
+      "No downloads required! Al Madmoon operates entirely through WhatsApp. Simply log in with your number and start chatting.",
   },
   {
     question: "How do I get started?",
-    answer: "Simply save our WhatsApp number and send a message. Our AI will guide you through the process."
+    answer:
+      "Getting started is easy:Go to Get Started. Our AI assistant will guide you through registration, payments, and your first betting query.",
   },
   {
     question: "Is my data safe?",
-    answer: "Yes, your data is safe with us. We use industry-standard security measures to protect your information."
-  }
+    answer:
+      "Absolutely. We employ industry‑standard encryption and security practices to keep your personal information and conversations safe and private.",
+  },
 ];
 
 export default function Home() {
@@ -79,12 +101,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="home-container" >
-
+    <div className="home-container">
       <div className="hero-background">
         {/* Hero Section */}
-        <section
-          className="section-base hero-section">
+        <section className="section-base hero-section">
           {/* Background Decorators */}
           <div className="glow-orb primary orb-tl" />
           <div className="glow-orb secondary orb-br" />
@@ -95,7 +115,7 @@ export default function Home() {
             initial="hidden"
             animate="visible"
             className="hero-layout"
-            style={{ position: 'relative', zIndex: 10 }}
+            style={{ position: "relative", zIndex: 10 }}
           >
             {/* Hero Content (Left Column) */}
             <div className="hero-content">
@@ -105,16 +125,22 @@ export default function Home() {
               </motion.div>
 
               <motion.h1 variants={itemVariants} className="hero-title">
-                Your Personal <span className="text-gradient">Sports Analyst</span>
+                Your Personal{" "}
+                <span className="text-gradient">Sports Analyst</span>
               </motion.h1>
 
               <motion.p variants={itemVariants} className="hero-subtitle">
-                Analyze any sport using real-time data, historical statistics, and AI prediction models directly through WhatsApp.
+                Analyze any sport using real-time data, historical statistics,
+                and AI prediction models directly through WhatsApp.
               </motion.p>
 
               <motion.div variants={itemVariants} className="hero-actions">
-                <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-                  <Button variant="ghost" size="lg" className="btn-icon btn-shadow w-75">
+                <a href="/onboarding" rel="noopener noreferrer">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="btn-icon btn-shadow w-75 rounded-full"
+                  >
                     <MessageCircle size={20} />
                     Start on WhatsApp
                   </Button>
@@ -163,8 +189,12 @@ export default function Home() {
           variants={containerVariants}
           className="section-header"
         >
-          <motion.h2 variants={itemVariants} className="section-title">Today's AI Picks</motion.h2>
-          <motion.p variants={itemVariants} className="section-desc">Sample predictions from our latest model execution.</motion.p>
+          <motion.h2 variants={itemVariants} className="section-title">
+            Today's AI Picks
+          </motion.h2>
+          <motion.p variants={itemVariants} className="section-desc">
+            Sample predictions from our latest model execution.
+          </motion.p>
         </motion.div>
 
         <motion.div
@@ -175,8 +205,18 @@ export default function Home() {
           className="picks-grid"
         >
           {[
-            { match: 'Man City vs Tottenham', bet: 'Over 2.5 Goals', confidence: '77%', odds: '1.65' },
-            { match: 'Lakers vs Suns', bet: 'Lakers +5.5', confidence: '72%', odds: '1.91' }
+            {
+              match: "Man City vs Tottenham",
+              bet: "Over 2.5 Goals",
+              confidence: "77%",
+              odds: "1.65",
+            },
+            {
+              match: "Lakers vs Suns",
+              bet: "Lakers +5.5",
+              confidence: "72%",
+              odds: "1.91",
+            },
           ].map((pick, i) => (
             <motion.div key={i} variants={itemVariants} className="pick-widget">
               <div className="pw-header">
@@ -196,11 +236,17 @@ export default function Home() {
       </section>
 
       {/* AI Example Section */}
-      <section className="section-base whatsapp-section" style={{ position: 'relative' }}>
+      <section
+        className="section-base whatsapp-section"
+        style={{ position: "relative" }}
+      >
         {/* Background Decorators */}
         <div className="glow-orb primary orb-tl" style={{ opacity: 0.3 }} />
         <div className="glow-orb secondary orb-br" style={{ opacity: 0.25 }} />
-        <div className="detail-dots dots-1" style={{ top: '20%', right: 'auto', left: '5%' }} />
+        <div
+          className="detail-dots dots-1"
+          style={{ top: "20%", right: "auto", left: "5%" }}
+        />
 
         <motion.div
           initial="hidden"
@@ -208,27 +254,42 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           variants={containerVariants}
           className="ai-layout"
-          style={{ position: 'relative', zIndex: 10 }}
+          style={{ position: "relative", zIndex: 10 }}
         >
           <motion.div variants={itemVariants}>
             <h2 className="section-title">Your Personal AI Betting Analyst</h2>
-            <p className="hero-subtitle-2" style={{ textAlign: 'left', margin: '0 0 32px 0' }}>
-              Simply send a match through WhatsApp and the AI instantly analyzes team form, odds movement, historical matchups, and statistical models to identify the best betting opportunities.
+            <p
+              className="hero-subtitle-2"
+              style={{ textAlign: "left", margin: "0 0 32px 0" }}
+            >
+              Simply send a match through WhatsApp and the AI instantly analyzes
+              team form, odds movement, historical matchups, and statistical
+              models to identify the best betting opportunities.
             </p>
             <ul className="ai-features-list">
               {[
-                'Real-time match analysis',
-                'AI probability calculations',
-                'Best bet suggestions',
-                'Works directly inside WhatsApp'
+                "Real-time match analysis",
+                "AI probability calculations",
+                "Best bet suggestions",
+                "Works directly inside WhatsApp",
               ].map((item, i) => (
                 <li key={i} className="ai-feature-item">
-                  <CheckCircle2 size={20} className="text-brand" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <CheckCircle2
+                    size={20}
+                    className="text-brand"
+                    style={{ flexShrink: 0, marginTop: "2px" }}
+                  />
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "48px",
+              }}
+            >
               <Link to="/features">
                 <Button variant="outline" className="btn-icon">
                   View All Capabilities
@@ -254,10 +315,10 @@ export default function Home() {
           className="metrics-grid"
         >
           {[
-            { label: 'Matches Analyzed', value: '2,300+' },
-            { label: 'Predictions Generated', value: '18,500+' },
-            { label: 'Active Bettors', value: '500+' },
-            { label: 'Data Sources', value: '40+' }
+            { label: "Matches Analyzed", value: "2,300+" },
+            { label: "Predictions Generated", value: "18,500+" },
+            { label: "Active Bettors", value: "500+" },
+            { label: "Data Sources", value: "40+" },
           ].map((metric, i) => (
             <motion.div key={i} variants={itemVariants} className="metric-card">
               <div className="metric-value">{metric.value}</div>
@@ -276,8 +337,12 @@ export default function Home() {
           variants={containerVariants}
           className="section-header"
         >
-          <motion.h2 variants={itemVariants} className="section-title">How It Works</motion.h2>
-          <motion.p variants={itemVariants} className="section-desc">Three simple steps to professional-grade betting insights.</motion.p>
+          <motion.h2 variants={itemVariants} className="section-title">
+            How It Works
+          </motion.h2>
+          <motion.p variants={itemVariants} className="section-desc">
+            Three simple steps to professional-grade betting insights.
+          </motion.p>
         </motion.div>
 
         <motion.div
@@ -285,44 +350,59 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={containerVariants}
-          className="how-it-works-grid"
+          className="how-it-works-grid gap-2"
         >
           {[
             {
-              step: '01',
-              title: 'Text Al Madmoon',
-              desc: 'Simply send the match you want to analyze via WhatsApp.',
-              example: '"Who wins Arsenal vs Chelsea tonight ?"'
+              step: "01",
+              title: "Text Al Madmoon",
+              desc: "Simply send the match you want to analyze via WhatsApp.",
+              example: '"Who wins Arsenal vs Chelsea tonight ?"',
             },
             {
-              step: '02',
-              title: 'AI analyzes the match',
-              desc: 'Our solution analyzes form, historical data, odds movement, and models.',
-              evaluates: ['Team Form', 'Historical Performance', 'Odds Movement', 'Statistical Models']
+              step: "02",
+              title: "AI analyzes the match",
+              desc: "Our solution analyzes form, historical data, odds movement, and models.",
+              evaluates: [
+                "Team Form",
+                "Historical Performance",
+                "Odds Movement",
+                "Statistical Models",
+              ],
             },
             {
-              step: '03',
-              title: 'Get the best bet',
-              desc: 'Receive a detailed breakdown and high-probability recommendation.',
-              returns: ['Win Probability', 'Best Bet Suggestion', 'Confidence Score']
-            }
+              step: "03",
+              title: "Get the best bet",
+              desc: "Receive a detailed breakdown and high-probability recommendation.",
+              returns: [
+                "Win Probability",
+                "Best Bet Suggestion",
+                "Confidence Score",
+              ],
+            },
           ].map((item, i) => (
             <motion.div key={i} variants={itemVariants} className="step-card">
               <div className="step-number">{item.step}</div>
               <h3 className="step-title">{item.title}</h3>
               <p className="step-desc">{item.desc}</p>
-              {item.example && <div className="step-example">{item.example}</div>}
+              {item.example && (
+                <div className="step-example">{item.example}</div>
+              )}
               {item.evaluates && (
                 <div className="step-list">
                   {item.evaluates.map((ev, idx) => (
-                    <div key={idx} className="step-list-item"><span className="list-dot" /> {ev}</div>
+                    <div key={idx} className="step-list-item">
+                      <span className="list-dot" /> {ev}
+                    </div>
                   ))}
                 </div>
               )}
               {item.returns && (
                 <div className="step-list">
                   {item.returns.map((ret, idx) => (
-                    <div key={idx} className="step-list-item"><span className="list-dot" /> {ret}</div>
+                    <div key={idx} className="step-list-item">
+                      <span className="list-dot" /> {ret}
+                    </div>
                   ))}
                 </div>
               )}
@@ -435,8 +515,13 @@ export default function Home() {
           variants={containerVariants}
           className="section-header"
         >
-          <motion.h2 variants={itemVariants} className="section-title">Ask about any sport</motion.h2>
-          <motion.p variants={itemVariants} className="section-desc">We cover all major global sports with deep analytical models for every league.</motion.p>
+          <motion.h2 variants={itemVariants} className="section-title">
+            Ask about any sport
+          </motion.h2>
+          <motion.p variants={itemVariants} className="section-desc">
+            We cover all major global sports with deep analytical models for
+            every league.
+          </motion.p>
         </motion.div>
 
         <motion.div
@@ -447,14 +532,14 @@ export default function Home() {
           className="leagues-grid"
         >
           {[
-            { name: 'Football', icon: <Flag size={18} /> },
-            { name: 'Basketball', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏀</div> },
-            { name: 'MMA', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🥊</div> },
-            { name: 'F1', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏁</div> },
-            { name: 'Tennis', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🎾</div> },
-            { name: 'Baseball', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>⚾</div> },
-            { name: 'Golf', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>⛳</div> },
-            { name: 'Rugby', icon: <div style={{ fontSize: 18, lineHeight: 1 }}>🏉</div> }
+            { name: "Football", icon: <FaFutbol size={18} /> },
+            { name: "Basketball", icon: <FaBasketballBall size={18} /> },
+            { name: "Tennis", icon: <IoIosTennisball size={18} /> },
+            { name: "Boxing", icon: <GiBoxingGlove size={18} /> },
+            { name: "Baseball", icon: <IoIosBaseball size={18} /> },
+            { name: "Formula 1", icon: <SiF1 size={18} /> },
+            { name: "Darts", icon: <GiDart size={18} /> },
+            { name: "And More", icon: <FiMoreHorizontal size={18} /> },
           ].map((league, i) => (
             <motion.div key={i} variants={itemVariants} className="league-card">
               <div className="league-icon">{league.icon}</div>
@@ -465,23 +550,41 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="testimonials-section" style={{ position: 'relative', overflow: 'hidden' }}>
+      <section
+        className="testimonials-section"
+        style={{ position: "relative", overflow: "hidden" }}
+      >
         {/* Background Decorators */}
         <div className="glow-orb secondary orb-tr" style={{ opacity: 0.2 }} />
         <div className="glow-orb primary orb-bl" style={{ opacity: 0.25 }} />
-        <div className="detail-dots dots-2" style={{ bottom: '20%', left: 'auto', right: '5%' }} />
+        <div
+          className="detail-dots dots-2"
+          style={{ bottom: "20%", left: "auto", right: "5%" }}
+        />
 
-        <div className="testimonials-container" style={{ position: 'relative', zIndex: 10 }}>
+        <div
+          className="testimonials-container"
+          style={{ position: "relative", zIndex: 10 }}
+        >
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={containerVariants}
-            style={{ textAlign: 'center' }}
+            style={{ textAlign: "center" }}
           >
-            <motion.h2 variants={itemVariants} className="section-title" style={{ marginBottom: '48px' }}>Trusted by Bettors</motion.h2>
+            <motion.h2
+              variants={itemVariants}
+              className="section-title"
+              style={{ marginBottom: "48px" }}
+            >
+              Trusted by Bettors
+            </motion.h2>
 
-            <motion.div variants={itemVariants} className="testimonials-carousel">
+            <motion.div
+              variants={itemVariants}
+              className="testimonials-carousel"
+            >
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentTestimonial}
@@ -492,16 +595,24 @@ export default function Home() {
                   className="testimonial-slide"
                 >
                   <div className="stars">
-                    {[...Array(5)].map((_, i) => <Star key={i} />)}
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} />
+                    ))}
                   </div>
-                  <p className="quote">"{testimonials[currentTestimonial].quote}"</p>
+                  <p className="quote">
+                    "{testimonials[currentTestimonial].quote}"
+                  </p>
                   <div className="author-info">
                     <div className="author-avatar">
                       {testimonials[currentTestimonial].avatar}
                     </div>
                     <div className="author-text">
-                      <p className="author-name">{testimonials[currentTestimonial].author}</p>
-                      <p className="author-role">{testimonials[currentTestimonial].role}</p>
+                      <p className="author-name">
+                        {testimonials[currentTestimonial].author}
+                      </p>
+                      <p className="author-role">
+                        {testimonials[currentTestimonial].role}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -513,7 +624,7 @@ export default function Home() {
                 <button
                   key={i}
                   onClick={() => setCurrentTestimonial(i)}
-                  className={`dot ${i === currentTestimonial ? 'active' : ''}`}
+                  className={`dot ${i === currentTestimonial ? "active" : ""}`}
                   aria-label={`Go to testimonial ${i + 1}`}
                 />
               ))}
@@ -523,7 +634,7 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="faq-section" style={{ position: 'relative' }}>
+      <section className="faq-section" style={{ position: "relative" }}>
         {/* Background Decorators */}
         <div className="glow-orb primary orb-tl" style={{ opacity: 0.2 }} />
         <div className="glow-orb secondary orb-br" style={{ opacity: 0.15 }} />
@@ -533,9 +644,15 @@ export default function Home() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={containerVariants}
-          style={{ position: 'relative', zIndex: 10 }}
+          style={{ position: "relative", zIndex: 10 }}
         >
-          <motion.h2 variants={itemVariants} className="section-title" style={{ textAlign: 'center', marginBottom: '48px' }}>Frequently Asked Questions</motion.h2>
+          <motion.h2
+            variants={itemVariants}
+            className="section-title"
+            style={{ textAlign: "center", marginBottom: "48px" }}
+          >
+            Frequently Asked Questions
+          </motion.h2>
           <div className="faq-list">
             {faqs.map((faq, i) => (
               <motion.div key={i} variants={itemVariants} className="faq-item">
@@ -548,7 +665,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section" style={{ position: 'relative' }}>
+      <section className="cta-section" style={{ position: "relative" }}>
         {/* Background Decorators */}
         <div className="glow-orb secondary orb-tr" style={{ opacity: 0.3 }} />
         <div className="glow-orb primary orb-bl" style={{ opacity: 0.3 }} />
@@ -559,7 +676,7 @@ export default function Home() {
           viewport={{ once: true, margin: "-100px" }}
           variants={containerVariants}
           className="cta-card"
-          style={{ position: 'relative', zIndex: 10 }}
+          style={{ position: "relative", zIndex: 10 }}
         >
           <div className="cta-bg">
             <div className="cta-blob-1" />
@@ -567,14 +684,18 @@ export default function Home() {
           </div>
 
           <div className="cta-content">
-            <motion.h2 variants={itemVariants} className="cta-title">Start Getting AI Betting Insights</motion.h2>
+            <motion.h2 variants={itemVariants} className="cta-title">
+              Start Getting AI Betting Insights
+            </motion.h2>
             <motion.p variants={itemVariants} className="cta-desc">
-              Message AI Madmoon on WhatsApp and get real-time predictions for any match.<br />
+              Message AI Madmoon on WhatsApp and get real-time predictions for
+              any match.
+              <br />
             </motion.p>
             <motion.div variants={itemVariants}>
-              <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
+              <a href="/onboarding" rel="noopener noreferrer">
                 <Button variant="ghost" size="lg" className="btn-icon cta-btn">
-                  <MessageCircle size={20} />
+                  <MessageCircle size={16} />
                   Start on WhatsApp
                 </Button>
               </a>

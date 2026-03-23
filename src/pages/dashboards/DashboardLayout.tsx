@@ -192,21 +192,18 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 z-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0  pt-10 h-full w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-100">
-          <Link to="/" className="font-bold text-xl text-slate-900">
-            almadmoon<span className="text-brand-600">.co</span>
-          </Link>
+        <div className="flex items-center justify-between p-4  border-slate-100">
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-slate-500"
@@ -269,31 +266,11 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-sm border-b border-slate-100">
           <div className="flex items-center justify-between px-4 py-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-slate-500"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+         
             <div className="flex-1" />
             <div className="w-8 h-8 rounded-full bg-brand-100" />
           </div>
-        </header>
-
         <main className="p-4 md:p-6">{children}</main>
       </div>
     </div>

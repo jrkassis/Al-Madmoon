@@ -19,7 +19,7 @@ export default function AdminAffiliates() {
     <DashboardLayout role="admin">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Affiliates</h1>
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full sm:w-64 h-full">
           <input
             type="text"
             placeholder="Search affiliates..."

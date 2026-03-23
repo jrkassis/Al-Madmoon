@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/Button";
-import { MessageCircle, Menu, X, LogOut, LogIn, User } from "lucide-react";
+import { MessageCircle, Menu, X, LogIn, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import "./Layout.css";
@@ -18,9 +18,7 @@ export function Layout() {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -32,46 +30,52 @@ export function Layout() {
 
   return (
     <div className="layout-wrapper">
-      {/* Navbar */}
+
+      {/* HEADER */}
       <header className={`header ${isScrolled ? "scrolled" : ""}`}>
-        <div className="header-container">
-          <Link to="/" className="brand-link">
+        <div className="header-container flex items-center justify-between">
+
+          {/* LOGO */}
+          <Link to="/" className="brand-link flex items-center gap-2">
             <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
-            <span className="brand-text">Al Madmoon</span>
+            <span className="brand-text hidden sm:block">Al Madmoon</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="desktop-nav">
+          {/* DESKTOP NAV */}
+          <nav className="hidden lg:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`nav-link ${location.pathname === link.path ? "active" : ""}`}
+                className={`nav-link ${
+                  location.pathname === link.path ? "active" : ""
+                }`}
               >
                 {link.name}
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
 
-            <a href="/auth/signin" rel="noopener noreferrer">
+          {/* DESKTOP ACTIONS */}
+          <div className="hidden lg:flex items-center gap-3">
+            <a href="/auth/signin">
               <Button variant="ghost" className="icon-gap">
                 <User size={16} />
                 Sign In
               </Button>
             </a>
 
-            <a href="/onboarding" rel="noopener noreferrer">
-              <Button variant="primary" className="icon-gap">
+            <a href="/onboarding">
+              <Button variant="primary" className="icon-gap rounded-full">
                 <LogIn size={16} />
                 Get Started
               </Button>
             </a>
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* MOBILE MENU BUTTON */}
           <button
-            className="mobile-menu-toggle"
+            className="lg:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -79,139 +83,127 @@ export function Layout() {
         </div>
       </header>
 
-      {/* Mobile Nav */}
+      {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="mobile-menu"
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-[64px] left-0 w-full bg-white z-50 shadow-lg lg:hidden"
           >
-            <nav className="mobile-nav">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`mobile-nav-link ${location.pathname === link.path ? "active" : ""}`}
+            <div className="p-4 flex flex-col gap-4">
+
+              {/* LINKS */}
+              <nav className="flex flex-col gap-3">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    className={`mobile-nav-link ${
+                      location.pathname === link.path ? "active" : ""
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
+
+              {/* ACTIONS */}
+              <div className="flex flex-col gap-2 pt-3 border-t">
+                <a href="/auth/signin">
+                  <Button variant="ghost" className="w-full icon-gap">
+                    <User size={18} />
+                    Sign In
+                  </Button>
+                </a>
+
+                <a href="/onboarding">
+                  <Button variant="primary" className="w-full icon-gap">
+                    <LogIn size={18} />
+                    Get Started
+                  </Button>
+                </a>
+
+                <a
+                  href="https://wa.me/79027611"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-            <div className="mobile-menu-footer">
-              <a
-                href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full"
-              >
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className="w-full icon-gap"
-                >
-                  <MessageCircle size={20} />
-                  Start on WhatsApp
-                </Button>
-              </a>
+                  <Button variant="secondary" className="w-full icon-gap">
+                    <MessageCircle size={18} />
+                    WhatsApp Support
+                  </Button>
+                </a>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
-      <main className="layout-main">
+      {/* MAIN */}
+      <main className="layout-main ">
         <Outlet />
       </main>
 
-      {/* Footer */}
+      {/* FOOTER */}
       {location.pathname !== "/links" && (
         <footer className="footer">
           <div className="footer-container">
-            <div className="footer-grid">
+
+            <div className="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+              {/* BRAND */}
               <div className="footer-brand">
-                <Link to="/" className="brand-link">
+                <Link to="/" className="brand-link flex items-center gap-2">
                   <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
-                  <span
-                    className="brand-text"
-                    style={{ color: "var(--color-text-primary)" }}
-                  >
-                    Al Madmoon
-                  </span>
+                  <span className="brand-text">Al Madmoon</span>
                 </Link>
-                <p className="footer-desc">
+
+                <p className="footer-desc mt-3">
                   AI-powered betting assistant providing personalized insights
-                  and recommendations for football, basketball, Formula 1, and
-                  more.
+                  and recommendations.
                 </p>
               </div>
+
+              {/* COMPANY */}
               <div>
                 <h4 className="footer-heading">Company</h4>
-                <ul className="footer-links">
-                  <li>
-                    <Link to="/" className="footer-link">
-                      Home
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/how-it-works" className="footer-link">
-                      How It Works
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/features" className="footer-link">
-                      Features
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/pricing" className="footer-link">
-                      Pricing
-                    </Link>
-                  </li>
+                <ul className="footer-links space-y-2">
+                  <li><Link to="/">Home</Link></li>
+                  <li><Link to="/how-it-works">How It Works</Link></li>
+                  <li><Link to="/features">Features</Link></li>
+                  <li><Link to="/pricing">Pricing</Link></li>
                 </ul>
               </div>
+
+              {/* SUPPORT */}
               <div>
                 <h4 className="footer-heading">Support</h4>
-                <ul className="footer-links">
-                  <li>
-                    <Link to="/contact" className="footer-link">
-                      Contact Us
-                    </Link>
-                  </li>
-                  <li>
-                    <a href="#" className="footer-link">
-                      FAQ
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="footer-link">
-                      Terms of Service
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="footer-link">
-                      Privacy Policy
-                    </a>
-                  </li>
+                <ul className="footer-links space-y-2">
+                  <li><Link to="/contact">Contact Us</Link></li>
+                  <li><a href="#">FAQ</a></li>
+                  <li><a href="#">Terms</a></li>
+                  <li><a href="#">Privacy</a></li>
                 </ul>
               </div>
+
             </div>
-            <div className="footer-bottom">
-              <p>
-                &copy; {new Date().getFullYear()} Al Madmoon. All rights
-                reserved.
+
+            <div className="footer-bottom flex flex-col md:flex-row justify-between items-center gap-3 mt-8">
+              <p className="text-sm text-center md:text-left">
+                &copy; {new Date().getFullYear()} Al Madmoon. All rights reserved.
               </p>
-              <div className="footer-support">
-                <a
-                  href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
-                  className="support-link"
-                >
-                  <MessageCircle size={16} />
-                  WhatsApp Support
-                </a>
-              </div>
+
+              <a
+                href="https://wa.me/79027611"
+                className="support-link flex items-center gap-2"
+              >
+                <MessageCircle size={16} />
+                WhatsApp Support
+              </a>
             </div>
+
           </div>
         </footer>
       )}

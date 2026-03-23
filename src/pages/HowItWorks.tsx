@@ -1,68 +1,79 @@
-import { motion } from 'motion/react';
-import { Button } from '../components/ui/Button';
-import { MessageCircle, CreditCard, CheckCircle, Smartphone, ArrowRight } from 'lucide-react';
-import './HowItWorks.css';
+import { motion } from "motion/react";
+import { Button } from "../components/ui/Button";
+import {
+  MessageCircle,
+  CreditCard,
+  CheckCircle,
+  Smartphone,
+  ArrowRight,
+} from "lucide-react";
+import "./HowItWorks.css";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
+  transition: { duration: 0.5 },
 };
 
 const stagger = {
   animate: {
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 export default function HowItWorks() {
   const steps = [
     {
       icon: CreditCard,
-      title: 'Subscribe via Whish',
-      description: 'Send your payment securely via Whish Money to activate your 1-month subscription.',
-      colorClass: 'step-color-blue'
+      title: "Subscribe via Whish",
+      description:
+        "Send your payment securely via Whish Money or Stripe to activate your 1-month subscription.",
+      colorClass: "step-color-blue",
     },
     {
       icon: CheckCircle,
-      title: 'Get Access',
-      description: 'Once payment is confirmed, our automated system instantly adds you to the Al Madmoon database.',
-      colorClass: 'step-color-brand'
+      title: "Get Access",
+      description:
+        "Once payment is confirmed, our automated system instantly adds you to the Al Madmoon database.",
+      colorClass: "step-color-brand",
     },
     {
       icon: Smartphone,
-      title: 'Chat with the AI',
-      description: 'Open WhatsApp and start asking about matches, odds, predictions, or specific sports.',
-      colorClass: 'step-color-sky'
+      title: "Chat with the AI",
+      description:
+        "Open WhatsApp and start asking about matches, odds, predictions, or specific sports.",
+      colorClass: "step-color-sky",
     },
     {
       icon: MessageCircle,
-      title: 'Get Recommendations',
-      description: 'Receive personalized, AI-powered betting insights instantly, tailored to your queries.',
-      colorClass: 'step-color-indigo'
-    }
+      title: "Get Recommendations",
+      description:
+        "Receive personalized, AI-powered betting insights instantly, tailored to your queries.",
+      colorClass: "step-color-indigo",
+    },
   ];
 
   return (
-    <motion.div
-      initial="initial"
-      animate="animate"
-      className="hiw-container"
-    >
+    <motion.div initial="initial" animate="animate" className="hiw-container">
       <div className="hiw-header">
         <motion.h1 variants={fadeIn} className="hiw-title">
           How Al Madmoon Works
         </motion.h1>
         <motion.p variants={fadeIn} className="hiw-subtitle">
-          A seamless, automated experience from payment to prediction. No apps to download, just smart insights delivered directly to your WhatsApp.
+          A seamless, automated experience from payment to prediction. No apps
+          to download, just smart insights delivered directly to your WhatsApp.
         </motion.p>
       </div>
 
       <div className="hiw-timeline-section">
         <div className="timeline-svg-container">
-          <svg viewBox="0 0 100 1000" preserveAspectRatio="none" className="timeline-svg">
+          <svg
+            viewBox="0 0 100 1000"
+            preserveAspectRatio="none"
+            className="timeline-svg"
+          >
             <path
               d="M 50 0 C 50 200, 80 250, 50 500 C 20 750, 50 800, 50 1000"
               fill="transparent"
@@ -82,7 +93,13 @@ export default function HowItWorks() {
               transition={{ duration: 3, ease: "easeOut" }}
             />
             <defs>
-              <linearGradient id="gradientPrimary" x1="0%" y1="0%" x2="0%" y2="100%">
+              <linearGradient
+                id="gradientPrimary"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
                 <stop offset="0%" stopColor="var(--color-brand-600)" />
                 <stop offset="100%" stopColor="var(--color-brand-300)" />
               </linearGradient>
@@ -100,7 +117,7 @@ export default function HowItWorks() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className={`timeline-step-wrapper ${isEven ? 'step-left' : 'step-right'}`}
+                className={`timeline-step-wrapper ${isEven ? "step-left" : "step-right"}`}
               >
                 <div className={`step-3d-card ${step.colorClass}`}>
                   <div className="step-3d-card-inner">
@@ -128,12 +145,23 @@ export default function HowItWorks() {
         <div className="arch-text-content">
           <h2 className="arch-title">Powered by Advanced Automation</h2>
           <p className="arch-desc">
-            Behind the scenes, Al Madmoon uses a huge database of sports data and a powerful AI model to analyze and predict matches. This ensures every response is data-driven, personalized, and delivered in milliseconds.
+            Behind the scenes, Al Madmoon uses a huge database of sports data
+            and a powerful AI model to analyze and predict matches. This ensures
+            every response is data-driven, personalized, and delivered in
+            milliseconds.
           </p>
           <ul className="arch-features">
-            {['Secure user database', 'Real-time odds processing', 'Personalized interaction history'].map((item, i) => (
+            {[
+              "Secure user database",
+              "Real-time odds processing",
+              "Personalized interaction history",
+            ].map((item, i) => (
               <li key={i} className="arch-feature-item">
-                <CheckCircle size={20} className="text-brand" style={{ color: 'var(--color-brand-500)' }} />
+                <CheckCircle
+                  size={20}
+                  className="text-brand"
+                  style={{ color: "var(--color-brand-500)" }}
+                />
                 {item}
               </li>
             ))}
@@ -153,9 +181,9 @@ export default function HowItWorks() {
       </motion.div>
 
       <motion.div variants={fadeIn} className="hiw-cta">
-        <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
-          <Button variant="ghost" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
-            <MessageCircle size={20} />
+        <a href="/onboarding" rel="noopener noreferrer">
+          <Button variant="ghost" size="lg" className="btn-icon cta-btn">
+            <MessageCircle size={16} />
             Start on WhatsApp
           </Button>
         </a>

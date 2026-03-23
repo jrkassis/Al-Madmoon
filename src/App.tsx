@@ -39,22 +39,26 @@ export default function App() {
           <Route path="pricing" element={<Pricing />} />
           <Route path="contact" element={<Contact />} />
           <Route path="links" element={<Links />} />
-          <Route path="become-an-affiliate" element={<BecomeAffiliate />} /> 
+          <Route path="become-an-affiliate" element={<BecomeAffiliate />} />
           <Route path="*" element={<ErrorPage />} />
+          <Route path="/auth/signin" element={<SignIn />} />
+          <Route path="/admin" element={<AdminAnalytics />} />
+          <Route path="/admin/clients" element={<AdminClients />} />
+          <Route path="/admin/affiliates" element={<AdminAffiliates />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/affiliate" element={<AffiliateMyCode />} />
+          <Route path="/affiliate/referrals" element={<AffiliateReferrals />} />
+          <Route path="/affiliate/withdraw" element={<AffiliateWithdraw />} />
+          <Route path="/affiliate/settings" element={<AffiliateSettings />} />
         </Route>
 
         {/* Auth routes - no layout */}
-        <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
 
         {/* Dashboard routes - they have their own layout (DashboardLayout) */}
-        <Route path="/admin" element={<AdminAnalytics />} />
-        <Route path="/admin/clients" element={<AdminClients />} />
-        <Route path="/admin/affiliates" element={<AdminAffiliates />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
 
         <Route path="/affiliate" element={<AffiliateMyCode />} />
         <Route path="/affiliate/referrals" element={<AffiliateReferrals />} />
