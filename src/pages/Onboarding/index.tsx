@@ -81,11 +81,11 @@ export default function Onboarding() {
 
         {currentStep < 4 && (
           <div className="flex justify-between items-center mt-12 pt-4 border-t border-slate-100">
-            <Button variant="outline" size="md" onClick={handleBack}>
+            <Button variant="ghost" size="md" onClick={handleBack}>
               ← Back
             </Button>
             <Button
-              variant="primary"
+              variant="primary rounded-3xl"
               size="md"
               onClick={handleNext}
               disabled={!canContinue}

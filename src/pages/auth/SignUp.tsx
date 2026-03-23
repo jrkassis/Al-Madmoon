@@ -36,7 +36,7 @@ export default function SignUp() {
           {/* Main Icon */}
           <div className="mb-8 flex justify-center">
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
+              <div className="absolute inset-0 rounded-3xl blur-2xl bg-white "></div>
               <div className="relative w-24 h-24 backdrop-blur-xl rounded-3xl flex items-center justify-center border-2 border-sky-200 shadow-xl">
                 <img 
                   src="/Icon-2.svg" 

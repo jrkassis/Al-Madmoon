@@ -7,7 +7,6 @@
 
 /* Hero Section */
 .affiliate-hero {
-  background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 50%, #cffafe 100%);
   padding: 80px 16px 60px;
   position: relative;
   overflow: hidden;
@@ -534,7 +533,7 @@
 .success-icon {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #86efac 0%, #16a34a 100%);
+  background: green;
   border-radius: 50%;
   display: flex;
   align-items: center;

@@ -1,5 +1,6 @@
-import React from 'react';
-import { AffiliateFormData } from './BecomeAffiliate';
+import React from "react";
+import { AffiliateFormData } from "./BecomeAffiliate";
+import { Check } from "lucide-react";
 
 interface StepFinishProps {
   formData: AffiliateFormData;
@@ -55,12 +56,7 @@ export default function StepFinish({ formData }: StepFinishProps) {
         </div>
 
         <div className="review-section">
-          <h3 className="review-title">Experience & Strategy</h3>
           <div className="review-grid">
-            <div className="review-item">
-              <span className="review-label">Experience:</span>
-              <span className="review-value">{formData.activeYears}</span>
-            </div>
             <div className="review-item">
               <span className="review-label">Country:</span>
               <span className="review-value">{formData.country}</span>
@@ -90,12 +86,14 @@ export default function StepFinish({ formData }: StepFinishProps) {
       </div>
 
       <div className="finish-info">
-        <svg className="finish-icon" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-        </svg>
+        <div className="success-icon">
+          <Check size={44} />
+        </div>
         <h3 className="finish-title">Everything looks good!</h3>
         <p className="finish-message">
-          Your application is ready to be submitted. Click "Submit Application" to complete the process. We'll review it and get back to you within 48 hours.
+          Your application is ready to be submitted. Click "Submit Application"
+          to complete the process. We'll review it and get back to you within 48
+          hours.
         </p>
       </div>
     </div>
