@@ -35,23 +35,22 @@ export function Layout() {
 
       {/* HEADER */}
       <header className={`header ${isScrolled ? "scrolled" : ""}`}>
-        <div className="header-container flex items-center justify-between">
+        <div className="header-container relative flex items-center justify-between">
 
           {/* LOGO */}
-          <Link to="/" className="brand-link flex items-center gap-2">
+          <Link to="/" className="brand-link flex items-center gap-2 lg:justify-self-start">
             <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
             <span className="brand-text hidden sm:block">Al Madmoon</span>
           </Link>
 
           {/* DESKTOP NAV */}
-          <nav className="hidden lg:flex items-center gap-6 z-40">
+          <nav className="hidden lg:flex items-center gap-6 z-40 lg:absolute lg:left-1/2 lg:-translate-x-1/2">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
-                className={`nav-link ${
-                  location.pathname === link.path ? "active" : ""
-                }`}
+                className={`nav-link ${location.pathname === link.path ? "active" : ""
+                  }`}
               >
                 {link.name}
               </Link>
@@ -136,9 +135,8 @@ export function Layout() {
                     key={link.name}
                     to={link.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`mobile-nav-link ${
-                      location.pathname === link.path ? "active" : ""
-                    }`}
+                    className={`mobile-nav-link ${location.pathname === link.path ? "active" : ""
+                      }`}
                   >
                     {link.name}
                   </Link>
