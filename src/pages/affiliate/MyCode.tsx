@@ -27,11 +27,6 @@ export default function AffiliateMyCode() {
     setCode(valid);
   };
 
-  const generateNewCode = () => {
-    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setCode(random);
-    setError('');
-  };
 
   const copyToClipboard = () => {
     if (error || code.length < 4) return;
@@ -40,7 +35,7 @@ export default function AffiliateMyCode() {
 
   return (
     <DashboardLayout role="affiliate">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">
+      <h1 className="text-2xl font-bold text-slate-900 mb-6 text-center">
         Your Affiliate Code
       </h1>
 
@@ -91,10 +86,6 @@ export default function AffiliateMyCode() {
                 />
               </svg>
               Copy Code
-            </Button>
-
-            <Button onClick={generateNewCode} variant="secondary">
-              <IoMdRefreshCircle size={18}/>
             </Button>
           </div>
 
