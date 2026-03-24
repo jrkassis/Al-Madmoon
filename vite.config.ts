@@ -13,11 +13,15 @@ export default defineConfig(({ mode }) => {
           manualChunks(id) {
             if (!id.includes('node_modules')) return;
 
-            if (id.includes('react-dom') || id.includes('react')) return 'react-vendor';
+            // React must be alone and load first
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) {
+              return 'react-vendor';
+            }
+            if (id.includes('recharts') || id.includes('d3-')) return 'charts';
+            if (id.includes('motion')) return 'motion';
             if (id.includes('lucide-react') || id.includes('react-icons') || id.includes('@fortawesome')) {
               return 'icons';
             }
-            if (id.includes('motion')) return 'motion';
 
             return 'vendor';
           },

@@ -104,10 +104,6 @@ export default function Home() {
       <div className="hero-background">
         {/* Hero Section */}
         <section className="section-base hero-section">
-          {/* Background Decorators */}
-          <div className="glow-orb primary orb-tl" />
-          <div className="glow-orb secondary orb-br" />
-          <div className="detail-dots dots-1" />
 
           <motion.div
             variants={containerVariants}
@@ -239,13 +235,7 @@ export default function Home() {
         className="section-base whatsapp-section"
         style={{ position: "relative" }}
       >
-        {/* Background Decorators */}
-        <div className="glow-orb primary orb-tl" style={{ opacity: 0.3 }} />
-        <div className="glow-orb secondary orb-br" style={{ opacity: 0.25 }} />
-        <div
-          className="detail-dots dots-1"
-          style={{ top: "20%", right: "auto", left: "5%" }}
-        />
+
 
         <motion.div
           initial="hidden"
@@ -553,13 +543,6 @@ export default function Home() {
         className="testimonials-section"
         style={{ position: "relative", overflow: "hidden" }}
       >
-        {/* Background Decorators */}
-        <div className="glow-orb secondary orb-tr" style={{ opacity: 0.2 }} />
-        <div className="glow-orb primary orb-bl" style={{ opacity: 0.25 }} />
-        <div
-          className="detail-dots dots-2"
-          style={{ bottom: "20%", left: "auto", right: "5%" }}
-        />
 
         <div
           className="testimonials-container"
@@ -634,9 +617,6 @@ export default function Home() {
 
       {/* FAQ Section */}
       <section className="faq-section" style={{ position: "relative" }}>
-        {/* Background Decorators */}
-        <div className="glow-orb primary orb-tl" style={{ opacity: 0.2 }} />
-        <div className="glow-orb secondary orb-br" style={{ opacity: 0.15 }} />
 
         <motion.div
           initial="hidden"
@@ -665,9 +645,6 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="cta-section" style={{ position: "relative" }}>
-        {/* Background Decorators */}
-        <div className="glow-orb secondary orb-tr" style={{ opacity: 0.3 }} />
-        <div className="glow-orb primary orb-bl" style={{ opacity: 0.3 }} />
 
         <motion.div
           initial="hidden"

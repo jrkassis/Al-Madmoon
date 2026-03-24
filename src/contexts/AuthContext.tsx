@@ -104,7 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const dashboardPath = role === 'admin' ? '/admin' : '/affiliate';
+  const dashboardPath =
+    role === 'admin'
+      ? '/admin'
+      : role === 'affiliate'
+      ? '/affiliate'
+      : role === 'client'
+      ? '/dashboard'
+      : '/';
 
   const value = useMemo<AuthContextValue>(
     () => ({
