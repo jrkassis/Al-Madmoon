@@ -1,20 +1,166 @@
 import { Button } from '../../components/ui/Button';
-import { Link } from 'react-router-dom';
-import { useState, ChangeEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, ChangeEvent, FormEvent } from 'react';
+import { supabase } from '../../lib/supabase';
 
 export default function SignUp() {
+  const defaultCountryCode = '961';
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [countryCode, setCountryCode] = useState(defaultCountryCode);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    referralCode: '',
     password: '',
     confirmPassword: '',
   });
+  const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === 'referralCode') {
+      const sanitizedReferralCode = value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6);
+      setFormData(prev => ({ ...prev, [name]: sanitizedReferralCode }));
+      return;
+    }
+    if (name === 'phone') {
+      const sanitizedPhone = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: sanitizedPhone }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const normalizePhoneNumber = (selectedCountryCode: string, localPhone: string) => {
+    const digitsOnlyCountryCode = selectedCountryCode.replace(/\D/g, '');
+    const digitsOnlyPhone = localPhone.replace(/\D/g, '').replace(/^0+/, '');
+
+    if (!digitsOnlyCountryCode || !digitsOnlyPhone) {
+      return '';
+    }
+
+    return `${digitsOnlyCountryCode}${digitsOnlyPhone}`;
+  };
+
+  const normalizedPhone = normalizePhoneNumber(countryCode, formData.phone);
+
+  const isReferralCodeValid =
+    formData.referralCode.trim() === '' || /^[A-Z]{4,6}$/.test(formData.referralCode.trim());
+  const isPasswordMismatch =
+    formData.password.trim() !== '' &&
+    formData.confirmPassword.trim() !== '' &&
+    formData.password !== formData.confirmPassword;
+
+  const isFormValid =
+    formData.name.trim() !== '' &&
+    formData.email.trim() !== '' &&
+    normalizedPhone !== '' &&
+    formData.password.trim() !== '' &&
+    formData.confirmPassword.trim() !== '' &&
+    formData.password === formData.confirmPassword &&
+    isReferralCodeValid &&
+    acceptedTerms;
+
+  const getDashboardPathForRole = (role: string | null | undefined) => {
+    if (role === 'admin') return '/admin';
+    return '/affiliate';
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!isFormValid || isSubmitting) {
+      return;
+    }
+
+    setErrorMessage('');
+    setSuccessMessage('');
+    setIsSubmitting(true);
+    const phoneToSave = normalizePhoneNumber(countryCode, formData.phone);
+    const referralCodeToSave = isReferralCodeValid
+      ? formData.referralCode.trim() || null
+      : null;
+
+    if (!phoneToSave) {
+      setErrorMessage('Please enter a valid phone number.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!isReferralCodeValid) {
+      setErrorMessage('Referral code must be 4 to 6 uppercase letters (A-Z), or left empty.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('signup-user', {
+        body: {
+          email: formData.email.trim(),
+          password: formData.password,
+          full_name: formData.name.trim(),
+          phone: phoneToSave,
+          ref_code: referralCodeToSave,
+        },
+      });
+
+      setIsSubmitting(false);
+
+      if (error) {
+        const isNetworkError = error.name === 'FunctionsFetchError';
+        setErrorMessage(
+          isNetworkError
+            ? 'Could not reach signup function. Check deployment name, CORS, and project URL.'
+            : error.message || 'Could not create account. Please try again.'
+        );
+        return;
+      }
+
+      if (!data?.ok) {
+        setErrorMessage(data?.error || 'Could not create account. Please try again.');
+        return;
+      }
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      if (signInError) {
+        setErrorMessage(
+          signInError.message || 'Account created, but automatic sign-in failed. Please sign in manually.'
+        );
+        return;
+      }
+
+      const targetPath = getDashboardPathForRole(data?.role ?? 'client');
+      setSuccessMessage('Account created successfully.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        referralCode: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setAcceptedTerms(false);
+      navigate(targetPath);
+    } catch (invokeError) {
+      setIsSubmitting(false);
+      const message =
+        invokeError instanceof Error
+          ? invokeError.message
+          : 'Failed to send a request to the Edge Function.';
+      setErrorMessage(message);
+      return;
+    }
   };
 
   return (
@@ -38,9 +184,9 @@ export default function SignUp() {
             <div className="relative">
               <div className="absolute inset-0 rounded-3xl blur-2xl bg-white "></div>
               <div className="relative w-24 h-24 backdrop-blur-xl rounded-3xl flex items-center justify-center border-2 border-sky-200 shadow-xl">
-                <img 
-                  src="/Icon-2.svg" 
-                  alt="Al Madmoon" 
+                <img
+                  src="/Icon-2.svg"
+                  alt="Al Madmoon"
                   className="w-12 h-12 object-contain"
                 />
               </div>
@@ -129,9 +275,9 @@ export default function SignUp() {
             <div className="mb-10">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                  <img 
-                    src="/Icon-3.svg" 
-                    alt="Al Madmoon" 
+                  <img
+                    src="/Icon-3.svg"
+                    alt="Al Madmoon"
                     className="w-8 h-8 object-contain"
                   />
                 </div>
@@ -148,7 +294,7 @@ export default function SignUp() {
             </div>
 
             {/* Sign Up Form */}
-            <form className="space-y-5 mb-8">
+            <form className="space-y-5 mb-8" onSubmit={handleSubmit}>
               {/* Full Name Field */}
               <div className="relative">
                 <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
@@ -161,8 +307,9 @@ export default function SignUp() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
-                    placeholder="John Doe"
+                    placeholder="Full Name"
                   />
                   {/* User Icon SVG */}
                   <svg
@@ -188,6 +335,7 @@ export default function SignUp() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
                     placeholder="you@example.com"
                   />
@@ -203,6 +351,52 @@ export default function SignUp() {
                 </div>
               </div>
 
+              {/* Phone Number Field */}
+              <div className="relative">
+                <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Phone Number
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    id="countryCode"
+                    name="countryCode"
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="px-3 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900"
+                  >
+                    <option value="961">+961</option>
+                    <option value="966">+966</option>
+                    <option value="971">+971</option>
+                    <option value="20">+20</option>
+                  </select>
+                  <div className="relative flex-1">
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
+                    placeholder="03 123 456"
+                  />
+                  <svg
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a2 2 0 011.94 1.515l.74 2.966a2 2 0 01-.53 1.946l-1.29 1.29a16 16 0 006.566 6.566l1.29-1.29a2 2 0 011.946-.53l2.966.74A2 2 0 0121 15.72V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                </div>
+                {normalizedPhone && (
+                  <p className="mt-2 text-xs text-slate-500">
+                    Saved as: {normalizedPhone}
+                  </p>
+                )}
+              </div>
+
               {/* Password Field */}
               <div className="relative">
                 <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
@@ -215,6 +409,7 @@ export default function SignUp() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300 pr-10"
                     placeholder="••••••••"
                   />
@@ -248,6 +443,7 @@ export default function SignUp() {
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300 pr-10"
                     placeholder="••••••••"
                   />
@@ -267,6 +463,42 @@ export default function SignUp() {
                     )}
                   </button>
                 </div>
+                {isPasswordMismatch && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Password and confirm password must match.
+                  </p>
+                )}
+              </div>
+
+              <div className="relative">
+                <label htmlFor="referralCode" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Code <span className="text-slate-500 font-normal">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="referralCode"
+                    name="referralCode"
+                    value={formData.referralCode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
+                    placeholder="ABCD"
+                    maxLength={6}
+                  />
+                  <svg
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h8m-8 5h10" />
+                  </svg>
+                </div>
+                {!isReferralCodeValid && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Referral code must be 4 to 6 uppercase letters (A-Z).
+                  </p>
+                )}
               </div>
 
               {/* Terms & Conditions */}
@@ -274,6 +506,9 @@ export default function SignUp() {
                 <input
                   type="checkbox"
                   id="terms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  required
                   className="w-4 h-4 mt-1 rounded border-slate-300 bg-white cursor-pointer accent-sky-500"
                 />
                 <label htmlFor="terms" className="text-sm text-slate-600 cursor-pointer">
@@ -289,8 +524,25 @@ export default function SignUp() {
               </div>
 
               {/* Sign Up Button */}
-              <Button variant="primary" size="lg" className="btn-icon btn-shadow w-full mt-8" style={{ display: 'inline-flex' }}>
-                Create Account
+              {errorMessage && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                  {errorMessage}
+                </p>
+              )}
+              {successMessage && (
+                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  {successMessage}
+                </p>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={!isFormValid || isSubmitting}
+                className="btn-icon btn-shadow w-full mt-8 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ display: 'inline-flex' }}
+              >
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
 
@@ -328,9 +580,9 @@ export default function SignUp() {
       {/* Mobile CTA */}
       <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <img 
-            src="/Icon-2.svg" 
-            alt="Al Madmoon" 
+          <img
+            src="/Icon-2.svg"
+            alt="Al Madmoon"
             className="w-6 h-6 object-contain"
           />
           <span className="font-bold text-lg">Al Madmoon AI</span>

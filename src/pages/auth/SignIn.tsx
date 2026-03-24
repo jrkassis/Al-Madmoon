@@ -1,14 +1,109 @@
 import { Button } from '../../components/ui/Button';
-import { Link } from 'react-router-dom';
-import { useState, ChangeEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, ChangeEvent, FormEvent } from 'react';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignIn() {
+  const defaultCountryCode = '961';
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [formData, setFormData] = useState({ identifier: '', password: '' });
+  const { rememberMe, setRememberMe } = useAuth();
+  const navigate = useNavigate();
 
-const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const isEmail = (value: string) => value.includes('@');
+
+  const normalizePhoneNumber = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith(defaultCountryCode)) return digits;
+
+    const withoutLeadingZeros = digits.replace(/^0+/, '');
+    return `${defaultCountryCode}${withoutLeadingZeros}`;
+  };
+
+  const resolveIdentifierToEmail = async (identifier: string) => {
+    if (isEmail(identifier)) {
+      return identifier.trim().toLowerCase();
+    }
+
+    const normalizedPhone = normalizePhoneNumber(identifier);
+    if (!normalizedPhone) {
+      throw new Error('Please enter a valid email or phone number.');
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('email')
+      .eq('phone', normalizedPhone)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error(error.message || 'Could not find account by phone number.');
+    }
+
+    if (!data?.email) {
+      throw new Error('No login email is linked to this phone number.');
+    }
+
+    return data.email;
+  };
+
+  const getDashboardPathForRole = (role: string | null | undefined) => {
+    if (role === 'admin') return '/admin';
+    return '/affiliate';
+  };
+
+  const isFormValid =
+    formData.identifier.trim() !== '' &&
+    formData.password.trim() !== '';
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!isFormValid || isSubmitting) {
+      return;
+    }
+
+    setErrorMessage('');
+    setSuccessMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const email = await resolveIdentifierToEmail(formData.identifier.trim());
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: formData.password,
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Invalid credentials.');
+      }
+
+      setSuccessMessage('Signed in successfully.');
+      const { data: roleRow } = await supabase
+        .from('users')
+        .select('role')
+        .eq('email', email)
+        .maybeSingle();
+      navigate(getDashboardPathForRole(roleRow?.role));
+    } catch (signinError) {
+      const message =
+        signinError instanceof Error
+          ? signinError.message
+          : 'Could not sign in. Please try again.';
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -29,9 +124,9 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
             <div className="mb-10">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                  <img 
-                    src="/Icon-3.svg" 
-                    alt="Al Madmoon" 
+                  <img
+                    src="/Icon-3.svg"
+                    alt="Al Madmoon"
                     className="w-8 h-8 object-contain"
                   />
                 </div>
@@ -48,21 +143,21 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
             </div>
 
             {/* Sign In Form */}
-            <form className="space-y-5 mb-8">
-              {/* Email Field */}
+            <form className="space-y-5 mb-8" onSubmit={handleSubmit}>
+              {/* Email / Phone Field */}
               <div className="relative">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
-                  Email Address
+                <label htmlFor="identifier" className="block text-sm font-semibold text-slate-700 mb-2">
+                  Email or Phone Number
                 </label>
                 <div className="relative">
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
+                    type="text"
+                    id="identifier"
+                    name="identifier"
+                    value={formData.identifier}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
-                    placeholder="you@example.com"
                   />
                   {/* Email Icon SVG */}
                   <svg
@@ -88,6 +183,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300 pr-10"
                     placeholder="••••••••"
                   />
@@ -114,6 +210,8 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
                 <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-slate-300 bg-white cursor-pointer accent-sky-500"
                   />
                   <span className="text-slate-600 group-hover:text-slate-700 transition-colors">
@@ -129,11 +227,27 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
               </div>
 
               {/* Sign In Button */}
-              <Button variant="primary" size="lg" className="btn-icon btn-shadow w-full mt-8 " style={{ display: 'inline-flex' }}>
-            
-            Sign In
-          </Button>
-        
+              {errorMessage && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                  {errorMessage}
+                </p>
+              )}
+              {successMessage && (
+                <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+                  {successMessage}
+                </p>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={!isFormValid || isSubmitting}
+                className="btn-icon btn-shadow w-full mt-8 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ display: 'inline-flex' }}
+              >
+                {isSubmitting ? 'Signing In...' : 'Sign In'}
+              </Button>
+
             </form>
 
             {/* Sign Up Link */}
@@ -179,9 +293,9 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
             <div className="relative">
               <div className="absolute inset-0 rounded-3xl blur-2xl bg-white"></div>
               <div className="relative w-24 h-24 backdrop-blur-xl rounded-3xl flex items-center justify-center border-2 border-sky-200 shadow-xl">
-                <img 
-                  src="/Icon-2.svg" 
-                  alt="Al Madmoon" 
+                <img
+                  src="/Icon-2.svg"
+                  alt="Al Madmoon"
                   className="w-12 h-12 object-contain"
                 />
               </div>
@@ -264,9 +378,9 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       {/* Mobile CTA */}
       <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <img 
-            src="/Icon-2.svg" 
-            alt="Al Madmoon" 
+          <img
+            src="/Icon-2.svg"
+            alt="Al Madmoon"
             className="w-6 h-6 object-contain"
           />
           <span className="font-bold text-lg">Al Madmoon AI</span>

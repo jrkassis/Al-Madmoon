@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface NavItem {
   label: string;
@@ -185,7 +186,14 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const navItems = role === "admin" ? adminNav : affiliateNav;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth/signin");
+  };
 
   return (
     <div className="animated-mesh-bg min-h-screen patternbg">
@@ -245,11 +253,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           })}
             <button
             className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 w-full mt-8"
-            onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                window.location.href = "/auth/signin";
-            }}
+            onClick={handleSignOut}
             >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

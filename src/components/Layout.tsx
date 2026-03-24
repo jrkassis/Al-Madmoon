@@ -1,8 +1,9 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/Button";
-import { MessageCircle, Menu, X, LogIn, User } from "lucide-react";
+import { MessageCircle, Menu, X, LogIn, User, LayoutDashboard } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuth } from "../contexts/AuthContext";
 import "./Layout.css";
 
 const navLinks = [
@@ -16,6 +17,7 @@ export function Layout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, dashboardPath } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -58,19 +60,30 @@ export function Layout() {
 
           {/* DESKTOP ACTIONS */}
           <div className="hidden lg:flex items-center gap-3">
-            <a href="/auth/signin">
-              <Button variant="ghost" className="icon-gap">
-                <User size={16} />
-                Sign In
-              </Button>
-            </a>
+            {isAuthenticated ? (
+              <Link to={dashboardPath}>
+                <Button variant="ghost" className="icon-gap rounded-full">
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth/signin">
+                  <Button variant="ghost" className="icon-gap">
+                    <User size={16} />
+                    Sign In
+                  </Button>
+                </Link>
 
-            <a href="/onboarding">
-              <Button variant="primary" className="icon-gap rounded-full">
-                <LogIn size={16} />
-                Get Started
-              </Button>
-            </a>
+                <Link to="/onboarding">
+                  <Button variant="primary" className="icon-gap rounded-full">
+                    <LogIn size={16} />
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* MOBILE MENU BUTTON */}
@@ -111,30 +124,30 @@ export function Layout() {
 
               {/* ACTIONS */}
               <div className="flex flex-col gap-2 pt-3 border-t">
-                <a href="/auth/signin">
-                  <Button variant="ghost" className="w-full icon-gap">
-                    <User size={18} />
-                    Sign In
-                  </Button>
-                </a>
+                {isAuthenticated ? (
+                  <Link to={dashboardPath}>
+                    <Button variant="ghost" className="w-full icon-gap">
+                      <LayoutDashboard size={18} />
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/auth/signin">
+                      <Button variant="ghost" className="w-full icon-gap">
+                        <User size={18} />
+                        Sign In
+                      </Button>
+                    </Link>
 
-                <a href="/onboarding">
-                  <Button variant="primary" className="w-full icon-gap">
-                    <LogIn size={18} />
-                    Get Started
-                  </Button>
-                </a>
-
-                <a
-                  href="https://wa.me/79027611"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="secondary" className="w-full icon-gap">
-                    <MessageCircle size={18} />
-                    WhatsApp Support
-                  </Button>
-                </a>
+                    <Link to="/onboarding">
+                      <Button variant="primary" className="w-full icon-gap">
+                        <LogIn size={18} />
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
