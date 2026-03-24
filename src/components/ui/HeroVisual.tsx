@@ -28,8 +28,6 @@ export function HeroVisual() {
                 transition={{ scale: { repeat: Infinity, duration: 4 }, opacity: { repeat: Infinity, duration: 4 } }}
             />
 
-            {/* Decorative Rotating Grid */}
-            <div className="hero-orbital-grid" />
 
             {/* Main Centerpiece: AI Prediction Dashboard Card */}
             <motion.div

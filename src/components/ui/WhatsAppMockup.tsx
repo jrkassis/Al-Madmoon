@@ -89,10 +89,6 @@ export function WhatsAppMockup() {
                     </div>
                 </div>
             </div>
-
-            {/* Decorative Orbs behind phone */}
-            <div className="wa-glow-orb orb-1"></div>
-            <div className="wa-glow-orb orb-2"></div>
         </div>
     );
 }
