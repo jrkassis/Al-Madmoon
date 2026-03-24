@@ -142,8 +142,12 @@ async function fetchOpenAICosts(): Promise<{
   // Set VITE_OPENAI_COSTS_URL to a backend endpoint that calls:
   //   GET https://api.openai.com/v1/organization/usage
   // and returns { rows: [{ created_at, input_cost, output_cost, total_cost }] }
-  const url = (import.meta as any)?.env?.VITE_OPENAI_COSTS_URL as string | undefined;
-  if (!url) return { input: 0, output: 0, total: 0, rows: [] };
+  const configuredUrl = (import.meta as any)?.env?.VITE_OPENAI_COSTS_URL as string | undefined;
+  const url = configuredUrl || '/api/openai-costs';
+  const isDev = Boolean((import.meta as any)?.env?.DEV);
+  if (isDev) {
+    console.debug('[adminAnalytics] OpenAI costs URL:', url, configuredUrl ? '(from env)' : '(default)');
+  }
   try {
     const resp = await fetch(url);
     if (!resp.ok) return { input: 0, output: 0, total: 0, rows: [] };
@@ -164,8 +168,17 @@ async function fetchOpenAICosts(): Promise<{
       created_at: String(r.created_at ?? ''),
       total_cost: parseCurrency(r.total_cost ?? r.request_cost),
     }));
+    if (isDev) {
+      console.debug('[adminAnalytics] OpenAI costs response:', {
+        rowCount: normalizedRows.length,
+        total: sums.total,
+      });
+    }
     return { ...sums, rows: normalizedRows };
   } catch {
+    if (isDev) {
+      console.debug('[adminAnalytics] OpenAI costs fetch failed');
+    }
     return { input: 0, output: 0, total: 0, rows: [] };
   }
 }
