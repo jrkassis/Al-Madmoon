@@ -40,59 +40,23 @@ export default function AdminAffiliates() {
     setError(null);
     setLoading(true);
 
-    // Preferred model: affiliate owns affiliate_code; users signup with ref_code.
-    const withCodeQuery = await supabase
+    const query = await supabase
       .from('users')
-      .select('id, full_name, phone, created_at, affiliate_code')
+      .select('id, full_name, phone, created_at')
       .eq('role', 'affiliate')
       .order('created_at', { ascending: false });
-
-    let affiliatesData: Array<{
+    if (query.error) throw query.error;
+    const affiliatesData = (query.data ?? []) as Array<{
       id: string;
       full_name: string | null;
       phone: string | null;
       created_at: string;
-      affiliate_code?: string | null;
-    }> = [];
+    }>;
 
-    if (!withCodeQuery.error) {
-      affiliatesData = (withCodeQuery.data ?? []) as typeof affiliatesData;
-    } else {
-      // Backward-compatible fallback when affiliate_code column doesn't exist yet.
-      const fallbackQuery = await supabase
-        .from('users')
-        .select('id, full_name, phone, created_at')
-        .eq('role', 'affiliate')
-        .order('created_at', { ascending: false });
-      if (fallbackQuery.error) throw fallbackQuery.error;
-      affiliatesData = ((fallbackQuery.data ?? []) as Array<{
-        id: string;
-        full_name: string | null;
-        phone: string | null;
-        created_at: string;
-      }>).map((u) => ({ ...u, affiliate_code: null }));
-    }
-
-    const refsQuery = await supabase.from('users').select('ref_code');
-    let referralCountByCode: Record<string, number> = {};
-    if (!refsQuery.error) {
-      referralCountByCode = ((refsQuery.data ?? []) as Array<{ ref_code?: string | null }>).reduce(
-        (acc, u) => {
-          const code = String(u?.ref_code ?? '').trim().toUpperCase();
-          if (code) acc[code] = (acc[code] ?? 0) + 1;
-          return acc;
-        },
-        {} as Record<string, number>
-      );
-    }
-
-    const normalized = affiliatesData.map((a) => {
-      const ownCode = String(a.affiliate_code ?? '').trim().toUpperCase();
-      return {
-        ...a,
-        referrals: ownCode ? referralCountByCode[ownCode] ?? 0 : 0,
-      };
-    });
+    const normalized = affiliatesData.map((a) => ({
+      ...a,
+      referrals: 0,
+    }));
 
     setAffiliates(normalized);
     setLoading(false);

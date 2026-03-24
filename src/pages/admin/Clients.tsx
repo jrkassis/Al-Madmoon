@@ -96,12 +96,13 @@ export default function AdminClients() {
     if (menuOpenFor) {
       window.addEventListener('scroll', close, true);
       window.addEventListener('resize', close);
-      document.addEventListener('click', close, true);
+      // Use bubbling phase so clicks inside the menu can stop propagation
+      document.addEventListener('click', close, false);
     }
     return () => {
       window.removeEventListener('scroll', close, true);
       window.removeEventListener('resize', close);
-      document.removeEventListener('click', close, true);
+      document.removeEventListener('click', close, false);
     };
   }, [menuOpenFor]);
 
