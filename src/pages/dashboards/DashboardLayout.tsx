@@ -215,7 +215,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   };
 
   return (
-    <div className="animated-mesh-bg min-h-screen patternbg">
+    <div className="bg-white min-h-screen patternbg">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -237,57 +237,6 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
           lg:left-0  lg:right-auto lg:w-64 lg:border-r lg:border-l-0 lg:translate-x-0
         `}
       >
-        {/* NAV ITEMS */}
-        {/* <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* LO) */}
-        {/* <div className="p-4 border-t border-slate-100">
-          <button
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 w-full mt-8"
-            onClick={() => {
-              localStorage.removeItem("token");
-              localStorage.removeItem("user");
-              window.location.href = "/auth/signin";
-            }}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-
-            <span className="leading-none">Sign out</span>
-          </button>
-        </div> */}
-
         <nav className="p-4 space-y-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -332,7 +281,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64 mt-15">
+      <div className="lg:pl-64 pt-15">
         <div className="flex items-center justify-between px-4 py-3 ">
           {/* MOBILE HAMBURGER */}
           <button
