@@ -136,33 +136,37 @@ async function fetchOpenAICosts(): Promise<{
   input: number;
   output: number;
   total: number;
+  rows: Array<{ created_at: string; total_cost: number }>;
 }> {
-  // Reads total usage from OpenAI Admin API via your backend proxy or env var.
+  // Reads token usage + derived costs from OpenAI Admin API via backend proxy.
   // Set VITE_OPENAI_COSTS_URL to a backend endpoint that calls:
-  //   GET https://api.openai.com/v1/organization/costs
-  // and returns { input_cost, output_cost, total_cost }
+  //   GET https://api.openai.com/v1/organization/usage
+  // and returns { rows: [{ created_at, input_cost, output_cost, total_cost }] }
   const url = (import.meta as any)?.env?.VITE_OPENAI_COSTS_URL as string | undefined;
-  if (!url) return { input: 0, output: 0, total: 0 };
+  if (!url) return { input: 0, output: 0, total: 0, rows: [] };
   try {
     const resp = await fetch(url);
-    if (!resp.ok) return { input: 0, output: 0, total: 0 };
+    if (!resp.ok) return { input: 0, output: 0, total: 0, rows: [] };
     const body = await resp.json();
     const rows: Array<Record<string, unknown>> = Array.isArray(body)
       ? body
       : body?.rows ?? [body];
-    return rows.reduce<{ input: number; output: number; total: number }>(
+    const sums = rows.reduce<{ input: number; output: number; total: number }>(
       (acc, r) => {
-        acc.input += parseCurrency((r as any).input_cost);
-        acc.output += parseCurrency((r as any).output_cost);
-        acc.total += parseCurrency(
-          (r as any).total_cost ?? parseCurrency((r as any).request_cost)
-        );
+        acc.input += parseCurrency(r.input_cost);
+        acc.output += parseCurrency(r.output_cost);
+        acc.total += parseCurrency(r.total_cost ?? r.request_cost);
         return acc;
       },
       { input: 0, output: 0, total: 0 }
     );
+    const normalizedRows = rows.map((r) => ({
+      created_at: String(r.created_at ?? ''),
+      total_cost: parseCurrency(r.total_cost ?? r.request_cost),
+    }));
+    return { ...sums, rows: normalizedRows };
   } catch {
-    return { input: 0, output: 0, total: 0 };
+    return { input: 0, output: 0, total: 0, rows: [] };
   }
 }
 
@@ -271,11 +275,12 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
     total: perplexitySums.total + openaiSums.total,
   };
 
-  // Monthly cost splits from api_costs rows
-  const costThisMonth = perplexityResult.rows
+  // Monthly cost splits include both Perplexity + OpenAI rows.
+  const allCostRows = [...perplexityResult.rows, ...openaiSums.rows];
+  const costThisMonth = allCostRows
     .filter((r) => r.created_at && new Date(r.created_at) >= startOfMonth)
     .reduce((s, r) => s + r.total_cost, 0);
-  const costLastMonth = perplexityResult.rows
+  const costLastMonth = allCostRows
     .filter((r) => {
       if (!r.created_at) return false;
       const d = new Date(r.created_at);
@@ -292,7 +297,7 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
 
   // Daily cost series (last 30d)
   const costByDay: Record<string, number> = {};
-  for (const r of perplexityResult.rows) {
+  for (const r of allCostRows) {
     if (!r.created_at) continue;
     const d = isoDate(new Date(r.created_at));
     if (d >= thirtyDaysAgo) costByDay[d] = (costByDay[d] ?? 0) + r.total_cost;

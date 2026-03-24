@@ -31,9 +31,11 @@ export default async function handler(req, res) {
   const normalizedBucketWidth = bucketWidthMap[granularity] ?? String(req.query.bucket_width ?? '1d');
   qs.set('bucket_width', normalizedBucketWidth);
 
-  // OpenAI Administration API reference:
-  // GET /organization/costs
-  const url = `${openAiBase}/organization/costs${qs.toString() ? `?${qs.toString()}` : ''}`;
+  // /organization/usage provides token-level usage buckets.
+  // We estimate spend from token totals using configurable per-1M-token rates.
+  const inputPricePer1M = Number(process.env.OPENAI_INPUT_PRICE_PER_1M ?? 0);
+  const outputPricePer1M = Number(process.env.OPENAI_OUTPUT_PRICE_PER_1M ?? 0);
+  const url = `${openAiBase}/organization/usage${qs.toString() ? `?${qs.toString()}` : ''}`;
 
   try {
     const response = await fetch(url, {
@@ -57,31 +59,75 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw?.costs) ? raw.costs : []);
+    const data = Array.isArray(raw?.data) ? raw.data : [];
 
     // Normalize to the dashboard format expected in src/lib/adminAnalytics.ts
     const rows = [];
     for (const item of data) {
       const nested = Array.isArray(item?.results) ? item.results : [];
+      const bucketStart = Number(item?.start_time ?? item?.start ?? 0);
+      const createdAt = bucketStart > 0 ? new Date(bucketStart * 1000).toISOString() : null;
       if (nested.length) {
         for (const n of nested) {
-          const amountValue =
-            Number(n?.amount?.value ?? n?.total_cost ?? n?.cost ?? n?.amount ?? 0) || 0;
+          const inputTokens = Number(
+            n?.input_tokens ??
+            n?.prompt_tokens ??
+            n?.n_input_tokens_total ??
+            n?.input_token_count ??
+            0
+          ) || 0;
+          const outputTokens = Number(
+            n?.output_tokens ??
+            n?.completion_tokens ??
+            n?.n_output_tokens_total ??
+            n?.output_token_count ??
+            0
+          ) || 0;
+          const requestCost = Number(n?.request_cost ?? 0) || 0;
+          const fallbackInputCost = (inputTokens / 1_000_000) * inputPricePer1M;
+          const fallbackOutputCost = (outputTokens / 1_000_000) * outputPricePer1M;
+          const inputCost = Number(n?.input_cost ?? fallbackInputCost) || 0;
+          const outputCost = Number(n?.output_cost ?? fallbackOutputCost) || 0;
+          const amountValue = Number(n?.amount?.value ?? n?.total_cost ?? n?.cost ?? (inputCost + outputCost + requestCost)) || 0;
           rows.push({
-            input_cost: Number(n?.input_cost ?? 0) || 0,
-            output_cost: Number(n?.output_cost ?? 0) || 0,
-            request_cost: Number(n?.request_cost ?? 0) || 0,
+            created_at: createdAt,
+            input_tokens: inputTokens,
+            output_tokens: outputTokens,
+            input_cost: inputCost,
+            output_cost: outputCost,
+            request_cost: requestCost,
             total_cost: amountValue,
             raw: n,
           });
         }
       } else {
-        const amountValue =
-          Number(item?.amount?.value ?? item?.total_cost ?? item?.cost ?? item?.amount ?? 0) || 0;
+        const inputTokens = Number(
+          item?.input_tokens ??
+          item?.prompt_tokens ??
+          item?.n_input_tokens_total ??
+          item?.input_token_count ??
+          0
+        ) || 0;
+        const outputTokens = Number(
+          item?.output_tokens ??
+          item?.completion_tokens ??
+          item?.n_output_tokens_total ??
+          item?.output_token_count ??
+          0
+        ) || 0;
+        const requestCost = Number(item?.request_cost ?? 0) || 0;
+        const fallbackInputCost = (inputTokens / 1_000_000) * inputPricePer1M;
+        const fallbackOutputCost = (outputTokens / 1_000_000) * outputPricePer1M;
+        const inputCost = Number(item?.input_cost ?? fallbackInputCost) || 0;
+        const outputCost = Number(item?.output_cost ?? fallbackOutputCost) || 0;
+        const amountValue = Number(item?.amount?.value ?? item?.total_cost ?? item?.cost ?? item?.amount ?? (inputCost + outputCost + requestCost)) || 0;
         rows.push({
-          input_cost: Number(item?.input_cost ?? 0) || 0,
-          output_cost: Number(item?.output_cost ?? 0) || 0,
-          request_cost: Number(item?.request_cost ?? 0) || 0,
+          created_at: createdAt,
+          input_tokens: inputTokens,
+          output_tokens: outputTokens,
+          input_cost: inputCost,
+          output_cost: outputCost,
+          request_cost: requestCost,
           total_cost: amountValue,
           raw: item,
         });
