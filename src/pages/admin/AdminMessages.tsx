@@ -1,104 +1,118 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '../../lib/supabase';
 
 // Types for message
 interface ContactMessage {
-  id: number;
-  name: string;
+  id: string;
+  full_name: string;
   email: string;
   message: string;
-  createdAt: string;
+  created_at: string;
   status: 'unread' | 'read';
 }
 
 export default function AdminMessages() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'read' | 'unread'>('all');
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch messages (simulate API)
-  useEffect(() => {
-    // Replace with actual API call
-    const fetchMessages = async () => {
-      setLoading(true);
-      // Mock data
-      const mockMessages: ContactMessage[] = [
-        {
-          id: 1,
-          name: 'John Doe',
-          email: 'john@example.com',
-          message: 'I have a question about my subscription...',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          status: 'unread',
-        },
-        {
-          id: 2,
-          name: 'Jane Smith',
-          email: 'jane@example.com',
-          message: 'How can I upgrade my plan?',
-          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-          status: 'read',
-        },
-        {
-          id: 3,
-          name: 'Ali Hassan',
-          email: 'ali@example.com',
-          message: 'I am having trouble logging in.',
-          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 mins ago
-          status: 'unread',
-        },
-      ];
-      setMessages(mockMessages);
+  const fetchMessages = async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error: fetchError } = await supabase
+      .from('contact_messages')
+      .select('id, full_name, email, message, created_at, status')
+      .order('created_at', { ascending: false });
+    if (fetchError) {
+      setError(fetchError.message);
+      setMessages([]);
       setLoading(false);
-    };
+      return;
+    }
+    setMessages((data as ContactMessage[]) ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchMessages();
   }, []);
 
   // Filter messages by name or email
-  const filteredMessages = messages.filter((msg) =>
-    msg.name.toLowerCase().includes(search.toLowerCase()) ||
-    msg.email.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredMessages = messages
+    .filter((msg) =>
+      msg.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      msg.email.toLowerCase().includes(search.toLowerCase())
+    )
+    .filter((msg) => (statusFilter === 'all' ? true : msg.status === statusFilter));
 
-  // Mark as read
-  const markAsRead = (id: number) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, status: 'read' } : msg))
-    );
-    // Optionally call API to update
+  const updateMessageStatus = async (id: string, status: 'read' | 'unread') => {
+    const { error: updateError } = await supabase
+      .from('contact_messages')
+      .update({ status })
+      .eq('id', id);
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+    setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, status } : msg)));
+    setSelectedMessage((prev) => (prev?.id === id ? { ...prev, status } : prev));
   };
 
   // Delete message
-  const deleteMessage = (id: number) => {
+  const deleteMessage = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this message?')) {
+      const { error: deleteError } = await supabase
+        .from('contact_messages')
+        .delete()
+        .eq('id', id);
+      if (deleteError) {
+        setError(deleteError.message);
+        return;
+      }
       setMessages((prev) => prev.filter((msg) => msg.id !== id));
       if (selectedMessage?.id === id) setSelectedMessage(null);
-      // Optionally call API to delete
     }
   };
 
   return (
     <DashboardLayout role="admin">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
-        <div className="relative w-full sm:w-64">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500/50"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          Messages
+          <span className="text-sm font-semibold text-slate-500">({filteredMessages.length})</span>
+        </h1>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500/50"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <select
+            className="px-3 py-2 rounded-full border border-slate-200 text-sm bg-white"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'read' | 'unread')}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
+            <option value="all">All</option>
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
+          </select>
         </div>
       </div>
 
@@ -106,6 +120,8 @@ export default function AdminMessages() {
         <div className="flex justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
         </div>
+      ) : error ? (
+        <div className="glass-panel p-6 text-sm text-red-600">{error}</div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Message List */}
@@ -128,17 +144,22 @@ export default function AdminMessages() {
                       className={`border-b border-slate-100 last:border-0 cursor-pointer hover:bg-slate-50 ${
                         msg.status === 'unread' ? 'font-semibold bg-blue-50/20' : ''
                       }`}
-                      onClick={() => setSelectedMessage(msg)}
+                      onClick={() => {
+                        setSelectedMessage(msg);
+                        if (msg.status === 'unread') {
+                          updateMessageStatus(msg.id, 'read');
+                        }
+                      }}
                     >
                       <td className="p-4">
                         <div>
-                          <p className="text-slate-900">{msg.name}</p>
+                          <p className="text-slate-900">{msg.full_name}</p>
                           <p className="text-xs text-slate-500">{msg.email}</p>
                         </div>
                       </td>
                       <td className="p-4 text-slate-600 max-w-xs truncate">{msg.message}</td>
                       <td className="p-4 text-slate-500 whitespace-nowrap">
-                        {formatDistanceToNow(new Date(msg.createdAt), { addSuffix: true })}
+                        {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                       </td>
                       <td className="p-4">
                         <span
@@ -192,27 +213,30 @@ export default function AdminMessages() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-slate-500">From</p>
-                    <p className="font-medium text-slate-900">{selectedMessage.name}</p>
+                    <p className="font-medium text-slate-900">{selectedMessage.full_name}</p>
                     <p className="text-sm text-slate-600">{selectedMessage.email}</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Received</p>
                     <p className="text-sm text-slate-700">
-                      {new Date(selectedMessage.createdAt).toLocaleString()}
+                      {new Date(selectedMessage.created_at).toLocaleString()}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-500">Message</p>
                     <p className="text-slate-800 whitespace-pre-wrap">{selectedMessage.message}</p>
                   </div>
-                  {selectedMessage.status === 'unread' && (
-                    <button
-                      onClick={() => markAsRead(selectedMessage.id)}
-                      className="mt-4 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
-                    >
-                      Mark as read
-                    </button>
-                  )}
+                  <button
+                    onClick={() =>
+                      updateMessageStatus(
+                        selectedMessage.id,
+                        selectedMessage.status === 'read' ? 'unread' : 'read'
+                      )
+                    }
+                    className="mt-4 px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                  >
+                    Mark as {selectedMessage.status === 'read' ? 'unread' : 'read'}
+                  </button>
                 </div>
               </div>
             ) : (

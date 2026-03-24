@@ -1,6 +1,8 @@
 import { motion } from "motion/react";
 import { Button } from "../components/ui/Button";
 import { MessageCircle, Mail, MapPin, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "../lib/supabase";
 import "./Contact.css";
 
 const fadeIn = {
@@ -18,6 +20,50 @@ const stagger = {
 };
 
 export default function Contact() {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatusMsg(null);
+    setStatusType(null);
+
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedMessage = message.trim();
+
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) {
+      setStatusType("error");
+      setStatusMsg("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const { error } = await supabase.from("contact_messages").insert({
+        full_name: trimmedName,
+        email: trimmedEmail,
+        message: trimmedMessage,
+        status: "unread",
+      });
+      if (error) throw error;
+      setStatusType("success");
+      setStatusMsg("Message sent successfully. We'll get back to you soon.");
+      setFullName("");
+      setEmail("");
+      setMessage("");
+    } catch (err: any) {
+      setStatusType("error");
+      setStatusMsg(err?.message ?? "Failed to send message. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <motion.div
       initial="initial"
@@ -89,13 +135,15 @@ export default function Contact() {
         <motion.div variants={fadeIn} className="contact-form-container">
           <div className="contact-form-wrapper">
             <h2 className="contact-form-title">Send us a message</h2>
-            <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
+            <form className="contact-form" onSubmit={handleSubmit}>
               <div className="form-group floating">
                 <input
                   type="text"
                   id="name"
                   className="form-input"
                   placeholder=" "
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
                 <label htmlFor="name" className="form-label">
                   Full Name
@@ -107,6 +155,8 @@ export default function Contact() {
                   id="email"
                   className="form-input"
                   placeholder=" "
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <label htmlFor="email" className="form-label">
                   Email Address
@@ -117,17 +167,27 @@ export default function Contact() {
                   id="message"
                   className="form-input form-textarea"
                   placeholder=" "
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                 ></textarea>
                 <label htmlFor="message" className="form-label">
                   Message
                 </label>
               </div>
+              {statusMsg && (
+                <p
+                  className={`text-sm ${statusType === "success" ? "text-emerald-600" : "text-red-600"}`}
+                >
+                  {statusMsg}
+                </p>
+              )}
               <Button
                 variant="outline"
                 size="lg"
                 style={{ width: "100%", marginTop: "8px" }}
+                disabled={submitting}
               >
-                Send Message
+                {submitting ? "Sending..." : "Send Message"}
               </Button>
             </form>
           </div>
