@@ -7,11 +7,12 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Links from "./pages/Links";
 import ErrorPage from "./pages/ErrorPage";
+import UserDashboard from "./pages/dashboards/UserDashboard";
+import AdminMessages from "./pages/admin/AdminMessages";
 
 // Auth pages
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
-import Onboarding from "./pages/Onboarding";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 
@@ -50,11 +51,12 @@ export default function App() {
           <Route path="/affiliate/referrals" element={<AffiliateReferrals />} />
           <Route path="/affiliate/withdraw" element={<AffiliateWithdraw />} />
           <Route path="/affiliate/settings" element={<AffiliateSettings />} />
+          <Route path="/admin/messages" element={<AdminMessages />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
         </Route>
 
         {/* Auth routes - no layout */}
         <Route path="/auth/signup" element={<SignUp />} />
-        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
 

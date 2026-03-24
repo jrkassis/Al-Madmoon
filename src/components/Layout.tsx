@@ -44,7 +44,7 @@ export function Layout() {
             <span className="brand-text hidden sm:block"></span>
           </Link>
           {/* DESKTOP NAV */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6 z-40">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -86,62 +86,85 @@ export function Layout() {
       </header>
 
       {/* MOBILE MENU */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[64px] h-full left-0 w-full bg-white z-50 shadow-lg lg:hidden"
+<AnimatePresence>
+  {isMobileMenuOpen && (
+    <>
+      {/* BACKDROP */}
+      <motion.div
+        key="backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.2 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black z-40 lg:hidden"
+        onClick={() => setIsMobileMenuOpen(false)}
+      />
+
+      {/* SLIDING MOBILE SIDEBAR */}
+      <motion.div
+        key="sidebar"
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "tween", duration: 0.3 }}
+        className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white z-50 shadow-lg lg:hidden flex flex-col"
+      >
+        {/* CLOSE BUTTON */}
+        <div className="flex justify-end p-4">
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-2"
           >
-            <div className="p-4 flex flex-col gap-4">
+            <X size={24} />
+          </button>
+        </div>
 
-              {/* LINKS */}
-              <nav className="flex flex-col gap-3">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.path}
-                    className={`mobile-nav-link ${
-                      location.pathname === link.path ? "active" : ""
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </nav>
+        {/* LINKS */}
+        <nav className="flex flex-col gap-3 p-4 flex-1 overflow-y-auto">
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`mobile-nav-link ${
+                location.pathname === link.path ? "active" : ""
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
 
-              {/* ACTIONS */}
-              <div className="flex flex-col gap-2 pt-3 ">
-                <a href="/auth/signin">
-                  <Button variant="ghost" className="w-full icon-gap">
-                    <User size={18} />
-                    Sign In
-                  </Button>
-                </a>
+        {/* ACTIONS */}
+        <div className="flex flex-col gap-2 p-4 ">
+          <a href="/auth/signin">
+            <Button variant="ghost" className="w-full icon-gap">
+              <User size={18} />
+              Sign In
+            </Button>
+          </a>
 
-                <a href="/onboarding">
-                  <Button variant="primary" className="w-full icon-gap">
-                    <LogIn size={18} />
-                    Get Started
-                  </Button>
-                </a>
+          <a href="/onboarding">
+            <Button variant="primary" className="w-full icon-gap">
+              <LogIn size={18} />
+              Get Started
+            </Button>
+          </a>
 
-                <a
-                  href="https://wa.me/79027611"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="secondary" className="w-full icon-gap">
-                    <MessageCircle size={18} />
-                    WhatsApp Support
-                  </Button>
-                </a>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <a
+            href="https://wa.me/79027611"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="secondary" className="w-full icon-gap">
+              <MessageCircle size={18} />
+              WhatsApp Support
+            </Button>
+          </a>
+        </div>
+      </motion.div>
+    </>
+  )}
+</AnimatePresence>
 
       {/* MAIN */}
       <main className="layout-main ">
@@ -150,7 +173,7 @@ export function Layout() {
 
       {/* FOOTER */}
       {location.pathname !== "/links" && (
-        <footer className="footer">
+        <footer className="footer z-40">
           <div className="footer-container">
 
             <div className="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

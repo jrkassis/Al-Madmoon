@@ -138,7 +138,7 @@ export default function Home() {
                   <Button
                     variant="secondary"
                     size="lg"
-                    className="btn-icon btn-shadow w-75 rounded-full"
+                    className="btn-icon btn-shadow w-75 "
                   >
                     <MessageCircle size={20} />
                     Start on WhatsApp
