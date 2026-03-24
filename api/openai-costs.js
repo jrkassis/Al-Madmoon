@@ -9,15 +9,21 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing OPENAI_ADMIN_KEY on server' });
   }
 
-  const startTime = req.query.start_time;
-  const endTime = req.query.end_time;
-  const limit = req.query.limit ?? '100';
+  // Defaults: last 30 days, daily granularity
+  const nowSec = Math.floor(Date.now() / 1000);
+  const defaultStart = nowSec - 30 * 24 * 60 * 60;
+  const startTime = req.query.start_time ? Number(req.query.start_time) : defaultStart;
+  const endTime = req.query.end_time ? Number(req.query.end_time) : nowSec;
+  const limit = req.query.limit ?? '1000';
+  const granularity = req.query.granularity ?? 'day';
   const openAiBase = process.env.OPENAI_ADMIN_BASE_URL || 'https://api.openai.com/v1';
+  const orgId = process.env.OPENAI_ORG_ID;
 
   const qs = new URLSearchParams();
-  if (startTime) qs.set('start_time', String(startTime));
-  if (endTime) qs.set('end_time', String(endTime));
+  qs.set('start_time', String(startTime));
+  qs.set('end_time', String(endTime));
   if (limit) qs.set('limit', String(limit));
+  if (granularity) qs.set('granularity', String(granularity));
 
   // OpenAI Administration API reference:
   // GET /organization/costs
@@ -29,6 +35,9 @@ export default async function handler(req, res) {
       headers: {
         Authorization: `Bearer ${adminKey}`,
         'Content-Type': 'application/json',
+        // Some Administration endpoints require this beta header
+        'OpenAI-Beta': 'organization-usage=opt-in',
+        ...(orgId ? { 'OpenAI-Organization': orgId } : {}),
       },
     });
 
@@ -36,11 +45,13 @@ export default async function handler(req, res) {
     if (!response.ok) {
       return res.status(response.status).json({
         error: 'OpenAI administration API request failed',
-        details: raw,
+        details: raw || null,
+        hint:
+          'Ensure OPENAI_ADMIN_KEY (and optionally OPENAI_ORG_ID) are set. Also verify required query params and the beta header.',
       });
     }
 
-    const data = Array.isArray(raw?.data) ? raw.data : [];
+    const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw?.costs) ? raw.costs : []);
 
     // Normalize to the dashboard format expected in src/lib/adminAnalytics.ts
     const rows = data.map((item) => {
