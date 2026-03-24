@@ -14,21 +14,23 @@ export default async function handler(req, res) {
   const defaultStart = nowSec - 30 * 24 * 60 * 60;
   const startTime = req.query.start_time ? Number(req.query.start_time) : defaultStart;
   const endTime = req.query.end_time ? Number(req.query.end_time) : nowSec;
-  const requestedLimit = Number(req.query.limit ?? 180);
-  const safeLimit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 180)
-    : 180;
   const granularity = String(req.query.granularity ?? 'day');
   const openAiBase = process.env.OPENAI_ADMIN_BASE_URL || 'https://api.openai.com/v1';
   const orgId = process.env.OPENAI_ORG_ID;
+  const requestedLimit = Number(req.query.limit ?? 180);
 
   const qs = new URLSearchParams();
   qs.set('start_time', String(startTime));
   qs.set('end_time', String(endTime));
-  qs.set('limit', String(safeLimit));
   // OpenAI costs endpoint expects bucket_width (1m|1h|1d); map friendly values.
   const bucketWidthMap = { minute: '1m', hour: '1h', day: '1d' };
   const normalizedBucketWidth = bucketWidthMap[granularity] ?? String(req.query.bucket_width ?? '1d');
+  const bucketMaxLimit = { '1m': 1440, '1h': 168, '1d': 31 };
+  const maxForBucket = bucketMaxLimit[normalizedBucketWidth] ?? 31;
+  const safeLimit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), maxForBucket)
+    : maxForBucket;
+  qs.set('limit', String(safeLimit));
   qs.set('bucket_width', normalizedBucketWidth);
 
   // /organization/usage provides token-level usage buckets.
