@@ -289,7 +289,7 @@ export default function SignUp() {
 
           {/* CTA - increased top margin */}
           <div className="mt-16 pt-8 border-t-2 border-sky-200 text-center">
-            <p className="text-sm text-slate-600 mb-4">
+            <p className="text-sm text-slate-600 pb-6">
               Join thousands of successful bettors
             </p>
             <div className="flex items-center justify-center gap-2">
@@ -308,7 +308,7 @@ export default function SignUp() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-15 patternbg">
             {/* Brand Header */}
             <div className="mb-10">
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">
+              <h1 className="text-4xl font-bold text-slate-900 pb-6">
                 Create Account
               </h1>
               <p className="text-slate-600 text-base">
