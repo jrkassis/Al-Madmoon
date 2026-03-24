@@ -241,42 +241,38 @@ export default function BecomeAffiliate() {
               {currentStep === "finish" && <StepFinish formData={formData} />}
 
               {/* Navigation Buttons */}
-              <div className="affiliate-form-actions flex items-center justify-between gap-4 flex-wrap">
-                {/* LEFT */}
-                <div>
-                  {currentStep !== "info" && (
-                    <button
-                      type="button"
-                      onClick={handlePrev}
-                      className="btn-secondary rounded-full"
-                    >
-                      ← Previous
-                    </button>
-                  )}
-                </div>
+              <div className="affiliate-form-actions flex justify-between items-center w-full mt-6">
+                {/* LEFT (Previous) */}
+                {currentStep !== "info" ? (
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="btn-secondary rounded-full"
+                  >
+                    ← Previous
+                  </button>
+                ) : (
+                  <div /> // keeps spacing
+                )}
 
-                {/* RIGHT */}
-                <div className="ml-auto">
-                  {currentStep !== "finish" && (
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="btn-primary rounded-full"
-                    >
-                      Next →
-                    </button>
-                  )}
-
-                  {currentStep === "finish" && (
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      className="btn-primary btn-submit rounded-full"
-                    >
-                      Submit Application
-                    </button>
-                  )}
-                </div>
+                {/* RIGHT (Next / Submit) */}
+                {currentStep !== "finish" ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="btn-primary rounded-full"
+                  >
+                    Next →
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    className="btn-primary btn-submit rounded-full"
+                  >
+                    Submit Application
+                  </button>
+                )}
               </div>
             </div>
           ) : (

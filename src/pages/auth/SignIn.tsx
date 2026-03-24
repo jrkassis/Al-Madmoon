@@ -109,15 +109,15 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
       {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-0  overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"></div>
         <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-cyan-200/15 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
       {/* Left Side - Sign In Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 ">
-        <div className="w-full max-w-md ">
+<div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0">
+          <div className="w-full max-w-md ">
           {/* White Card Container */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
             {/* Brand Header */}

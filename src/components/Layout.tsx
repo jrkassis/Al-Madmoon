@@ -1,6 +1,13 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/Button";
-import { MessageCircle, Menu, X, LogIn, User, LayoutDashboard } from "lucide-react";
+import {
+  MessageCircle,
+  Menu,
+  X,
+  LogIn,
+  User,
+  LayoutDashboard,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useAuth } from "../contexts/AuthContext";
@@ -32,19 +39,19 @@ export function Layout() {
 
   return (
     <div className="layout-wrapper">
-
       {/* HEADER */}
       <header className={`header ${isScrolled ? "scrolled" : ""}`}>
         <div className="header-container flex items-center justify-between">
-
           {/* LOGO */}
           <Link to="/" className="brand-link flex items-center gap-2">
             <img src="/Icon-3.svg" alt="Logo" width="32" height="32" />
             <span className="brand-text hidden sm:block">Al Madmoon</span>
           </Link>
-
+          <Link to="/" className="brand-link flex items-center ">
+            <span className="brand-text hidden sm:block"></span>
+          </Link>
           {/* DESKTOP NAV */}
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6 z-40">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
@@ -59,31 +66,20 @@ export function Layout() {
           </nav>
 
           {/* DESKTOP ACTIONS */}
-          <div className="hidden lg:flex items-center gap-3">
-            {isAuthenticated ? (
-              <Link to={dashboardPath}>
-                <Button variant="ghost" className="icon-gap rounded-full">
-                  <LayoutDashboard size={16} />
-                  Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link to="/auth/signin">
-                  <Button variant="ghost" className="icon-gap">
-                    <User size={16} />
-                    Sign In
-                  </Button>
-                </Link>
+          <div className="hidden lg:flex items-center gap-2">
+            <a href="/auth/signin">
+              <Button variant="ghost" className="icon-gap">
+                <User size={16} />
+                Sign In
+              </Button>
+            </a>
 
-                <Link to="/onboarding">
-                  <Button variant="primary" className="icon-gap rounded-full">
-                    <LogIn size={16} />
-                    Get Started
-                  </Button>
-                </Link>
-              </>
-            )}
+            <Link to="/onboarding">
+              <Button variant="primary" className="icon-gap rounded-full">
+                <LogIn size={16} />
+                Get Started
+              </Button>
+            </Link>
           </div>
 
           {/* MOBILE MENU BUTTON */}
@@ -99,20 +95,43 @@ export function Layout() {
       {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-[64px] left-0 w-full bg-white z-50 shadow-lg lg:hidden"
-          >
-            <div className="p-4 flex flex-col gap-4">
+          <>
+            {/* BACKDROP */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.2 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40 lg:hidden"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* SLIDING MOBILE SIDEBAR */}
+            <motion.div
+              key="sidebar"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white z-50 shadow-lg lg:hidden flex flex-col"
+            >
+              {/* CLOSE BUTTON */}
+              <div className="flex justify-end p-4">
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
               {/* LINKS */}
-              <nav className="flex flex-col gap-3">
+              <nav className="flex flex-col gap-3 p-4 flex-1 overflow-y-auto">
                 {navLinks.map((link) => (
                   <Link
                     key={link.name}
                     to={link.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
                     className={`mobile-nav-link ${
                       location.pathname === link.path ? "active" : ""
                     }`}
@@ -123,34 +142,34 @@ export function Layout() {
               </nav>
 
               {/* ACTIONS */}
-              <div className="flex flex-col gap-2 pt-3 border-t">
-                {isAuthenticated ? (
-                  <Link to={dashboardPath}>
-                    <Button variant="ghost" className="w-full icon-gap">
-                      <LayoutDashboard size={18} />
-                      Dashboard
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link to="/auth/signin">
-                      <Button variant="ghost" className="w-full icon-gap">
-                        <User size={18} />
-                        Sign In
-                      </Button>
-                    </Link>
+              <div className="flex flex-col gap-2 p-4 ">
+                <a href="/auth/signin">
+                  <Button variant="ghost" className="w-full icon-gap">
+                    <User size={18} />
+                    Sign In
+                  </Button>
+                </a>
 
-                    <Link to="/onboarding">
-                      <Button variant="primary" className="w-full icon-gap">
-                        <LogIn size={18} />
-                        Get Started
-                      </Button>
-                    </Link>
-                  </>
-                )}
+                <a href="/onboarding">
+                  <Button variant="primary" className="w-full icon-gap">
+                    <LogIn size={18} />
+                    Get Started
+                  </Button>
+                </a>
+
+                <a
+                  href="https://wa.me/79027611"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="secondary" className="w-full icon-gap">
+                    <MessageCircle size={18} />
+                    WhatsApp Support
+                  </Button>
+                </a>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -161,11 +180,9 @@ export function Layout() {
 
       {/* FOOTER */}
       {location.pathname !== "/links" && (
-        <footer className="footer">
+        <footer className="footer z-40">
           <div className="footer-container">
-
             <div className="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
               {/* BRAND */}
               <div className="footer-brand">
                 <Link to="/" className="brand-link flex items-center gap-2">
@@ -183,10 +200,18 @@ export function Layout() {
               <div>
                 <h4 className="footer-heading">Company</h4>
                 <ul className="footer-links space-y-2">
-                  <li><Link to="/">Home</Link></li>
-                  <li><Link to="/how-it-works">How It Works</Link></li>
-                  <li><Link to="/features">Features</Link></li>
-                  <li><Link to="/pricing">Pricing</Link></li>
+                  <li>
+                    <Link to="/">Home</Link>
+                  </li>
+                  <li>
+                    <Link to="/how-it-works">How It Works</Link>
+                  </li>
+                  <li>
+                    <Link to="/features">Features</Link>
+                  </li>
+                  <li>
+                    <Link to="/pricing">Pricing</Link>
+                  </li>
                 </ul>
               </div>
 
@@ -194,18 +219,26 @@ export function Layout() {
               <div>
                 <h4 className="footer-heading">Support</h4>
                 <ul className="footer-links space-y-2">
-                  <li><Link to="/contact">Contact Us</Link></li>
-                  <li><a href="#">FAQ</a></li>
-                  <li><a href="#">Terms</a></li>
-                  <li><a href="#">Privacy</a></li>
+                  <li>
+                    <Link to="/contact">Contact Us</Link>
+                  </li>
+                  <li>
+                    <a href="#">FAQ</a>
+                  </li>
+                  <li>
+                    <a href="#">Terms</a>
+                  </li>
+                  <li>
+                    <a href="#">Privacy</a>
+                  </li>
                 </ul>
               </div>
-
             </div>
 
             <div className="footer-bottom flex flex-col md:flex-row justify-between items-center gap-3 mt-8">
               <p className="text-sm text-center md:text-left">
-                &copy; {new Date().getFullYear()} Al Madmoon. All rights reserved.
+                &copy; {new Date().getFullYear()} Al Madmoon. All rights
+                reserved.
               </p>
 
               <a
@@ -216,7 +249,6 @@ export function Layout() {
                 WhatsApp Support
               </a>
             </div>
-
           </div>
         </footer>
       )}

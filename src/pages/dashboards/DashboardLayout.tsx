@@ -48,6 +48,15 @@ const adminNav: NavItem[] = [
     ),
   },
   {
+  label: "Messages",
+  path: "/admin/messages",
+  icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+    </svg>
+  ),
+},
+  {
     label: "Affiliates",
     path: "/admin/affiliates",
     icon: (
@@ -200,21 +209,55 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/20 z-50 lg:hidden"
+          className="fixed inset-0 bg-black/20 lg:hidden z-35"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
       {/* Sidebar */}
       <aside
-        className={`fixed left-0  pt-10 h-full w-64 bg-white border-r border-slate-100 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`
+    fixed top-0 right-0 h-full 
+    w-[80%] max-w-[320px] 
+    bg-white border-slate-100 pt-20
+    flex flex-col
+    transition-transform duration-300 ease-in-out
+    z-40
+    ${sidebarOpen ? "translate-x-0" : "translate-x-full"}
+
+    lg:left-0  lg:right-auto lg:w-64 lg:border-r lg:border-l-0 lg:translate-x-0
+  `}
       >
-        <div className="flex items-center justify-between p-4  border-slate-100">
+        {/* NAV ITEMS */}
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-brand-50 text-brand-700"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* LOGOUT (PINNED BOTTOM) */}
+        <div className="p-4 border-t border-slate-100">
           <button
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-slate-500"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 w-full mt-8"            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("user");
+              window.location.href = "/auth/signin";
+            }}
           >
             <svg
               className="w-5 h-5"
@@ -226,56 +269,27 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               />
             </svg>
+
+            <span className="leading-none">Sign out</span>
           </button>
         </div>
-
-        <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-brand-50 text-brand-700"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-                onClick={() => setSidebarOpen(false)}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            );
-          })}
-            <button
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 w-full mt-8"
-            onClick={handleSignOut}
-            >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-            </svg>
-            Sign out
-            </button>
-        </nav>
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64">
-          <div className="flex items-center justify-between px-4 py-3">
-         
-            <div className="flex-1" />
-            <div className="w-8 h-8 rounded-full bg-brand-100" />
-          </div>
-        <main className="p-4 md:p-6">{children}</main>
+      <div className="lg:pl-64 mt-15">
+        <div className="flex items-center justify-between px-4 py-3 ">
+          {/* MOBILE HAMBURGER */}
+          <button
+            className="lg:hidden text-blue-400"
+            onClick={() => setSidebarOpen(true)}
+          >
+            See all pages
+          </button>
+        </div>
+        <main className="p-4 md:pt-20 ">{children}</main>
       </div>
     </div>
   );

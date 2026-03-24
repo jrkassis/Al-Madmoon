@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Star,
-  LogIn,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { WhatsAppMockup } from "../components/ui/WhatsAppMockup";
@@ -139,7 +138,7 @@ export default function Home() {
                   <Button
                     variant="secondary"
                     size="lg"
-                    className="btn-icon btn-shadow w-75 rounded-full"
+                    className="btn-icon btn-shadow w-75 "
                   >
                     <MessageCircle size={20} />
                     Start on WhatsApp

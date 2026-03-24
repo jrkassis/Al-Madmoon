@@ -85,12 +85,16 @@ export default function StepFinish({ formData }: StepFinishProps) {
         </div>
       </div>
 
-      <div className="finish-info">
-        <div className="success-icon">
+      <div className="finish-info flex flex-col items-center text-center px-4">
+        <div className="success-icon flex items-center justify-center w-20 h-20 rounded-full">
           <Check size={44} />
         </div>
-        <h3 className="finish-title">Everything looks good!</h3>
-        <p className="finish-message">
+
+        <h3 className="finish-title mt-4 text-xl font-semibold">
+          Everything looks good!
+        </h3>
+
+        <p className="finish-message mt-2 text-sm text-gray-500 max-w-md">
           Your application is ready to be submitted. Click "Submit Application"
           to complete the process. We'll review it and get back to you within 48
           hours.
