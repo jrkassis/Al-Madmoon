@@ -1,5 +1,9 @@
+import { useState } from 'react';
 import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
+import { Button } from '../../components/ui/Button';
+import { Copy, Check } from 'lucide-react'; // Using Lucide icons
 
+// Mock data – replace with real API calls later
 const referrals = [
   { id: 1, name: 'Alex Johnson', date: '2025-03-15', status: 'converted', commission: '$8.99' },
   { id: 2, name: 'Emily Davis', date: '2025-03-14', status: 'pending', commission: '$0.00' },
@@ -8,6 +12,17 @@ const referrals = [
 ];
 
 export default function AffiliateReferrals() {
+  const [copied, setCopied] = useState(false);
+  // This should come from your backend/user context.
+  // For now we hardcode a placeholder – replace with real data.
+  const affiliateCode = 'ABCD';
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(affiliateCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const stats = {
     clicks: 1243,
     signups: 87,
@@ -17,9 +32,49 @@ export default function AffiliateReferrals() {
 
   return (
     <DashboardLayout role="affiliate">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Referral Analytics</h1>
+      <h1 className="text-2xl font-bold text-slate-900 pb-6">
+        Referral Analytics
+      </h1>
 
-      {/* Stats cards */}
+      {/* Affiliate Code Card (read‑only) */}
+<div className="glass-panel p-6 mb-6">
+  <div className="space-y-4">
+    {/* Row with label, code, and copy button */}
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-sm font-medium text-slate-600">Your affiliate code:</span>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={affiliateCode}
+            readOnly
+            className="w-36 text-center text-xl font-mono font-bold p-2 rounded-lg border border-slate-200 bg-slate-50 focus:outline-none"
+          />
+          <Button
+            variant="ghost"
+            onClick={copyToClipboard}
+            className="p-2"
+            title="Copy code"
+          >
+            {copied ? <Check size={20} className="text-green-600" /> : <Copy size={20} />}
+          </Button>
+        </div>
+      </div>
+      {/* Referral link (right side on larger screens) */}
+      <div className="text-left">
+        <span className="text-sm font-medium text-slate-600">Your referral link:</span>
+        <p className="font-mono text-sm text-slate-700 break-all">almadmoon.co/?ref={affiliateCode}</p>
+      </div>
+    </div>
+
+    {/* Under the URL link – sharing tip */}
+    <p className="text-xs text-slate-500 text-center">
+      Share this link with your audience to start earning.
+    </p>
+  </div>
+</div>
+
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="glass-panel p-4">
           <p className="text-sm text-slate-500">Clicks</p>
@@ -39,7 +94,7 @@ export default function AffiliateReferrals() {
         </div>
       </div>
 
-      {/* Referrals table */}
+      {/* Referrals Table */}
       <div className="glass-panel overflow-hidden">
         <div className="p-4 border-b border-slate-100">
           <h3 className="font-semibold text-slate-900">Recent referrals</h3>
@@ -62,7 +117,9 @@ export default function AffiliateReferrals() {
                   <td className="p-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        r.status === 'converted' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'
+                        r.status === 'converted'
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-yellow-50 text-yellow-700'
                       }`}
                     >
                       {r.status}
