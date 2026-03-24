@@ -126,7 +126,7 @@ export default function SignIn() {
             {/* Brand Header */}
             <div className="mb-10">
               <div className="flex items-center gap-3 mb-8"></div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">
+              <h1 className="text-4xl font-bold text-slate-900 pb-6">
                 Sign In
               </h1>
               <p className="text-slate-600 text-base">
@@ -322,7 +322,7 @@ export default function SignIn() {
           </div>
 
           {/* Headline */}
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 pb-6">
             AI-Powered Betting Intelligence
           </h2>
           <p className="text-slate-600 text-lg mb-10">
@@ -401,7 +401,7 @@ export default function SignIn() {
 
           {/* CTA */}
           <div className="mt-10 pt-8 border-t-2 border-sky-200">
-            <p className="text-sm text-slate-600 mb-4">
+            <p className="text-sm text-slate-600 pb-6">
               Join thousands of successful bettors
             </p>
             <div className="flex items-center justify-center gap-2">
