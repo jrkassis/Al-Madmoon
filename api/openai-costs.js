@@ -35,7 +35,9 @@ export default async function handler(req, res) {
   // We estimate spend from token totals using configurable per-1M-token rates.
   const inputPricePer1M = Number(process.env.OPENAI_INPUT_PRICE_PER_1M ?? 0);
   const outputPricePer1M = Number(process.env.OPENAI_OUTPUT_PRICE_PER_1M ?? 0);
-  const url = `${openAiBase}/organization/usage${qs.toString() ? `?${qs.toString()}` : ''}`;
+  // The token usage endpoint is namespaced by product.
+  // "completions" returns input/output token buckets we can price.
+  const url = `${openAiBase}/organization/usage/completions${qs.toString() ? `?${qs.toString()}` : ''}`;
 
   try {
     const response = await fetch(url, {
