@@ -131,16 +131,16 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
     'api_cost_configuration',
   ]);
 
-  // OpenAI API costs: try tables, else optional external endpoint VITE_OPENAI_COSTS_URL
-  let openaiSums = await sumCostsFromTables([
-    'openai_cost',
-    'openai_costs',
-    'openai_api_cost',
-    'openai_api_costs',
-  ]);
+  // OpenAI API costs: prefer external endpoint first (avoid Supabase 404s),
+  // then fall back to potential tables if the endpoint yields no data.
+  let openaiSums = await sumCostsFromExternalUrl('VITE_OPENAI_COSTS_URL', '/api/openai-costs');
   if (openaiSums.total === 0 && openaiSums.input === 0 && openaiSums.output === 0) {
-    // try external API (should be backend/edge function, never your raw API key)
-    openaiSums = await sumCostsFromExternalUrl('VITE_OPENAI_COSTS_URL', '/api/openai-costs');
+    openaiSums = await sumCostsFromTables([
+      'openai_cost',
+      'openai_costs',
+      'openai_api_cost',
+      'openai_api_costs',
+    ]);
   }
 
   const combined = {
