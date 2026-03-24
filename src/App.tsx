@@ -7,7 +7,6 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Links from "./pages/Links";
 import ErrorPage from "./pages/ErrorPage";
-import UserDashboard from "./pages/dashboards/UserDashboard";
 import AdminMessages from "./pages/admin/AdminMessages";
 
 // Auth pages
@@ -26,6 +25,7 @@ import AffiliateMyCode from "./pages/affiliate/MyCode";
 import AffiliateReferrals from "./pages/affiliate/Referrals";
 import AffiliateWithdraw from "./pages/affiliate/Withdraw";
 import AffiliateSettings from "./pages/affiliate/Settings";
+import UserDashboard from "./pages/dashboards/UserDashboard";
 import Logout from "../src/pages/auth/Logout";
 import BecomeAffiliate from "../src/pages/onboarding-affiliate/BecomeAffiliate";
 
@@ -61,6 +61,14 @@ export default function App() {
             }
           />
           <Route
+            path="/admin/messages"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminMessages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/affiliates"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
@@ -77,34 +85,10 @@ export default function App() {
             }
           />
           <Route
-            path="/affiliate"
+            path="/dashboard"
             element={
-              <ProtectedRoute allowedRoles={["affiliate", "client"]}>
-                <AffiliateMyCode />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/affiliate/referrals"
-            element={
-              <ProtectedRoute allowedRoles={["affiliate", "client"]}>
-                <AffiliateReferrals />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/affiliate/withdraw"
-            element={
-              <ProtectedRoute allowedRoles={["affiliate", "client"]}>
-                <AffiliateWithdraw />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/affiliate/settings"
-            element={
-              <ProtectedRoute allowedRoles={["affiliate", "client"]}>
-                <AffiliateSettings />
+              <ProtectedRoute allowedRoles={["client"]}>
+                <UserDashboard />
               </ProtectedRoute>
             }
           />
@@ -120,7 +104,7 @@ export default function App() {
         <Route
           path="/affiliate"
           element={
-            <ProtectedRoute allowedRoles={["affiliate", "client"]}>
+            <ProtectedRoute allowedRoles={["affiliate"]}>
               <AffiliateMyCode />
             </ProtectedRoute>
           }
@@ -128,7 +112,7 @@ export default function App() {
         <Route
           path="/affiliate/referrals"
           element={
-            <ProtectedRoute allowedRoles={["affiliate", "client"]}>
+            <ProtectedRoute allowedRoles={["affiliate"]}>
               <AffiliateReferrals />
             </ProtectedRoute>
           }
@@ -136,7 +120,7 @@ export default function App() {
         <Route
           path="/affiliate/withdraw"
           element={
-            <ProtectedRoute allowedRoles={["affiliate", "client"]}>
+            <ProtectedRoute allowedRoles={["affiliate"]}>
               <AffiliateWithdraw />
             </ProtectedRoute>
           }
@@ -144,7 +128,7 @@ export default function App() {
         <Route
           path="/affiliate/settings"
           element={
-            <ProtectedRoute allowedRoles={["affiliate", "client"]}>
+            <ProtectedRoute allowedRoles={["affiliate"]}>
               <AffiliateSettings />
             </ProtectedRoute>
           }

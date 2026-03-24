@@ -171,7 +171,7 @@ export function Layout() {
                     </Link>
                   </>
                 )}
-              </div> {/* ✅ Added missing closing tag */}
+              </div>
             </motion.div>
           </>
         )}

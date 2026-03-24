@@ -59,7 +59,8 @@ export default function SignIn() {
 
   const getDashboardPathForRole = (role: string | null | undefined) => {
     if (role === 'admin') return '/admin';
-    return '/affiliate';
+    if (role === 'client') return '/dashboard';
+    if (role === 'affiliate') return '/affiliate';
   };
 
   const isFormValid =
