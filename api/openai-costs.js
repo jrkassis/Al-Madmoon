@@ -14,16 +14,22 @@ export default async function handler(req, res) {
   const defaultStart = nowSec - 30 * 24 * 60 * 60;
   const startTime = req.query.start_time ? Number(req.query.start_time) : defaultStart;
   const endTime = req.query.end_time ? Number(req.query.end_time) : nowSec;
-  const limit = req.query.limit ?? '1000';
-  const granularity = req.query.granularity ?? 'day';
+  const requestedLimit = Number(req.query.limit ?? 180);
+  const safeLimit = Number.isFinite(requestedLimit)
+    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 180)
+    : 180;
+  const granularity = String(req.query.granularity ?? 'day');
   const openAiBase = process.env.OPENAI_ADMIN_BASE_URL || 'https://api.openai.com/v1';
   const orgId = process.env.OPENAI_ORG_ID;
 
   const qs = new URLSearchParams();
   qs.set('start_time', String(startTime));
   qs.set('end_time', String(endTime));
-  if (limit) qs.set('limit', String(limit));
-  if (granularity) qs.set('granularity', String(granularity));
+  qs.set('limit', String(safeLimit));
+  // OpenAI costs endpoint expects bucket_width (1m|1h|1d); map friendly values.
+  const bucketWidthMap = { minute: '1m', hour: '1h', day: '1d' };
+  const normalizedBucketWidth = bucketWidthMap[granularity] ?? String(req.query.bucket_width ?? '1d');
+  qs.set('bucket_width', normalizedBucketWidth);
 
   // OpenAI Administration API reference:
   // GET /organization/costs
@@ -54,17 +60,33 @@ export default async function handler(req, res) {
     const data = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw?.costs) ? raw.costs : []);
 
     // Normalize to the dashboard format expected in src/lib/adminAnalytics.ts
-    const rows = data.map((item) => {
-      const amountValue =
-        Number(item?.amount?.value ?? item?.total_cost ?? item?.cost ?? item?.amount ?? 0) || 0;
-      return {
-        input_cost: Number(item?.input_cost ?? 0) || 0,
-        output_cost: Number(item?.output_cost ?? 0) || 0,
-        request_cost: Number(item?.request_cost ?? 0) || 0,
-        total_cost: amountValue,
-        raw: item,
-      };
-    });
+    const rows = [];
+    for (const item of data) {
+      const nested = Array.isArray(item?.results) ? item.results : [];
+      if (nested.length) {
+        for (const n of nested) {
+          const amountValue =
+            Number(n?.amount?.value ?? n?.total_cost ?? n?.cost ?? n?.amount ?? 0) || 0;
+          rows.push({
+            input_cost: Number(n?.input_cost ?? 0) || 0,
+            output_cost: Number(n?.output_cost ?? 0) || 0,
+            request_cost: Number(n?.request_cost ?? 0) || 0,
+            total_cost: amountValue,
+            raw: n,
+          });
+        }
+      } else {
+        const amountValue =
+          Number(item?.amount?.value ?? item?.total_cost ?? item?.cost ?? item?.amount ?? 0) || 0;
+        rows.push({
+          input_cost: Number(item?.input_cost ?? 0) || 0,
+          output_cost: Number(item?.output_cost ?? 0) || 0,
+          request_cost: Number(item?.request_cost ?? 0) || 0,
+          total_cost: amountValue,
+          raw: item,
+        });
+      }
+    }
 
     return res.status(200).json({ rows, raw });
   } catch (error) {
