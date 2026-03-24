@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import React from 'react';
+import { useAuth } from "../../contexts/AuthContext";
 
 interface SubscriptionInfo {
   plan: string;
@@ -17,6 +18,7 @@ export default function UserDashboard() {
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   // Modal states
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -89,6 +91,11 @@ export default function UserDashboard() {
     alert("Account deleted (demo). Redirecting...");
     localStorage.removeItem("token");
     navigate("/");
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth/signin");
   };
 
   if (loading) {
@@ -240,7 +247,7 @@ export default function UserDashboard() {
             <div className="border-t border-slate-100 pt-6 flex flex-wrap gap-4">
               <button
                 onClick={() => navigate("/pricing")}
-                className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                className="px-4 py-2 bg-brand-600 text-slate-700 rounded-lg hover:bg-brand-700 transition-colors"
               >
                 Manage Subscription
               </button>
@@ -285,7 +292,7 @@ export default function UserDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8 mb-20"
+          className="mt-8"
         >
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
             <div className="px-6 py-4 border-b border-slate-100">
@@ -338,6 +345,26 @@ export default function UserDashboard() {
                 </button>
               </div>
             </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+          className="mt-6 mb-16"
+        >
+          <div className="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-slate-900">Session</h3>
+              <p className="text-sm text-slate-500">Sign out from this device.</p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 bg-red-600 text-slate-700 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
         </motion.div>
       </div>
@@ -482,6 +509,7 @@ export default function UserDashboard() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

@@ -92,16 +92,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-        </Route>
-
-        {/* Auth routes - no layout */}
-        <Route path="/auth/signup" element={<SignUp />} />
-        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/auth/reset-password" element={<ResetPassword />} />
-
-        {/* Dashboard routes - they have their own layout (DashboardLayout) */}
-
-        <Route
+          <Route
           path="/affiliate"
           element={
             <ProtectedRoute allowedRoles={["affiliate"]}>
@@ -133,6 +124,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        </Route>
+
+        {/* Auth routes - no layout */}
+        <Route path="/auth/signup" element={<SignUp />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+        <Route path="/auth/reset-password" element={<ResetPassword />} />
 
         <Route
           path="/logout"
