@@ -1,49 +1,53 @@
-import { Button } from '../../components/ui/Button';
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { supabase } from '../../lib/supabase';
+import { Button } from "../../components/ui/Button";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { supabase } from "../../lib/supabase";
+import { CreditCard, Shield, Zap } from "lucide-react"; // added
 
 export default function SignUp() {
-  const defaultCountryCode = '961';
+  const defaultCountryCode = "961";
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [countryCode, setCountryCode] = useState(defaultCountryCode);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    referralCode: '',
-    password: '',
-    confirmPassword: '',
+    name: "",
+    email: "",
+    phone: "",
+    referralCode: "",
+    password: "",
+    confirmPassword: "",
   });
   const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'referralCode') {
-      const sanitizedReferralCode = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+      const sanitizedReferralCode = value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6);
       setFormData(prev => ({ ...prev, [name]: sanitizedReferralCode }));
       return;
     }
-    if (name === 'phone') {
-      const sanitizedPhone = value.replace(/\D/g, '');
-      setFormData(prev => ({ ...prev, [name]: sanitizedPhone }));
+    if (name === "phone") {
+      const sanitizedPhone = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, [name]: sanitizedPhone }));
       return;
     }
 
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const normalizePhoneNumber = (selectedCountryCode: string, localPhone: string) => {
-    const digitsOnlyCountryCode = selectedCountryCode.replace(/\D/g, '');
-    const digitsOnlyPhone = localPhone.replace(/\D/g, '').replace(/^0+/, '');
+  const normalizePhoneNumber = (
+    selectedCountryCode: string,
+    localPhone: string,
+  ) => {
+    const digitsOnlyCountryCode = selectedCountryCode.replace(/\D/g, "");
+    const digitsOnlyPhone = localPhone.replace(/\D/g, "").replace(/^0+/, "");
 
     if (!digitsOnlyCountryCode || !digitsOnlyPhone) {
-      return '';
+      return "";
     }
 
     return `${digitsOnlyCountryCode}${digitsOnlyPhone}`;
@@ -52,25 +56,25 @@ export default function SignUp() {
   const normalizedPhone = normalizePhoneNumber(countryCode, formData.phone);
 
   const isReferralCodeValid =
-  formData.referralCode.trim() === '' || /^[A-Z0-9]{4,6}$/.test(formData.referralCode.trim());
+    formData.referralCode.trim() === '' || /^[A-Z]{4,6}$/.test(formData.referralCode.trim());
   const isPasswordMismatch =
-    formData.password.trim() !== '' &&
-    formData.confirmPassword.trim() !== '' &&
+    formData.password.trim() !== "" &&
+    formData.confirmPassword.trim() !== "" &&
     formData.password !== formData.confirmPassword;
 
   const isFormValid =
-    formData.name.trim() !== '' &&
-    formData.email.trim() !== '' &&
-    normalizedPhone !== '' &&
-    formData.password.trim() !== '' &&
-    formData.confirmPassword.trim() !== '' &&
+    formData.name.trim() !== "" &&
+    formData.email.trim() !== "" &&
+    normalizedPhone !== "" &&
+    formData.password.trim() !== "" &&
+    formData.confirmPassword.trim() !== "" &&
     formData.password === formData.confirmPassword &&
     isReferralCodeValid &&
     acceptedTerms;
 
   const getDashboardPathForRole = (role: string | null | undefined) => {
-    if (role === 'admin') return '/admin';
-    return '/affiliate';
+    if (role === "admin") return "/admin";
+    return "/affiliate";
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -80,8 +84,8 @@ export default function SignUp() {
       return;
     }
 
-    setErrorMessage('');
-    setSuccessMessage('');
+    setErrorMessage("");
+    setSuccessMessage("");
     setIsSubmitting(true);
     const phoneToSave = normalizePhoneNumber(countryCode, formData.phone);
     const referralCodeToSave = isReferralCodeValid
@@ -89,19 +93,19 @@ export default function SignUp() {
       : null;
 
     if (!phoneToSave) {
-      setErrorMessage('Please enter a valid phone number.');
+      setErrorMessage("Please enter a valid phone number.");
       setIsSubmitting(false);
       return;
     }
 
     if (!isReferralCodeValid) {
-      setErrorMessage('Referral code must be 4 to 6 uppercase letters or numbers, or left empty.');
+      setErrorMessage('Referral code must be 4 to 6 uppercase letters (A-Z), or left empty.');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('signup-user', {
+      const { data, error } = await supabase.functions.invoke("signup-user", {
         body: {
           email: formData.email.trim(),
           password: formData.password,
@@ -114,17 +118,19 @@ export default function SignUp() {
       setIsSubmitting(false);
 
       if (error) {
-        const isNetworkError = error.name === 'FunctionsFetchError';
+        const isNetworkError = error.name === "FunctionsFetchError";
         setErrorMessage(
           isNetworkError
-            ? 'Could not reach signup function. Check deployment name, CORS, and project URL.'
-            : error.message || 'Could not create account. Please try again.'
+            ? "Could not reach signup function. Check deployment name, CORS, and project URL."
+            : error.message || "Could not create account. Please try again.",
         );
         return;
       }
 
       if (!data?.ok) {
-        setErrorMessage(data?.error || 'Could not create account. Please try again.');
+        setErrorMessage(
+          data?.error || "Could not create account. Please try again.",
+        );
         return;
       }
 
@@ -135,20 +141,21 @@ export default function SignUp() {
 
       if (signInError) {
         setErrorMessage(
-          signInError.message || 'Account created, but automatic sign-in failed. Please sign in manually.'
+          signInError.message ||
+            "Account created, but automatic sign-in failed. Please sign in manually.",
         );
         return;
       }
 
-      const targetPath = getDashboardPathForRole(data?.role ?? 'client');
-      setSuccessMessage('Account created successfully.');
+      const targetPath = getDashboardPathForRole(data?.role ?? "client");
+      setSuccessMessage("Account created successfully.");
       setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        referralCode: '',
-        password: '',
-        confirmPassword: '',
+        name: "",
+        email: "",
+        phone: "",
+        referralCode: "",
+        password: "",
+        confirmPassword: "",
       });
       setAcceptedTerms(false);
       navigate(targetPath);
@@ -157,7 +164,7 @@ export default function SignUp() {
       const message =
         invokeError instanceof Error
           ? invokeError.message
-          : 'Failed to send a request to the Edge Function.';
+          : "Failed to send a request to the Edge Function.";
       setErrorMessage(message);
       return;
     }
@@ -173,16 +180,17 @@ export default function SignUp() {
       </div>
 
       {/* Left Side - Feature Showcase */}
-      <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 relative overflow-hidden">
+      {/* Left Side - Feature Showcase */}
+      <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-12 relative overflow-hidden">
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
 
         {/* Content */}
-        <div className="relative z-10 max-w-md text-center">
-          {/* Main Icon */}
-          <div className="mb-8 flex justify-center">
+        <div className="z-10 max-w-md w-full pt-10 mb-0">
+          {/* Main Icon - increased bottom margin */}
+          <div className="mb-12 flex justify-center">
             <div className="relative">
-              <div className="absolute inset-0 rounded-3xl blur-2xl bg-white "></div>
+              <div className="rounded-3xl blur-2xl bg-white"></div>
               <div className="relative w-24 h-24 backdrop-blur-xl rounded-3xl flex items-center justify-center border-2 border-sky-200 shadow-xl">
                 <img
                   src="/Icon-2.svg"
@@ -193,68 +201,89 @@ export default function SignUp() {
             </div>
           </div>
 
-          {/* Headline */}
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          {/* Headline - keep large bottom margin */}
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 pb-5">
             Start Your Winning Journey
           </h2>
-          <p className="text-slate-600 text-lg mb-10">
-            Get instant access to AI-powered betting insights, real-time analysis, and personalized recommendations—all on WhatsApp.
+
+          {/* Description - increased bottom margin to separate from first feature */}
+          <p className="text-slate-600 text-lg pb-10">
+            Get instant access to AI-powered betting insights, real-time
+            analysis, and personalized recommendations—all on WhatsApp.
           </p>
 
-          {/* Features Grid */}
+          {/* Features Grid - keep vertical gap */}
           <div className="space-y-4">
-            {/* Feature 1 */}
+            {/* Feature 1 - No Credit Card */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <CreditCard className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">No Credit Card</h3>
-                <p className="text-sm text-slate-600">Free account setup in seconds</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  All Credit Card Suported
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Create account in seconds
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 2 - 100% Secure */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <Shield className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">100% Secure</h3>
-                <p className="text-sm text-slate-600">Military-grade encryption protecting your data</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  100% Secure
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Military-grade encryption protecting your data
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
-            {/* Feature 3 */}
+            {/* Feature 3 - Instant Access */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                </svg>
+                <Zap className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Instant Access</h3>
-                <p className="text-sm text-slate-600">WhatsApp alerts 24/7 with AI insights</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Instant Access
+                </h3>
+                <p className="text-sm text-slate-600">
+                  WhatsApp alerts 24/7 with AI insights
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="mt-10 pt-8 border-t-2 border-sky-200">
-            <p className="text-sm text-slate-600 mb-4">
+          {/* CTA - increased top margin */}
+          <div className="mt-16 pt-8 border-t-2 border-sky-200 text-center">
+            <p className="text-sm text-slate-600 pb-6">
               Join thousands of successful bettors
             </p>
             <div className="flex items-center justify-center gap-2">
@@ -270,22 +299,10 @@ export default function SignUp() {
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
           {/* White Card Container */}
-          <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-15 patternbg">
             {/* Brand Header */}
             <div className="mb-10">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                  <img
-                    src="/Icon-3.svg"
-                    alt="Al Madmoon"
-                    className="w-8 h-8 object-contain"
-                  />
-                </div>
-                <span className="text-2xl font-bold">
-                  Al Madmoon
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">
+              <h1 className="text-4xl font-bold text-slate-900 pb-6">
                 Create Account
               </h1>
               <p className="text-slate-600 text-base">
@@ -297,7 +314,10 @@ export default function SignUp() {
             <form className="space-y-5 mb-8" onSubmit={handleSubmit}>
               {/* Full Name Field */}
               <div className="relative">
-                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Full Name
                 </label>
                 <div className="relative">
@@ -318,14 +338,22 @@ export default function SignUp() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
               </div>
 
               {/* Email Field */}
               <div className="relative">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -346,14 +374,22 @@ export default function SignUp() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
               </div>
 
               {/* Phone Number Field */}
               <div className="relative">
-                <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Phone Number
                 </label>
                 <div className="flex gap-2">
@@ -370,25 +406,30 @@ export default function SignUp() {
                     <option value="20">+20</option>
                   </select>
                   <div className="relative flex-1">
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
-                    placeholder="03 123 456"
-                  />
-                  <svg
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a2 2 0 011.94 1.515l.74 2.966a2 2 0 01-.53 1.946l-1.29 1.29a16 16 0 006.566 6.566l1.29-1.29a2 2 0 011.946-.53l2.966.74A2 2 0 0121 15.72V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                </div>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
+                      placeholder="03 123 456"
+                    />
+                    <svg
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 5a2 2 0 012-2h3.28a2 2 0 011.94 1.515l.74 2.966a2 2 0 01-.53 1.946l-1.29 1.29a16 16 0 006.566 6.566l1.29-1.29a2 2 0 011.946-.53l2.966.74A2 2 0 0121 15.72V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 {normalizedPhone && (
                   <p className="mt-2 text-xs text-slate-500">
@@ -399,12 +440,15 @@ export default function SignUp() {
 
               {/* Password Field */}
               <div className="relative">
-                <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
                     value={formData.password}
@@ -419,11 +463,19 @@ export default function SignUp() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M3.98 8.223A10.477 10.477 0 001.934 12c2.71 5.555 8.063 9 13.066 9 .75 0 1.49-.035 2.221-.1a4.5 4.5 0 00-7.707-7.707l-.5.5zm15.848-1.299a4.5 4.5 0 00-7.707 7.707l.5-.5A10.477 10.477 0 0122.066 12c-2.71-5.555-8.063-9-13.066-9-.75 0-1.49.035-2.221.1a4.5 4.5 0 007.707 7.707l.5-.5zM6.5 12a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0z" />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                       </svg>
                     )}
@@ -433,12 +485,15 @@ export default function SignUp() {
 
               {/* Confirm Password Field */}
               <div className="relative">
-                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Confirm Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
                     name="confirmPassword"
                     value={formData.confirmPassword}
@@ -453,11 +508,19 @@ export default function SignUp() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showConfirmPassword ? (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M3.98 8.223A10.477 10.477 0 001.934 12c2.71 5.555 8.063 9 13.066 9 .75 0 1.49-.035 2.221-.1a4.5 4.5 0 00-7.707-7.707l-.5.5zm15.848-1.299a4.5 4.5 0 00-7.707 7.707l.5-.5A10.477 10.477 0 0122.066 12c-2.71-5.555-8.063-9-13.066-9-.75 0-1.49.035-2.221.1a4.5 4.5 0 007.707 7.707l.5-.5zM6.5 12a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0z" />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                       </svg>
                     )}
@@ -471,8 +534,12 @@ export default function SignUp() {
               </div>
 
               <div className="relative">
-                <label htmlFor="referralCode" className="block text-sm font-semibold text-slate-700 mb-2">
-                  Code <span className="text-slate-500 font-normal">(Optional)</span>
+                <label
+                  htmlFor="referralCode"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
+                  Code{" "}
+                  <span className="text-slate-500 font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -491,7 +558,12 @@ export default function SignUp() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h8m-8 5h10" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 7h16M4 12h8m-8 5h10"
+                    />
                   </svg>
                 </div>
                 {!isReferralCodeValid && (
@@ -511,13 +583,22 @@ export default function SignUp() {
                   required
                   className="w-4 h-4 mt-1 rounded border-slate-300 bg-white cursor-pointer accent-sky-500"
                 />
-                <label htmlFor="terms" className="text-sm text-slate-600 cursor-pointer">
-                  I agree to the{' '}
-                  <Link to="/" className="text-sky-500 font-semibold hover:text-sky-600">
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-slate-600 cursor-pointer"
+                >
+                  I agree to the{" "}
+                  <Link
+                    to="/"
+                    className="text-sky-500 font-semibold hover:text-sky-600"
+                  >
                     Terms & Conditions
-                  </Link>
-                  {' '}and{' '}
-                  <Link to="/" className="text-sky-500 font-semibold hover:text-sky-600">
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    to="/"
+                    className="text-sky-500 font-semibold hover:text-sky-600"
+                  >
                     Privacy Policy
                   </Link>
                 </label>
@@ -540,16 +621,16 @@ export default function SignUp() {
                 size="lg"
                 disabled={!isFormValid || isSubmitting}
                 className="btn-icon btn-shadow w-full mt-8 disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ display: 'inline-flex' }}
+                style={{ display: "inline-flex" }}
               >
-                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+                {isSubmitting ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 
             {/* Sign In Link */}
             <div className="text-center pb-6 border-b border-slate-200">
               <p className="text-slate-600">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link
                   to="/auth/signin"
                   className="text-sky-500 font-semibold hover:text-sky-600 transition-colors"

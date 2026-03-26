@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '../../components/ui/Button';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/ui/Button";
+import { MailCheck, ShieldCheck, Timer } from "lucide-react";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // API call to request password reset
-    console.log('Reset password for:', email);
+    console.log("Reset password for:", email);
     setSubmitted(true);
   };
 
@@ -25,13 +26,20 @@ export default function ForgotPassword() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
             <div className="text-center">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-8 h-8"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-2">Check Your Email</h2>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                Check Your Email
+              </h2>
               <p className="text-slate-600 mb-8">
-                We've sent a password reset link to <strong className="text-slate-900">{email}</strong>
+                We've sent a password reset link to{" "}
+                <strong className="text-slate-900">{email}</strong>
               </p>
               <Link to="/auth/signin">
                 <Button variant="primary" className="w-full">
@@ -66,9 +74,9 @@ export default function ForgotPassword() {
             <div className="relative">
               <div className="absolute inset-0 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
               <div className="relative w-24 h-24 backdrop-blur-xl rounded-3xl flex items-center justify-center border-2 border-sky-200 shadow-xl">
-                <img 
-                  src="/Icon-2.svg" 
-                  alt="Al Madmoon" 
+                <img
+                  src="/Icon-2.svg"
+                  alt="Al Madmoon"
                   className="w-12 h-12 object-contain"
                 />
               </div>
@@ -76,59 +84,78 @@ export default function ForgotPassword() {
           </div>
 
           {/* Headline */}
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 lg:pb-5">
             Account Recovery
           </h2>
-          <p className="text-slate-600 text-lg mb-10">
-            Regain access to your AI betting insights and continue your winning journey with Al Madmoon.
+          <p className="text-slate-600 text-lg pb-10">
+            Regain access to your AI betting insights and continue your winning
+            journey with Al Madmoon.
           </p>
 
           {/* Features Grid */}
           <div className="space-y-4">
-            {/* Feature 1 */}
+            {/* Feature 1 - Email Verification */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <MailCheck className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Email Verification</h3>
-                <p className="text-sm text-slate-600">Quick and secure email confirmation</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Email Verification
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Quick and secure email confirmation
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
-            {/* Feature 2 */}
+            {/* Feature 2 - Secure Link */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <ShieldCheck className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Secure Link</h3>
-                <p className="text-sm text-slate-600">Time-limited secure reset links</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Secure Link
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Time-limited secure reset links
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
-            {/* Feature 3 */}
+            {/* Feature 3 - Fast Recovery */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <Timer className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Fast Recovery</h3>
-                <p className="text-sm text-slate-600">Reset your password in minutes</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Fast Recovery
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Reset your password in minutes
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
@@ -154,19 +181,7 @@ export default function ForgotPassword() {
           {/* White Card Container */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
             {/* Brand Header */}
-            <div className="mb-10">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                  <img 
-                    src="/Icon-3.svg" 
-                    alt="Al Madmoon" 
-                    className="w-8 h-8 object-contain"
-                  />
-                </div>
-                <span className="text-2xl font-bold">
-                  Al Madmoon
-                </span>
-              </div>
+            <div className="mb-10 mt-8">
               <h1 className="text-4xl font-bold text-slate-900 mb-2">
                 Forgot Password?
               </h1>
@@ -179,7 +194,10 @@ export default function ForgotPassword() {
             <form onSubmit={handleSubmit} className="space-y-6 mb-8">
               {/* Email Field */}
               <div className="relative">
-                <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -199,25 +217,40 @@ export default function ForgotPassword() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
               </div>
 
               {/* Help Text */}
               <p className="text-xs text-slate-500">
-                Enter the email address associated with your account, and we'll send you a link to reset your password.
+                Enter the email address associated with your account, and we'll
+                send you a link to reset your password.
               </p>
 
               {/* Send Reset Link Button */}
-              <Button variant="primary" size="lg" type="submit" className="btn-icon btn-shadow w-full" style={{ display: 'inline-flex' }}>
+              <Button
+                variant="primary"
+                size="lg"
+                type="submit"
+                className="btn-icon btn-shadow w-full mt-10"
+                style={{ display: "inline-flex" }}
+              >
                 Send Reset Link
               </Button>
             </form>
 
             {/* Back to Sign In */}
             <div className="text-center pb-6 border-b border-slate-200">
-              <Link to="/auth/signin" className="text-sky-500 font-semibold hover:text-sky-600 transition-colors text-sm">
+              <Link
+                to="/auth/signin"
+                className="text-sky-500 font-semibold hover:text-sky-600 transition-colors text-sm"
+              >
                 ← Back to Sign In
               </Link>
             </div>
@@ -243,9 +276,9 @@ export default function ForgotPassword() {
       {/* Mobile CTA */}
       <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <img 
-            src="/Icon-2.svg" 
-            alt="Al Madmoon" 
+          <img
+            src="/Icon-2.svg"
+            alt="Al Madmoon"
             className="w-6 h-6 object-contain"
           />
           <span className="font-bold text-lg">Al Madmoon AI</span>

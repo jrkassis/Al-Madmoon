@@ -150,7 +150,7 @@ export default function UserDashboard() {
   );
 
   return (
-    <div className="pt-40 min-h-screen bg-linear-to-br from-slate-50 to-slate-100 px-4 sm:px-6">
+    <div className="pt-40 min-h-screen bg-white patternbg pb-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
