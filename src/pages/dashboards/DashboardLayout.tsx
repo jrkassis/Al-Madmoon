@@ -115,7 +115,7 @@ const adminNav: NavItem[] = [
 const affiliateNav: NavItem[] = [
   {
     label: "Referrals",
-    path: "/affiliate/referrals",
+    path: "/affiliate",
     icon: (
       <svg
         className="w-5 h-5"

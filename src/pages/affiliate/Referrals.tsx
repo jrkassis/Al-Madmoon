@@ -7,7 +7,6 @@ type ReferredUserRow = {
   full_name: string | null;
   created_at: string;
   plan: string | null;
-  ref_code?: string | null;
   is_referred?: string | null;
 };
 
@@ -31,6 +30,24 @@ export default function AffiliateReferrals() {
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReferralRow[]>([]);
   const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
+  const [affiliateCode, setAffiliateCode] = useState<string>('');
+  const [copyNotice, setCopyNotice] = useState<string | null>(null);
+
+  const referralUrl = affiliateCode
+    ? `${window.location.origin}/auth/signup?ref=${encodeURIComponent(affiliateCode)}`
+    : '';
+
+  const handleCopyReferralUrl = async () => {
+    if (!referralUrl) return;
+    try {
+      await navigator.clipboard.writeText(referralUrl);
+      setCopyNotice('Referral URL copied.');
+      window.setTimeout(() => setCopyNotice(null), 2000);
+    } catch {
+      setCopyNotice('Could not copy URL.');
+      window.setTimeout(() => setCopyNotice(null), 2000);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -75,29 +92,29 @@ export default function AffiliateReferrals() {
         let ownCode: string | null = null;
         const ownProfile = await supabase
           .from('users')
-          .select('ref_code')
+          .select('affiliate_code')
           .eq('id', user.id)
           .maybeSingle();
         if (!ownProfile.error) {
-          ownCode = String((ownProfile.data as { ref_code?: string | null } | null)?.ref_code ?? '')
+          const profile = ownProfile.data as { affiliate_code?: string | null } | null;
+          ownCode = String(profile?.affiliate_code ?? '')
             .trim()
             .toUpperCase();
           if (!ownCode) ownCode = null;
         }
+        setAffiliateCode(ownCode ?? '');
 
         // Pull potential referred users and match in-memory.
         const referredQuery = await supabase
           .from('users')
-          .select('id, full_name, created_at, plan, ref_code, is_referred')
+          .select('id, full_name, created_at, plan, is_referred')
           .order('created_at', { ascending: false });
         if (referredQuery.error) throw referredQuery.error;
         const allUsers = (referredQuery.data ?? []) as ReferredUserRow[];
 
         const matchesAffiliate = (u: ReferredUserRow) => {
           const referredBy = String(u.is_referred ?? '').trim();
-          const codeUsed = String(u.ref_code ?? '').trim().toUpperCase();
           if (referredBy && referredBy === user.id) return true;
-          if (ownCode && codeUsed && codeUsed === ownCode) return true;
           return false;
         };
 
@@ -148,6 +165,29 @@ export default function AffiliateReferrals() {
         {error && (
           <div className="glass-panel p-4 mb-4 text-sm text-red-600">{error}</div>
         )}
+
+        <div className="glass-panel p-4 mb-4">
+          <p className="text-sm font-semibold text-slate-900 mb-2">Your referral code</p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              value={affiliateCode || (loading ? 'Loading...' : 'No code found')}
+              disabled
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-slate-50 text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={handleCopyReferralUrl}
+              disabled={!affiliateCode}
+              className="px-4 py-2 rounded-lg bg-brand-600 text-slate-700 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Copy URL
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-2 break-all">
+            {affiliateCode ? referralUrl : 'Add your referral code in your profile to enable URL copy.'}
+          </p>
+          {copyNotice && <p className="text-xs text-slate-500 mt-1">{copyNotice}</p>}
+        </div>
 
         {/* Stats cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

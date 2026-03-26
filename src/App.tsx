@@ -23,7 +23,6 @@ import AdminAnalytics from "./pages/admin/Analytics";
 import AdminClients from "./pages/admin/Clients";
 import AdminAffiliates from "./pages/admin/Affiliates";
 import AdminSettings from "./pages/admin/Settings";
-import AffiliateMyCode from "./pages/affiliate/MyCode";
 import AffiliateReferrals from "./pages/affiliate/Referrals";
 import AffiliateWithdraw from "./pages/affiliate/Withdraw";
 import AffiliateSettings from "./pages/affiliate/Settings";

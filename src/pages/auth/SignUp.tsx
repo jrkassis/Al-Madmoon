@@ -25,12 +25,9 @@ export default function SignUp() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === "referralCode") {
-      const sanitizedReferralCode = value
-        .toUpperCase()
-        .replace(/[^A-Z]/g, "")
-        .slice(0, 6);
-      setFormData((prev) => ({ ...prev, [name]: sanitizedReferralCode }));
+    if (name === 'referralCode') {
+      const sanitizedReferralCode = value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6);
+      setFormData(prev => ({ ...prev, [name]: sanitizedReferralCode }));
       return;
     }
     if (name === "phone") {
@@ -59,8 +56,7 @@ export default function SignUp() {
   const normalizedPhone = normalizePhoneNumber(countryCode, formData.phone);
 
   const isReferralCodeValid =
-    formData.referralCode.trim() === "" ||
-    /^[A-Z]{4,6}$/.test(formData.referralCode.trim());
+    formData.referralCode.trim() === '' || /^[A-Z]{4,6}$/.test(formData.referralCode.trim());
   const isPasswordMismatch =
     formData.password.trim() !== "" &&
     formData.confirmPassword.trim() !== "" &&
@@ -103,9 +99,7 @@ export default function SignUp() {
     }
 
     if (!isReferralCodeValid) {
-      setErrorMessage(
-        "Referral code must be 4 to 6 uppercase letters (A-Z), or left empty.",
-      );
+      setErrorMessage('Referral code must be 4 to 6 uppercase letters (A-Z), or left empty.');
       setIsSubmitting(false);
       return;
     }
