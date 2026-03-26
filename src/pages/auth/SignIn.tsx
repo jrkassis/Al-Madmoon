@@ -1,32 +1,33 @@
-import { Button } from '../../components/ui/Button';
-import { Link, useNavigate } from 'react-router-dom';
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext';
+import { Button } from "../../components/ui/Button";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../contexts/AuthContext";
+import { BadgeCheck, MessageCircle, Zap } from "lucide-react";
 
 export default function SignIn() {
-  const defaultCountryCode = '961';
+  const defaultCountryCode = "961";
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [formData, setFormData] = useState({ identifier: '', password: '' });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
   const { rememberMe, setRememberMe } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isEmail = (value: string) => value.includes('@');
+  const isEmail = (value: string) => value.includes("@");
 
   const normalizePhoneNumber = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (!digits) return '';
+    const digits = value.replace(/\D/g, "");
+    if (!digits) return "";
     if (digits.startsWith(defaultCountryCode)) return digits;
 
-    const withoutLeadingZeros = digits.replace(/^0+/, '');
+    const withoutLeadingZeros = digits.replace(/^0+/, "");
     return `${defaultCountryCode}${withoutLeadingZeros}`;
   };
 
@@ -37,35 +38,36 @@ export default function SignIn() {
 
     const normalizedPhone = normalizePhoneNumber(identifier);
     if (!normalizedPhone) {
-      throw new Error('Please enter a valid email or phone number.');
+      throw new Error("Please enter a valid email or phone number.");
     }
 
     const { data, error } = await supabase
-      .from('users')
-      .select('email')
-      .eq('phone', normalizedPhone)
+      .from("users")
+      .select("email")
+      .eq("phone", normalizedPhone)
       .maybeSingle();
 
     if (error) {
-      throw new Error(error.message || 'Could not find account by phone number.');
+      throw new Error(
+        error.message || "Could not find account by phone number.",
+      );
     }
 
     if (!data?.email) {
-      throw new Error('No login email is linked to this phone number.');
+      throw new Error("No login email is linked to this phone number.");
     }
 
     return data.email;
   };
 
   const getDashboardPathForRole = (role: string | null | undefined) => {
-    if (role === 'admin') return '/admin';
-    if (role === 'client') return '/dashboard';
-    if (role === 'affiliate') return '/affiliate';
+    if (role === "admin") return "/admin";
+    if (role === "client") return "/dashboard";
+    if (role === "affiliate") return "/affiliate";
   };
 
   const isFormValid =
-    formData.identifier.trim() !== '' &&
-    formData.password.trim() !== '';
+    formData.identifier.trim() !== "" && formData.password.trim() !== "";
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -74,8 +76,8 @@ export default function SignIn() {
       return;
     }
 
-    setErrorMessage('');
-    setSuccessMessage('');
+    setErrorMessage("");
+    setSuccessMessage("");
     setIsSubmitting(true);
 
     try {
@@ -86,21 +88,21 @@ export default function SignIn() {
       });
 
       if (error) {
-        throw new Error(error.message || 'Invalid credentials.');
+        throw new Error(error.message || "Invalid credentials.");
       }
 
-      setSuccessMessage('Signed in successfully.');
+      setSuccessMessage("Signed in successfully.");
       const { data: roleRow } = await supabase
-        .from('users')
-        .select('role')
-        .eq('email', email)
+        .from("users")
+        .select("role")
+        .eq("email", email)
         .maybeSingle();
       navigate(getDashboardPathForRole(roleRow?.role));
     } catch (signinError) {
       const message =
         signinError instanceof Error
           ? signinError.message
-          : 'Could not sign in. Please try again.';
+          : "Could not sign in. Please try again.";
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
@@ -117,26 +119,15 @@ export default function SignIn() {
       </div>
 
       {/* Left Side - Sign In Form */}
-<div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0">
-          <div className="w-full max-w-md ">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0">
+        <div className="w-full max-w-md ">
           {/* White Card Container */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
             {/* Brand Header */}
             <div className="mb-10">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                  <img
-                    src="/Icon-3.svg"
-                    alt="Al Madmoon"
-                    className="w-8 h-8 object-contain"
-                  />
-                </div>
-                <span className="text-2xl font-bold ">
-                  Al Madmoon
-                </span>
-              </div>
-              <h1 className="text-4xl font-bold text-slate-900 mb-2">
-                Welcome
+              <div className="flex items-center gap-3 mb-8"></div>
+              <h1 className="text-4xl font-bold text-slate-900 pb-6">
+                Sign In
               </h1>
               <p className="text-slate-600 text-base">
                 Access your AI betting assistant and unlock winning insights
@@ -147,7 +138,10 @@ export default function SignIn() {
             <form className="space-y-5 mb-8" onSubmit={handleSubmit}>
               {/* Email / Phone Field */}
               <div className="relative">
-                <label htmlFor="identifier" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="identifier"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Email or Phone Number
                 </label>
                 <div className="relative">
@@ -167,19 +161,27 @@ export default function SignIn() {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
               </div>
 
               {/* Password Field */}
               <div className="relative">
-                <label htmlFor="password" className="block text-sm font-semibold text-slate-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-semibold text-slate-700 mb-2"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     id="password"
                     name="password"
                     value={formData.password}
@@ -194,11 +196,19 @@ export default function SignIn() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M3.98 8.223A10.477 10.477 0 001.934 12c2.71 5.555 8.063 9 13.066 9 .75 0 1.49-.035 2.221-.1a4.5 4.5 0 00-7.707-7.707l-.5.5zm15.848-1.299a4.5 4.5 0 00-7.707 7.707l.5-.5A10.477 10.477 0 0122.066 12c-2.71-5.555-8.063-9-13.066-9-.75 0-1.49.035-2.221.1a4.5 4.5 0 007.707 7.707l.5-.5zM6.5 12a5.5 5.5 0 1111 0 5.5 5.5 0 01-11 0z" />
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                       </svg>
                     )}
@@ -244,20 +254,19 @@ export default function SignIn() {
                 size="lg"
                 disabled={!isFormValid || isSubmitting}
                 className="btn-icon btn-shadow w-full mt-8 disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ display: 'inline-flex' }}
+                style={{ display: "inline-flex" }}
               >
-                {isSubmitting ? 'Signing In...' : 'Sign In'}
+                {isSubmitting ? "Signing In..." : "Sign In"}
               </Button>
-
             </form>
 
             {/* Sign Up Link */}
             <div className="text-center pb-6 border-b border-slate-200">
               <p className="text-slate-600">
-                New to Al Madmoon?{' '}
+                New to Al Madmoon?{" "}
                 <Link
                   to="/auth/signup"
-                  className="text-sky-500 font-semibold hover:text-sky-600 transition-colors"
+                  className="text-sky-500 font-semibold hover:text-sky-600 link transition-colors"
                 >
                   Sign Up
                 </Link>
@@ -266,15 +275,24 @@ export default function SignIn() {
 
             {/* Footer Links */}
             <div className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-500">
-              <Link to="/" className="hover:text-slate-700 transition-colors">
+              <Link
+                to="/privacy"
+                className="hover:text-slate-700 transition-colors"
+              >
                 Privacy
               </Link>
               <span>•</span>
-              <Link to="/" className="hover:text-slate-700 transition-colors">
+              <Link
+                to="/terms"
+                className="hover:text-slate-700 transition-colors"
+              >
                 Terms
               </Link>
               <span>•</span>
-              <Link to="/" className="hover:text-slate-700 transition-colors">
+              <Link
+                to="/support"
+                className="hover:text-slate-700 transition-colors"
+              >
                 Support
               </Link>
             </div>
@@ -304,27 +322,34 @@ export default function SignIn() {
           </div>
 
           {/* Headline */}
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 pb-6">
             AI-Powered Betting Intelligence
           </h2>
           <p className="text-slate-600 text-lg mb-10">
-            Get real-time analysis, data-driven predictions, and personalized insights delivered to WhatsApp 24/7.
+            Get real-time analysis, data-driven predictions, and personalized
+            insights delivered to WhatsApp 24/7.
           </p>
 
           {/* Features Grid */}
-          <div className="space-y-4">
+          <div className="space-y-4 mt-10">
             {/* Feature 1 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+                <Zap className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Instant Analysis</h3>
-                <p className="text-sm text-slate-600">Real-time match insights in seconds</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Instant Analysis
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Real-time match insights in seconds
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
@@ -332,15 +357,21 @@ export default function SignIn() {
             {/* Feature 2 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <BadgeCheck className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">Verified Data</h3>
-                <p className="text-sm text-slate-600">Backed by advanced algorithms</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  Verified Data
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Backed by advanced algorithms
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
@@ -348,15 +379,21 @@ export default function SignIn() {
             {/* Feature 3 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
               <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
-                <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-                </svg>
+                <MessageCircle className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="text-slate-900 font-semibold mb-1">WhatsApp Direct</h3>
-                <p className="text-sm text-slate-600">Recommendations on your phone</p>
+                <h3 className="text-slate-900 font-semibold mb-1">
+                  WhatsApp Direct
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Recommendations on your phone
+                </p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
@@ -364,7 +401,7 @@ export default function SignIn() {
 
           {/* CTA */}
           <div className="mt-10 pt-8 border-t-2 border-sky-200">
-            <p className="text-sm text-slate-600 mb-4">
+            <p className="text-sm text-slate-600 pb-6">
               Join thousands of successful bettors
             </p>
             <div className="flex items-center justify-center gap-2">
