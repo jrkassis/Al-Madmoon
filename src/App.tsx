@@ -93,37 +93,29 @@ export default function App() {
             }
           />
           <Route
-          path="/affiliate"
-          element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateMyCode />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/affiliate/referrals"
-          element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateReferrals />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/affiliate/withdraw"
-          element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateWithdraw />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/affiliate/settings"
-          element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateSettings />
-            </ProtectedRoute>
-          }
-        />
+            path="/affiliate"
+            element={
+              <ProtectedRoute allowedRoles={["affiliate"]}>
+                <AffiliateReferrals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/affiliate/withdraw"
+            element={
+              <ProtectedRoute allowedRoles={["affiliate"]}>
+                <AffiliateWithdraw />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/affiliate/settings"
+            element={
+              <ProtectedRoute allowedRoles={["affiliate"]}>
+                <AffiliateSettings />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Auth routes - no layout */}
