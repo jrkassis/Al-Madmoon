@@ -20,6 +20,9 @@ type AffiliateForm = {
   affiliate_code: string;
 };
 
+const COMMISSION_KEY = 'affiliate_commission_percent';
+const DEFAULT_COMMISSION_PERCENT = 30;
+
 export default function AdminAffiliates() {
   const PAGE_SIZE = 10;
   const [search, setSearch] = useState('');
@@ -28,6 +31,9 @@ export default function AdminAffiliates() {
   const [affiliates, setAffiliates] = useState<AffiliateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
+  const [commissionSaving, setCommissionSaving] = useState(false);
+  const [commissionNotice, setCommissionNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState<AffiliateForm>({
@@ -75,6 +81,59 @@ export default function AdminAffiliates() {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    const loadCommissionPercent = async () => {
+      try {
+        const { data, error: settingsError } = await supabase
+          .from('app_settings')
+          .select('value')
+          .eq('key', COMMISSION_KEY)
+          .maybeSingle();
+        if (!settingsError && data?.value != null) {
+          const parsed = Number(data.value);
+          if (Number.isFinite(parsed) && parsed > 0 && parsed <= 100) {
+            setCommissionPercent(parsed);
+            localStorage.setItem(COMMISSION_KEY, String(parsed));
+            return;
+          }
+        }
+      } catch {
+        // Ignore and fallback to local storage.
+      }
+
+      const local = Number(localStorage.getItem(COMMISSION_KEY));
+      if (Number.isFinite(local) && local > 0 && local <= 100) {
+        setCommissionPercent(local);
+      } else {
+        setCommissionPercent(DEFAULT_COMMISSION_PERCENT);
+      }
+    };
+
+    void loadCommissionPercent();
+  }, []);
+
+  const saveCommissionPercent = async () => {
+    const normalized = Math.min(100, Math.max(1, Number(commissionPercent) || DEFAULT_COMMISSION_PERCENT));
+    try {
+      setCommissionSaving(true);
+      setCommissionNotice(null);
+      const { error: upsertError } = await supabase
+        .from('app_settings')
+        .upsert({ key: COMMISSION_KEY, value: String(normalized) }, { onConflict: 'key' });
+      if (upsertError) throw upsertError;
+      setCommissionPercent(normalized);
+      localStorage.setItem(COMMISSION_KEY, String(normalized));
+      setCommissionNotice('Commission updated and saved.');
+    } catch {
+      // Fallback persistence if app_settings table is unavailable.
+      localStorage.setItem(COMMISSION_KEY, String(normalized));
+      setCommissionPercent(normalized);
+      setCommissionNotice('Saved locally in this browser. Create app_settings table for global sync.');
+    } finally {
+      setCommissionSaving(false);
+    }
+  };
 
   const openCreateModal = () => {
     setForm({ full_name: '', phone: '', affiliate_code: '' });
@@ -181,6 +240,29 @@ export default function AdminAffiliates() {
             Add Affiliate
           </Button>
         </div>
+
+        <div className="glass-panel p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Affiliate commission</p>
+            <p className="text-xs text-slate-500">Used by affiliate referral analytics.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={1}
+              max={100}
+              step={1}
+              value={commissionPercent}
+              onChange={(e) => setCommissionPercent(Number(e.target.value))}
+              className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+            <span className="text-sm text-slate-500">%</span>
+            <Button variant="primary" onClick={saveCommissionPercent} disabled={commissionSaving}>
+              {commissionSaving ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+        </div>
+        {commissionNotice && <p className="text-xs text-slate-500 mb-4">{commissionNotice}</p>}
 
         <div className="glass-panel overflow-visible">
           {loading && (
