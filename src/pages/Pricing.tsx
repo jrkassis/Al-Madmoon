@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { Button } from "../components/ui/Button";
 import { MessageCircle, CheckCircle2, Zap, Crown, XCircle, ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, redirect } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./Pricing.css";
 
@@ -13,7 +13,7 @@ const fadeIn = {
 };
 
 export default function Pricing() {
-  const { isAuthenticated, dashboardPath } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "annual">("annual");
 
   const plans = useMemo(
@@ -69,7 +69,12 @@ export default function Pricing() {
     };
   };
 
-  const ctaTo = isAuthenticated ? dashboardPath : "/auth/signup";
+  const ctaTo = (planId: string) =>
+    isAuthenticated
+      ? `/paywall?plan=${planId}&billing=${billing}`
+      : `/auth/signup?redirect=${encodeURIComponent(`/paywall?plan=${planId}&billing=${billing}`)}`;
+
+    
   const ctaLabel = isAuthenticated ? "Upgrade" : "Checkout";
 
   return (
@@ -170,7 +175,7 @@ export default function Pricing() {
                 })}
               </ul>
 
-              <Link to={ctaTo}>
+              <Link to={ctaTo(plan.id)}>
                 <Button variant="ghost" size="lg" className="btn-icon cta-btn">
                   <ArrowRight size={16} />
                   {ctaLabel}

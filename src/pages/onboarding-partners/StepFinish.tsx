@@ -1,9 +1,9 @@
 import React from "react";
-import { AffiliateFormData } from "./BecomeAffiliate";
+import { partnerFormData } from "./BecomePartner";
 import { Check } from "lucide-react";
 
 interface StepFinishProps {
-  formData: AffiliateFormData;
+  formData: partnerFormData;
 }
 
 export default function StepFinish({ formData }: StepFinishProps) {

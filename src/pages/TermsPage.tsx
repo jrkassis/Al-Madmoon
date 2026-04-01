@@ -9,7 +9,7 @@ export function TermsPage() {
   });
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 to-white min-h-screen">
+    <div className="bg-linear-to-b from-slate-50 to-white min-h-screen">
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">

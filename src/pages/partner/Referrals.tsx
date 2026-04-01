@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
+import { DashboardLayout } from '../dashboards/DashboardLayout';
 import { supabase } from '../../lib/supabase';
 
 type ReferredUserRow = {
@@ -14,27 +14,27 @@ type ReferralRow = {
   id: string;
   name: string;
   date: string;
-  status: 'converted' | 'pending';
+  status: 'Paid' | 'Free';
   commission: number;
 };
 
-const COMMISSION_KEY = 'affiliate_commission_percent';
+const COMMISSION_KEY = 'partner_commission_percent';
 const DEFAULT_COMMISSION_PERCENT = 30;
 const PLAN_PRICE: Record<string, number> = {
   t1: 19.99,
   t2: 34.99,
 };
 
-export default function AffiliateReferrals() {
+export default function partnerReferrals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReferralRow[]>([]);
   const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
-  const [affiliateCode, setAffiliateCode] = useState<string>('');
+  const [partnerCode, setpartnerCode] = useState<string>('');
   const [copyNotice, setCopyNotice] = useState<string | null>(null);
 
-  const referralUrl = affiliateCode
-    ? `${window.location.origin}/auth/signup?ref=${encodeURIComponent(affiliateCode)}`
+  const referralUrl = partnerCode
+    ? `${window.location.origin}/auth/signup?ref=${encodeURIComponent(partnerCode)}`
     : '';
 
   const handleCopyReferralUrl = async () => {
@@ -88,21 +88,21 @@ export default function AffiliateReferrals() {
         if (authError) throw authError;
         if (!user) throw new Error('You must be signed in to view referrals.');
 
-        // Resolve affiliate code from profile if available.
+        // Resolve partner code from profile if available.
         let ownCode: string | null = null;
         const ownProfile = await supabase
           .from('users')
-          .select('affiliate_code')
+          .select('partner_code')
           .eq('id', user.id)
           .maybeSingle();
         if (!ownProfile.error) {
-          const profile = ownProfile.data as { affiliate_code?: string | null } | null;
-          ownCode = String(profile?.affiliate_code ?? '')
+          const profile = ownProfile.data as { partner_code?: string | null } | null;
+          ownCode = String(profile?.partner_code ?? '')
             .trim()
             .toUpperCase();
           if (!ownCode) ownCode = null;
         }
-        setAffiliateCode(ownCode ?? '');
+        setpartnerCode(ownCode ?? '');
 
         // Pull potential referred users and match in-memory.
         const referredQuery = await supabase
@@ -112,13 +112,13 @@ export default function AffiliateReferrals() {
         if (referredQuery.error) throw referredQuery.error;
         const allUsers = (referredQuery.data ?? []) as ReferredUserRow[];
 
-        const matchesAffiliate = (u: ReferredUserRow) => {
+        const matchespartner = (u: ReferredUserRow) => {
           const referredBy = String(u.is_referred ?? '').trim();
           if (referredBy && referredBy === user.id) return true;
           return false;
         };
 
-        const referredUsers = allUsers.filter((u) => u.id !== user.id).filter(matchesAffiliate);
+        const referredUsers = allUsers.filter((u) => u.id !== user.id).filter(matchespartner);
 
         const mapped: ReferralRow[] = referredUsers.map((u) => {
           const isConverted = Boolean(u.plan && u.plan !== 'free');
@@ -128,7 +128,7 @@ export default function AffiliateReferrals() {
             id: u.id,
             name: u.full_name?.trim() || `User ${u.id.slice(0, 8)}`,
             date: new Date(u.created_at).toISOString().split('T')[0],
-            status: isConverted ? 'converted' : 'pending',
+            status: isConverted ? 'Paid' : 'Free',
             commission,
           };
         });
@@ -146,7 +146,7 @@ export default function AffiliateReferrals() {
 
   const stats = useMemo(() => {
     const signups = rows.length;
-    const conversions = rows.filter((r) => r.status === 'converted').length;
+    const conversions = rows.filter((r) => r.status === 'Paid').length;
     const totalCommission = rows.reduce((sum, r) => sum + r.commission, 0);
     return {
       // No click tracking table yet; use signup count as dynamic proxy.
@@ -158,7 +158,7 @@ export default function AffiliateReferrals() {
   }, [rows]);
 
   return (
-    <DashboardLayout role="affiliate">
+    <DashboardLayout role="partner">
       <div className="max-w-10/12 mx-auto px-6">
         <h1 className="text-2xl font-bold text-slate-900 mb-6">Referral Analytics</h1>
 
@@ -170,21 +170,21 @@ export default function AffiliateReferrals() {
           <p className="text-sm font-semibold text-slate-900 mb-2">Your referral code</p>
           <div className="flex flex-col sm:flex-row gap-2">
             <input
-              value={affiliateCode || (loading ? 'Loading...' : 'No code found')}
+              value={partnerCode || (loading ? 'Loading...' : 'No code found')}
               disabled
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm bg-slate-50 text-slate-700"
             />
             <button
               type="button"
               onClick={handleCopyReferralUrl}
-              disabled={!affiliateCode}
+              disabled={!partnerCode}
               className="px-4 py-2 rounded-lg bg-brand-600 text-slate-700 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Copy URL
             </button>
           </div>
           <p className="text-xs text-slate-500 mt-2 break-all">
-            {affiliateCode ? referralUrl : 'Add your referral code in your profile to enable URL copy.'}
+            {partnerCode ? referralUrl : 'Add your referral code in your profile to enable URL copy.'}
           </p>
           {copyNotice && <p className="text-xs text-slate-500 mt-1">{copyNotice}</p>}
         </div>
@@ -242,7 +242,7 @@ export default function AffiliateReferrals() {
                       <td className="p-4">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            r.status === 'converted'
+                            r.status === 'Paid'
                               ? 'bg-green-50 text-green-700'
                               : 'bg-yellow-50 text-yellow-700'
                           }`}

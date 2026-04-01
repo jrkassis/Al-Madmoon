@@ -1,10 +1,10 @@
 import React from 'react';
-import { AffiliateFormData } from './BecomeAffiliate';
+import { partnerFormData } from './BecomePartner';
 
 interface StepAudienceProps {
-  formData: AffiliateFormData;
-  onInputChange: (field: keyof AffiliateFormData, value: string) => void;
-  errors: Partial<AffiliateFormData>;
+  formData: partnerFormData;
+  onInputChange: (field: keyof partnerFormData, value: string) => void;
+  errors: Partial<partnerFormData>;
 }
 
 export default function StepAudience({ formData, onInputChange, errors }: StepAudienceProps) {

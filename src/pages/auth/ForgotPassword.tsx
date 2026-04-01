@@ -16,7 +16,7 @@ export default function ForgotPassword() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"></div>
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
@@ -65,7 +65,7 @@ export default function ForgotPassword() {
       {/* Left Side - Feature Showcase */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 relative overflow-hidden">
         {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
 
         {/* Content */}
         <div className="relative z-10 max-w-md text-center">
@@ -96,7 +96,7 @@ export default function ForgotPassword() {
           <div className="space-y-4">
             {/* Feature 1 - Email Verification */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <MailCheck className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -108,7 +108,7 @@ export default function ForgotPassword() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -118,7 +118,7 @@ export default function ForgotPassword() {
 
             {/* Feature 2 - Secure Link */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <ShieldCheck className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -130,7 +130,7 @@ export default function ForgotPassword() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -140,7 +140,7 @@ export default function ForgotPassword() {
 
             {/* Feature 3 - Fast Recovery */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <Timer className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -152,7 +152,7 @@ export default function ForgotPassword() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -274,7 +274,7 @@ export default function ForgotPassword() {
       </div>
 
       {/* Mobile CTA */}
-      <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
+      <div className="lg:hidden p-6 bg-linear-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
           <img
             src="/Icon-2.svg"

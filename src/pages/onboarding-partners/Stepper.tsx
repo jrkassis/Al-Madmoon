@@ -1,16 +1,16 @@
 import React from "react";
-import { AffiliateStep } from "./BecomeAffiliate";
+import { partnerStep } from "./BecomePartner";
 
 interface StepperProps {
-  steps: { id: AffiliateStep; label: string }[];
-  currentStep: AffiliateStep;
+  steps: { id: partnerStep; label: string }[];
+  currentStep: partnerStep;
 }
 
 export default function Stepper({ steps, currentStep }: StepperProps) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="affiliate-stepper">
+    <div className="partner-stepper">
       {steps.map((step, index) => (
         <React.Fragment key={step.id}>
           <div

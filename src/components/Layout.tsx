@@ -11,6 +11,7 @@ const navLinks = [
   { name: "Features", path: "/features" },
   { name: "Pricing", path: "/pricing" },
   { name: "Contact", path: "/contact" },
+  { name: "Become a Partner", path: "/become-a-partner" },
 ];
 
 export function Layout() {

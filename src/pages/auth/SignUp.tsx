@@ -1,11 +1,12 @@
 import { Button } from "../../components/ui/Button";
-import { Link, useNavigate } from "react-router-dom";
-import { useState, ChangeEvent, FormEvent } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { CreditCard, Shield, Zap } from "lucide-react"; // added
 
 export default function SignUp() {
   const defaultCountryCode = "961";
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -55,6 +56,24 @@ export default function SignUp() {
 
   const normalizedPhone = normalizePhoneNumber(countryCode, formData.phone);
 
+  useEffect(() => {
+    const refFromUrl = searchParams.get("ref");
+    if (!refFromUrl) return;
+
+    const sanitizedReferralCode = refFromUrl
+      .toUpperCase()
+      .replace(/[^A-Z]/g, "")
+      .slice(0, 6);
+
+    if (!sanitizedReferralCode) return;
+
+    setFormData((prev) =>
+      prev.referralCode === sanitizedReferralCode
+        ? prev
+        : { ...prev, referralCode: sanitizedReferralCode },
+    );
+  }, [searchParams]);
+
   const isReferralCodeValid =
     formData.referralCode.trim() === '' || /^[A-Z]{4,6}$/.test(formData.referralCode.trim());
   const isPasswordMismatch =
@@ -74,7 +93,7 @@ export default function SignUp() {
 
   const getDashboardPathForRole = (role: string | null | undefined) => {
     if (role === "admin") return "/admin";
-    return "/affiliate";
+    return "/partner";
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -147,7 +166,11 @@ export default function SignUp() {
         return;
       }
 
-      const targetPath = getDashboardPathForRole(data?.role ?? "client");
+      const redirectPath = searchParams.get("redirect");
+      const safeRedirectPath =
+        redirectPath && redirectPath.startsWith("/") ? redirectPath : null;
+      const targetPath =
+        safeRedirectPath ?? getDashboardPathForRole(data?.role ?? "client");
       setSuccessMessage("Account created successfully.");
       setFormData({
         name: "",
@@ -171,7 +194,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
@@ -183,7 +206,7 @@ export default function SignUp() {
       {/* Left Side - Feature Showcase */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-start p-12 relative overflow-hidden">
         {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
 
         {/* Content */}
         <div className="z-10 max-w-md w-full pt-10 mb-0">
@@ -216,7 +239,7 @@ export default function SignUp() {
           <div className="space-y-4">
             {/* Feature 1 - No Credit Card */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <CreditCard className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -228,7 +251,7 @@ export default function SignUp() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -238,7 +261,7 @@ export default function SignUp() {
 
             {/* Feature 2 - 100% Secure */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <Shield className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -250,7 +273,7 @@ export default function SignUp() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -260,7 +283,7 @@ export default function SignUp() {
 
             {/* Feature 3 - Instant Access */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <Zap className="w-6 h-6 text-sky-600" />
               </div>
               <div className="text-left flex-1">
@@ -272,7 +295,7 @@ export default function SignUp() {
                 </p>
               </div>
               <svg
-                className="w-5 h-5 text-emerald-500 flex-shrink-0"
+                className="w-5 h-5 text-emerald-500 shrink-0"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -659,7 +682,7 @@ export default function SignUp() {
       </div>
 
       {/* Mobile CTA */}
-      <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
+      <div className="lg:hidden p-6 bg-linear-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
           <img
             src="/Icon-2.svg"

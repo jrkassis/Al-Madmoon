@@ -1,4 +1,4 @@
-import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
+import { DashboardLayout } from '../dashboards/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 
 export default function AffiliateWithdraw() {

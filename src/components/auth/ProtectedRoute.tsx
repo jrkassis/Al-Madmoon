@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-type UserRole = 'client' | 'affiliate' | 'admin';
+type UserRole = 'client' | 'partner' | 'admin';
 
 type ProtectedRouteProps = {
   children: ReactElement;

@@ -32,7 +32,7 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"></div>
@@ -64,7 +64,7 @@ export default function ResetPassword() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full filter blur-3xl translate-x-1/2 translate-y-1/2"></div>
@@ -90,7 +90,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
@@ -101,7 +101,7 @@ export default function ResetPassword() {
       {/* Left Side - Feature Showcase */}
       <div className="hidden lg:flex flex-1 flex-col items-center justify-center p-12 relative overflow-hidden">
         {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-cyan-50 to-sky-50 opacity-40"></div>
 
         {/* Content */}
         <div className="relative z-10 max-w-md text-center">
@@ -131,7 +131,7 @@ export default function ResetPassword() {
           <div className="space-y-4">
             {/* Feature 1 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
                 </svg>
@@ -140,14 +140,14 @@ export default function ResetPassword() {
                 <h3 className="text-slate-900 font-semibold mb-1">Strong Encryption</h3>
                 <p className="text-sm text-slate-600">Military-grade security protection</p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
             {/* Feature 2 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -156,14 +156,14 @@ export default function ResetPassword() {
                 <h3 className="text-slate-900 font-semibold mb-1">Quick Recovery</h3>
                 <p className="text-sm text-slate-600">Easy password reset anytime</p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
 
             {/* Feature 3 */}
             <div className="group flex items-center gap-4 p-4 rounded-xl bg-white/40 backdrop-blur-sm border-2 border-sky-200/50 hover:border-sky-300 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md">
-              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors flex-shrink-0">
+              <div className="w-12 h-12 bg-sky-100 rounded-lg flex items-center justify-center group-hover:bg-sky-200 transition-colors shrink-0">
                 <svg className="w-6 h-6 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
                 </svg>
@@ -172,7 +172,7 @@ export default function ResetPassword() {
                 <h3 className="text-slate-900 font-semibold mb-1">Access Anytime</h3>
                 <p className="text-sm text-slate-600">24/7 support available for help</p>
               </div>
-              <svg className="w-5 h-5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
               </svg>
             </div>
@@ -331,7 +331,7 @@ export default function ResetPassword() {
       </div>
 
       {/* Mobile CTA */}
-      <div className="lg:hidden p-6 bg-gradient-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
+      <div className="lg:hidden p-6 bg-linear-to-r from-sky-300 to-blue-500 text-white text-center relative z-10 rounded-t-3xl">
         <div className="flex items-center justify-center gap-2 mb-2">
           <img 
             src="/Icon-2.svg" 

@@ -16,19 +16,20 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import Paywall from "./pages/paywall/paywall";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Dashboard pages
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminClients from "./pages/admin/Clients";
-import AdminAffiliates from "./pages/admin/Affiliates";
+import AdminPartners from "./pages/admin/Partners";
 import AdminSettings from "./pages/admin/Settings";
-import AffiliateReferrals from "./pages/affiliate/Referrals";
-import AffiliateWithdraw from "./pages/affiliate/Withdraw";
-import AffiliateSettings from "./pages/affiliate/Settings";
+import PartnerReferrals from "./pages/partner/Referrals";
+import PartnerWithdraw from "./pages/partner/Withdraw";
+import PartnerSettings from "./pages/partner/Settings";
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import Logout from "../src/pages/auth/Logout";
-import BecomeAffiliate from "../src/pages/onboarding-affiliate/BecomeAffiliate";
+import BecomePartner from "./pages/onboarding-partners/BecomePartner";
 
 export default function App() {
   return (
@@ -42,39 +43,39 @@ export default function App() {
           <Route path="pricing" element={<Pricing />} />
           <Route path="contact" element={<Contact />} />
           <Route path="links" element={<Links />} />
-          <Route path="become-an-affiliate" element={<BecomeAffiliate />} />
+          <Route path="become-a-partner" element={<BecomePartner />} />
           <Route path="*" element={<ErrorPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
 
         <Route
-          path="/affiliate"
+          path="/partner"
           element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateReferrals />
+            <ProtectedRoute allowedRoles={["partner"]}>
+              <PartnerReferrals />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/affiliate/referrals"
+          path="/partner/referrals"
           element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateReferrals />
+            <ProtectedRoute allowedRoles={["partner"]}>
+              <PartnerReferrals />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/affiliate/withdraw"
+          path="/partner/withdraw"
           element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateWithdraw />
+            <ProtectedRoute allowedRoles={["partner"]}>
+              <PartnerWithdraw />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/affiliate/settings"
+          path="/partner/settings"
           element={
-            <ProtectedRoute allowedRoles={["affiliate"]}>
-              <AffiliateSettings />
+            <ProtectedRoute allowedRoles={["partner"]}>
+              <PartnerSettings />
             </ProtectedRoute>
           }
         />
@@ -103,10 +104,10 @@ export default function App() {
             }
           />
           <Route
-            path="/admin/affiliates"
+            path="/admin/partners"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminAffiliates />
+                <AdminPartners />
               </ProtectedRoute>
             }
           />
@@ -132,6 +133,7 @@ export default function App() {
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
         <Route path="/auth/reset-password" element={<ResetPassword />} />
+        <Route path="/paywall" element={<Paywall />} />
 
         {/* Dashboard routes - they have their own layout (DashboardLayout) */}
         <Route path="/privacy" element={<PrivacyPage />} />

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
+import { DashboardLayout } from '../dashboards/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 
-export default function AffiliateSettings() {
+export default function partnerSettings() {
   const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('affiliate@example.com');
+  const [email, setEmail] = useState('partner@example.com');
   const [paypal, setPaypal] = useState('john@paypal.com');
 
   const handleSave = () => {
@@ -12,7 +12,7 @@ export default function AffiliateSettings() {
   };
 
   return (
-    <DashboardLayout role="affiliate">
+    <DashboardLayout role="partner">
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Settings</h1>
 
       <div className="glass-panel p-6 max-w-2xl">

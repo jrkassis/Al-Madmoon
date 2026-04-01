@@ -18,7 +18,7 @@ export default function Logout() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sky-200 via-blue-100 to-cyan-100">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-sky-200 via-blue-100 to-cyan-100">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-sky-300/30 rounded-full filter blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
@@ -55,7 +55,7 @@ export default function Logout() {
           <div className="flex flex-col items-center justify-center py-12">
             {/* Animated Circle */}
             <div className="relative w-20 h-20 mb-8">
-              <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-blue-600 rounded-full blur-lg opacity-50 animate-pulse"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-sky-400 to-blue-600 rounded-full blur-lg opacity-50 animate-pulse"></div>
               <div className="relative inset-0 flex items-center justify-center">
                 <div className="w-20 h-20 border-4 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
               </div>
@@ -73,7 +73,7 @@ export default function Logout() {
           {/* Info Section */}
           <div className="mt-8 p-4 bg-sky-50 border-2 border-sky-200 rounded-xl">
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-sky-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-sky-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
               </svg>
               <div>

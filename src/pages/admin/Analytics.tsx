@@ -26,7 +26,7 @@ const PLAN_COLORS: Record<string, string> = {
   free: C.slate,
   t1: C.blue,
   t2: C.emerald,
-  affiliate: C.amber,
+  partner: C.amber,
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

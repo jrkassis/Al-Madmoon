@@ -1,10 +1,10 @@
 import React from 'react';
-import { AffiliateFormData } from './BecomeAffiliate';
+import { partnerFormData } from './BecomePartner';
 
 interface StepStrategyProps {
-  formData: AffiliateFormData;
-  onInputChange: (field: keyof AffiliateFormData, value: string) => void;
-  errors: Partial<AffiliateFormData>;
+  formData: partnerFormData;
+  onInputChange: (field: keyof partnerFormData, value: string) => void;
+  errors: Partial<partnerFormData>;
   countries: string[];
 }
 
@@ -65,7 +65,7 @@ export default function StepStrategy({ formData, onInputChange, errors, countrie
       <div className="strategy-info">
         <h3 className="info-title">Payment Information</h3>
         <p className="info-text">
-          We'll use your PayPal email to send affiliate commissions. Make sure it's accurate!
+          We'll use your PayPal email to send partner commissions. Make sure it's accurate!
         </p>
       </div>
     </div>

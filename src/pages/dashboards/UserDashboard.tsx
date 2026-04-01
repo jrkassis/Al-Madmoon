@@ -169,7 +169,7 @@ export default function UserDashboard() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100"
         >
-          <div className="bg-gradient-to-r from-brand-600 to-brand-700 px-6 py-4">
+          <div className="bg-linear-to-r from-brand-600 to-brand-700 px-6 py-4">
             <h2 className="text-xl font-semibold text-white">Subscription Details</h2>
           </div>
           <div className="p-6 space-y-6">

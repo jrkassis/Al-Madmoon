@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
-  role: 'client' | 'affiliate' | 'admin' | null;
+  role: 'client' | 'partner' | 'admin' | null;
   dashboardPath: string;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<'client' | 'affiliate' | 'admin' | null>(null);
+  const [role, setRole] = useState<'client' | 'partner' | 'admin' | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [rememberMe, setRememberMeState] = useState<boolean>(() => {
     const savedValue = localStorage.getItem(REMEMBER_ME_KEY);
@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', authUserId)
         .maybeSingle();
 
-      if (userById?.role === 'client' || userById?.role === 'affiliate' || userById?.role === 'admin') {
+      if (userById?.role === 'client' || userById?.role === 'partner' || userById?.role === 'admin') {
         setRole(userById.role);
         return;
       }
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .eq('email', userEmail)
           .maybeSingle();
 
-        if (userByEmail?.role === 'client' || userByEmail?.role === 'affiliate' || userByEmail?.role === 'admin') {
+        if (userByEmail?.role === 'client' || userByEmail?.role === 'partner' || userByEmail?.role === 'admin') {
           setRole(userByEmail.role);
           return;
         }
@@ -107,8 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const dashboardPath =
     role === 'admin'
       ? '/admin'
-      : role === 'affiliate'
-      ? '/affiliate'
+      : role === 'partner'
+      ? '/partner'
       : role === 'client'
       ? '/dashboard'
       : '/';

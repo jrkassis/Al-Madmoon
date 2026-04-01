@@ -14,7 +14,7 @@ export type AdminAnalytics = {
   userGrowthPct: number;          // MoM % change
   paidUsers: number;
   freeUsers: number;
-  affiliates: number;
+  partners: number;
   t1Users: number;
   t2Users: number;
   conversionRate: number;         // paidUsers / totalUsers * 100
@@ -216,7 +216,7 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
 
   const paidUsers = users?.filter((u) => u.plan && u.plan !== 'free').length ?? 0;
   const freeUsers = users?.filter((u) => u.plan === 'free' || !u.plan).length ?? 0;
-  const affiliates = users?.filter((u) => u.role === 'affiliate').length ?? 0;
+  const partners = users?.filter((u) => u.role === 'partner').length ?? 0;
   const t1Users = users?.filter((u) => u.plan === 't1').length ?? 0;
   const t2Users = users?.filter((u) => u.plan === 't2').length ?? 0;
   const conversionRate = totalUsers > 0 ? (paidUsers / totalUsers) * 100 : 0;
@@ -340,7 +340,7 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
     userGrowthPct,
     paidUsers,
     freeUsers,
-    affiliates,
+    partners,
     t1Users,
     t2Users,
     conversionRate,

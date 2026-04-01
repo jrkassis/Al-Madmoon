@@ -1,34 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DashboardLayout } from '../../pages/dashboards/DashboardLayout';
+import { DashboardLayout } from '../dashboards/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 
 type ReferralFilter = 'all' | 'none' | '1-9' | '10+';
 
-type AffiliateRow = {
+type partnerRow = {
   id: string;
   full_name: string | null;
   phone: string | null;
   created_at: string;
-  affiliate_code?: string | null;
+  partner_code?: string | null;
   referrals: number;
 };
 
-type AffiliateForm = {
+type partnerForm = {
   full_name: string;
   phone: string;
-  affiliate_code: string;
+  partner_code: string;
 };
 
-const COMMISSION_KEY = 'affiliate_commission_percent';
+const COMMISSION_KEY = 'partner_commission_percent';
 const DEFAULT_COMMISSION_PERCENT = 30;
 
-export default function AdminAffiliates() {
+export default function AdminPartners() {
   const PAGE_SIZE = 10;
   const [search, setSearch] = useState('');
   const [referralFilter, setReferralFilter] = useState<ReferralFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [affiliates, setAffiliates] = useState<AffiliateRow[]>([]);
+  const [partners, setpartners] = useState<partnerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
@@ -36,35 +36,35 @@ export default function AdminAffiliates() {
   const [commissionNotice, setCommissionNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState<AffiliateForm>({
+  const [form, setForm] = useState<partnerForm>({
     full_name: '',
     phone: '',
-    affiliate_code: '',
+    partner_code: '',
   });
 
-  const loadAffiliates = async () => {
+  const loadpartners = async () => {
     setError(null);
     setLoading(true);
 
     const query = await supabase
       .from('users')
       .select('id, full_name, phone, created_at')
-      .eq('role', 'affiliate')
+      .eq('role', 'partner')
       .order('created_at', { ascending: false });
     if (query.error) throw query.error;
-    const affiliatesData = (query.data ?? []) as Array<{
+    const partnersData = (query.data ?? []) as Array<{
       id: string;
       full_name: string | null;
       phone: string | null;
       created_at: string;
     }>;
 
-    const normalized = affiliatesData.map((a) => ({
+    const normalized = partnersData.map((a) => ({
       ...a,
       referrals: 0,
     }));
 
-    setAffiliates(normalized);
+    setpartners(normalized);
     setLoading(false);
   };
 
@@ -72,9 +72,9 @@ export default function AdminAffiliates() {
     let mounted = true;
     (async () => {
       try {
-        await loadAffiliates();
+        await loadpartners();
       } catch (e: any) {
-        if (mounted) setError(e?.message ?? 'Failed to load affiliates');
+        if (mounted) setError(e?.message ?? 'Failed to load partners');
       }
     })();
     return () => {
@@ -136,34 +136,34 @@ export default function AdminAffiliates() {
   };
 
   const openCreateModal = () => {
-    setForm({ full_name: '', phone: '', affiliate_code: '' });
+    setForm({ full_name: '', phone: '', partner_code: '' });
     setIsModalOpen(true);
   };
 
-  const handleCreateAffiliate = async () => {
+  const handleCreatepartner = async () => {
     try {
       setSaving(true);
       setError(null);
       const payload = {
         full_name: form.full_name.trim() || null,
         phone: form.phone.trim() || null,
-        role: 'affiliate',
-        affiliate_code: form.affiliate_code.trim().toUpperCase() || null,
+        role: 'partner',
+        partner_code: form.partner_code.trim().toUpperCase() || null,
       };
       const withCodeInsert = await supabase.from('users').insert(payload);
       if (withCodeInsert.error) {
-        // Fallback if affiliate_code column doesn't exist yet.
+        // Fallback if partner_code column doesn't exist yet.
         const fallbackInsert = await supabase.from('users').insert({
           full_name: form.full_name.trim() || null,
           phone: form.phone.trim() || null,
-          role: 'affiliate',
+          role: 'partner',
         });
         if (fallbackInsert.error) throw fallbackInsert.error;
       }
       setIsModalOpen(false);
-      await loadAffiliates();
+      await loadpartners();
     } catch (e: any) {
-      setError(e?.message ?? 'Failed to create affiliate');
+      setError(e?.message ?? 'Failed to create partner');
     } finally {
       setSaving(false);
     }
@@ -171,17 +171,17 @@ export default function AdminAffiliates() {
 
   const rows = useMemo(
     () =>
-      affiliates.map((a) => ({
+      partners.map((a) => ({
         id: a.id,
-        name: a.full_name?.trim() || `Affiliate ${a.id.slice(0, 8)}`,
+        name: a.full_name?.trim() || `partner ${a.id.slice(0, 8)}`,
         contact: a.phone || '-',
         referrals: a.referrals,
         joined: new Date(a.created_at).toISOString().split('T')[0],
       })),
-    [affiliates]
+    [partners]
   );
 
-  // Keep search behavior unchanged: filter by affiliate name only.
+  // Keep search behavior unchanged: filter by partner name only.
   const filtered = rows
     .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
     .filter((a) => {
@@ -191,7 +191,7 @@ export default function AdminAffiliates() {
       return true;
     });
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginatedAffiliates = useMemo(
+  const paginatedpartners = useMemo(
     () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
     [filtered, currentPage]
   );
@@ -211,7 +211,7 @@ export default function AdminAffiliates() {
       <div className="max-w-10/12 mx-auto px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            Affiliates
+            partners
             <span className="text-sm font-semibold text-slate-500">
               {loading ? 'Loading...' : `(${filtered.length})`}
             </span>
@@ -219,7 +219,7 @@ export default function AdminAffiliates() {
           <div className="relative w-full sm:w-64 h-full">
             <input
               type="text"
-              placeholder="Search affiliates..."
+              placeholder="Search partners..."
               className="w-full px-4 py-2 pl-10 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-brand-500/50"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -237,14 +237,14 @@ export default function AdminAffiliates() {
             <option value="10+">10+ referrals</option>
           </select>
           <Button variant="primary" className="whitespace-nowrap" onClick={openCreateModal}>
-            Add Affiliate
+            Add partner
           </Button>
         </div>
 
         <div className="glass-panel p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-900">Affiliate commission</p>
-            <p className="text-xs text-slate-500">Used by affiliate referral analytics.</p>
+            <p className="text-sm font-semibold text-slate-900">partner commission</p>
+            <p className="text-xs text-slate-500">Used by partner referral analytics.</p>
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -266,7 +266,7 @@ export default function AdminAffiliates() {
 
         <div className="glass-panel overflow-visible">
           {loading && (
-            <div className="p-6 text-sm text-slate-500 animate-pulse">Loading affiliates...</div>
+            <div className="p-6 text-sm text-slate-500 animate-pulse">Loading partners...</div>
           )}
           {error && (
             <div className="p-6 text-sm text-red-600">{error}</div>
@@ -283,7 +283,7 @@ export default function AdminAffiliates() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedAffiliates.map((a) => (
+                  {paginatedpartners.map((a) => (
                     <tr key={a.id} className="border-b border-slate-100 last:border-0">
                       <td className="p-4 font-medium text-slate-900">{a.name}</td>
                       <td className="p-4 text-slate-600">{a.contact}</td>
@@ -294,7 +294,7 @@ export default function AdminAffiliates() {
                   {filtered.length === 0 && (
                     <tr>
                       <td colSpan={4} className="p-6 text-center text-slate-500">
-                        No affiliates found.
+                        No partners found.
                       </td>
                     </tr>
                   )}
@@ -333,7 +333,7 @@ export default function AdminAffiliates() {
         <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-slate-200 p-5">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
-              Create Affiliate
+              Create partner
             </h2>
             <div className="space-y-3">
               <div>
@@ -355,12 +355,12 @@ export default function AdminAffiliates() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Affiliate Code (optional)</label>
+                <label className="text-xs text-slate-500">partner Code (optional)</label>
                 <input
                   type="text"
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                  value={form.affiliate_code}
-                  onChange={(e) => setForm((f) => ({ ...f, affiliate_code: e.target.value }))}
+                  value={form.partner_code}
+                  onChange={(e) => setForm((f) => ({ ...f, partner_code: e.target.value }))}
                 />
               </div>
             </div>
@@ -374,7 +374,7 @@ export default function AdminAffiliates() {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleCreateAffiliate}
+                onClick={handleCreatepartner}
                 disabled={saving}
               >
                 {saving ? 'Saving...' : 'Save'}

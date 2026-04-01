@@ -67,8 +67,8 @@ const adminNav: NavItem[] = [
     ),
   },
   {
-    label: "Affiliates",
-    path: "/admin/affiliates",
+    label: "partners",
+    path: "/admin/partners",
     icon: (
       <svg
         className="w-5 h-5"
@@ -112,10 +112,10 @@ const adminNav: NavItem[] = [
   },
 ];
 
-const affiliateNav: NavItem[] = [
+const partnerNav: NavItem[] = [
   {
     label: "Referrals",
-    path: "/affiliate",
+    path: "/partner",
     icon: (
       <svg
         className="w-5 h-5"
@@ -134,7 +134,7 @@ const affiliateNav: NavItem[] = [
   },
   {
     label: "Withdraw",
-    path: "/affiliate/withdraw",
+    path: "/partner/withdraw",
     icon: (
       <svg
         className="w-5 h-5"
@@ -153,7 +153,7 @@ const affiliateNav: NavItem[] = [
   },
   {
     label: "Settings",
-    path: "/affiliate/settings",
+    path: "/partner/settings",
     icon: (
       <svg
         className="w-5 h-5"
@@ -180,7 +180,7 @@ const affiliateNav: NavItem[] = [
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: "admin" | "affiliate";
+  role: "admin" | "partner";
 }
 
 export function DashboardLayout({ children, role }: DashboardLayoutProps) {
@@ -188,7 +188,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const navItems = role === "admin" ? adminNav : affiliateNav;
+  const navItems = role === "admin" ? adminNav : partnerNav;
 
   const handleSignOut = async () => {
     await signOut();
