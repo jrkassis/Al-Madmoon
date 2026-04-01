@@ -1,9 +1,8 @@
 // api/whish-payment.js
 // Vercel Serverless Function — POST /api/whish-payment
 // Creates a Whish Pay session and returns the collectUrl
-
 const BASE_URL =
-  process.env.WHISH_BASE_URL || "https://api.whish.money/itel-service/api";
+  process.env.WHISH_BASE_URL || "https://api.sandbox.whish.money/itel-service/api";
 
 const PLANS = {
   pro: {
@@ -37,29 +36,51 @@ export default async function handler(req, res) {
   const amount = billing === "annual" ? selectedPlan.annual : selectedPlan.monthly;
   const invoice = `${selectedPlan.label} ${billing === "annual" ? "Annual" : "Monthly"} Subscription`;
 
-  const origin =
-    process.env.VITE_SITE_URL ||
+  const originSite =
+    process.env.SITE_URL ||
     `https://${req.headers.host}`;
+  const websiteHeader =
+    process.env.WHISH_WEBSITE_URL || originSite;
 
   const body = {
     amount,
     currency: "USD",
     invoice,
     externalId,
-    successCallbackUrl: `${origin}/api/whish-callback?status=success&externalId=${externalId}`,
-    failureCallbackUrl: `${origin}/api/whish-callback?status=failure&externalId=${externalId}`,
-    successRedirectUrl: `${origin}/paywall?payment=success`,
-    failureRedirectUrl: `${origin}/paywall?payment=failure`,
+    successCallbackUrl: `${originSite}/api/whish-callback?status=success&externalId=${externalId}`,
+    failureCallbackUrl: `${originSite}/api/whish-callback?status=failure&externalId=${externalId}`,
+    successRedirectUrl: `${originSite}/paywall?payment=success`,
+    failureRedirectUrl: `${originSite}/paywall?payment=failure`,
   };
 
   try {
+    // Best-effort: record pending payment in Supabase if server creds exist
+    try {
+      if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+        const { createClient } = await import("@supabase/supabase-js");
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+        await supabase.from("payments").upsert({
+          external_id: String(externalId),
+          status: "pending",
+          amount,
+          currency: "USD",
+          invoice,
+          plan,
+          billing,
+          created_at: new Date().toISOString(),
+        }, { onConflict: "external_id" });
+      }
+    } catch (e) {
+      console.warn("[whish-payment] Supabase logging skipped:", e?.message ?? e);
+    }
+
     const whishRes = await fetch(`${BASE_URL}/payment/whish`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         channel: process.env.WHISH_CHANNEL,
         secret: process.env.WHISH_SECRET,
-        websiteUrl: origin,
+        websiteUrl: websiteHeader,
         "User-Agent": "Whish/1.0 (https://whish.money; support@whish.money)",
       },
       body: JSON.stringify(body),

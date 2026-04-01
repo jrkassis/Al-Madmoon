@@ -221,7 +221,7 @@ export default function Paywall() {
                 disabled={whishLoading}
               >
                 <span className="pw-method__icon pw-method__icon--whish">
-                  <img src="../../../public/Whish-Logo.jpg" alt="Whish Money" width={20} height={20} />
+                  <img src="/Whish-Logo.jpg" alt="Whish Money" width={20} height={20} />
                 </span>
                 <span className="pw-method__body">
                   <span className="pw-method__name">Whish Money</span>
