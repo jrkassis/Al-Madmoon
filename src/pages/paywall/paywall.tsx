@@ -131,6 +131,9 @@ export default function Paywall() {
     setError(null);
     const externalId = generateExternalId();
 
+    // Pre-open tab immediately on user gesture to avoid popup blockers
+    const paymentWindow = window.open("about:blank", "_blank", "noopener,noreferrer");
+
     try {
       const res = await fetch("/api/whish-payment", {
         method: "POST",
@@ -145,9 +148,22 @@ export default function Paywall() {
 
       startPolling(externalId);
       setStep("whish-waiting");
-      window.open(data.collectUrl, "_blank", "noopener,noreferrer");
+
+      // Navigate the pre-opened window; if blocked/null, fallback to same-tab navigation
+      if (paymentWindow) {
+        try {
+          paymentWindow.location.replace(data.collectUrl);
+        } catch {
+          // Some browsers disallow location.replace across processes; fallback
+          paymentWindow.location.href = data.collectUrl;
+        }
+      } else {
+        window.location.href = data.collectUrl;
+      }
     } catch (err) {
       setError(err.message ?? "Unexpected error. Please try again.");
+      // Close the pre-opened tab if something went wrong
+      try { paymentWindow?.close(); } catch {}
     } finally {
       setWLoad(false);
     }
