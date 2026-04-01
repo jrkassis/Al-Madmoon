@@ -1,4 +1,4 @@
-import "./Paywall.css";
+import "./paywall.css";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
