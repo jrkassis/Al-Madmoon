@@ -100,7 +100,12 @@ export default function Paywall() {
         const data = await res.json();
         const s = data.collectStatus;
         setCS(s);
-        if (s === "success") { stopPolling(); setStep("success"); }
+        if (s === "success") {
+          stopPolling();
+          setStep("success");
+          // Auto-redirect to dashboard shortly after success
+          setTimeout(() => navigate("/dashboard"), 1200);
+        }
         if (s === "failed") { stopPolling(); setStep("failed"); }
       } catch {
         // network blip — keep polling
