@@ -35,7 +35,6 @@ function useLemonSqueezy(onSuccess) {
 
   useEffect(() => {
     if (document.querySelector('script[src="https://app.lemonsqueezy.com/js/lemon.js"]')) {
-      //window.createLemonSqueezy?.();
       setReady(true);
       return;
     }
@@ -49,20 +48,12 @@ function useLemonSqueezy(onSuccess) {
           if (e.event === "Checkout.Success") onSuccess();
         },
       });
+      setReady(true);
     };
-      script.onload = () => {
-        // @ts-ignore
-        window.LemonSqueezy?.Setup({
-          eventHandler: (e) => {
-            if (e.event === "Checkout.Success") onSuccess();
-          },
-        });
-        setReady(true);
-      };
-      document.body.appendChild(script);
-    }, [onSuccess]);
-  
-    return ready;
+    document.body.appendChild(script);
+  }, [onSuccess]);
+
+  return ready;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -129,7 +120,7 @@ export default function Paywall() {
     setMethod("ls");
     const url = isAnnual ? plan.lsAnnualUrl : plan.lsMonthlyUrl;
     // @ts-ignore: LemonSqueezy might not be typed on window
-    (window as any).LemonSqueezy?.Url?.Open(url);
+    //window.LemonSqueezy?.Url?.Open(url);
   };
 
   const handleWhish = async () => {
@@ -228,7 +219,7 @@ export default function Paywall() {
                 disabled={whishLoading}
               >
                 <span className="pw-method__icon pw-method__icon--whish">
-                  <img src="../../../public/Whish-Logo.jpg" alt="Whish Money" width={20} height={20} />
+                  <img src="/Whish-Logo.jpg" alt="Whish Money" width={20} height={20} />
                 </span>
                 <span className="pw-method__body">
                   <span className="pw-method__name">Whish Money</span>
