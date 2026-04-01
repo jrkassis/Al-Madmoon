@@ -29,11 +29,19 @@ type UserForm = {
   role: 'admin' | 'client' | 'affiliate';
 };
 
-function formatPlan(plan: string | null): string {
+function normalizePlanKey(plan: string | null): 'free' | 'pro' | 'ultimate' {
   if (!plan || plan === 'free') return 'free';
-  if (plan === 't1') return 'Pro';
-  if (plan === 't2') return 'Ultimate';
-  return plan;
+  if (plan === 't1') return 'pro';
+  if (plan === 't2') return 'ultimate';
+  if (plan === 'pro' || plan === 'ultimate') return plan;
+  return 'free';
+}
+
+function formatPlan(plan: string | null): string {
+  const key = normalizePlanKey(plan);
+  if (key === 'free') return 'free';
+  if (key === 'pro') return 'Pro';
+  return 'Ultimate';
 }
 
 function normalizeRole(role: UserRow['role']): 'admin' | 'client' | 'affiliate' {
@@ -46,7 +54,7 @@ export default function AdminClients() {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'client' | 'affiliate'>('all');
-  const [planFilter, setPlanFilter] = useState<'all' | 'free' | 't1' | 't2'>('all');
+  const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultimate'>('all');
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -119,7 +127,7 @@ export default function AdminClients() {
     setForm({
       full_name: user.full_name ?? '',
       phone: user.phone ?? '',
-      plan: user.plan ?? 'free',
+      plan: normalizePlanKey(user.plan),
       role: normalizeRole(user.role),
     });
     setIsModalOpen(true);
@@ -179,7 +187,7 @@ export default function AdminClients() {
         name: u.full_name?.trim() || `User ${u.id.slice(0, 8)}`,
         contact: u.phone || '-',
         plan: formatPlan(u.plan),
-        rawPlan: u.plan ?? 'free',
+        rawPlan: normalizePlanKey(u.plan),
         role: normalizeRole(u.role),
         joined: new Date(u.created_at).toISOString().split('T')[0],
       })),
@@ -255,14 +263,12 @@ export default function AdminClients() {
             <select
               className="px-3 py-2 rounded-full border border-slate-200 text-sm bg-white"
               value={planFilter}
-              onChange={(e) =>
-                setPlanFilter(e.target.value as 'all' | 'free' | 't1' | 't2')
-              }
+              onChange={(e) => setPlanFilter(e.target.value as 'all' | 'free' | 'pro' | 'ultimate')}
             >
               <option value="all">All plans</option>
               <option value="free">free</option>
-              <option value="t1">t1</option>
-              <option value="t2">t2</option>
+              <option value="pro">pro</option>
+              <option value="ultimate">ultimate</option>
             </select>
           </div>
           <Button variant="primary" className="whitespace-nowrap" onClick={openCreateModal}>
@@ -427,8 +433,8 @@ export default function AdminClients() {
                     onChange={(e) => setForm((f) => ({ ...f, plan: e.target.value }))}
                   >
                     <option value="free">free</option>
-                    <option value="t1">t1</option>
-                    <option value="t2">t2</option>
+                    <option value="pro">pro</option>
+                    <option value="ultimate">ultimate</option>
                   </select>
                 </div>
                 <div>

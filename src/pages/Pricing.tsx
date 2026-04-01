@@ -75,7 +75,7 @@ export default function Pricing() {
       : `/auth/signup?redirect=${encodeURIComponent(`/paywall?plan=${planId}&billing=${billing}`)}`;
 
     
-  const ctaLabel = isAuthenticated ? "Upgrade" : "Checkout";
+  const ctaLabel = isAuthenticated ? "Upgrade" : "Subscribe";
 
   return (
     <motion.div

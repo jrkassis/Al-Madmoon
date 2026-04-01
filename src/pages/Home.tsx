@@ -18,6 +18,7 @@ import { SiF1 } from "react-icons/si";
 import { IoIosBaseball } from "react-icons/io";
 
 import { FaFutbol, FaBasketballBall } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
 
 // Then use them similarly as in the previous answer
 const containerVariants = {
@@ -91,7 +92,7 @@ const faqs = [
 
 export default function Home() {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-
+  const { isAuthenticated } = useAuth();
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -130,19 +131,23 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={itemVariants} className="hero-actions">
-                <a href="/onboarding" rel="noopener noreferrer">
+                <a
+                    href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F"
+                    target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button
-                    variant="secondary"
+                    variant="primary"
                     size="lg"
-                    className="btn-icon btn-shadow w-75 "
+                    className="btn-icon btn-shadow w-75 icon-gap rounded-full"
                   >
                     <MessageCircle size={20} />
-                    Start on WhatsApp
+                    Start for free
                   </Button>
                 </a>
-                <Link to="/how-it-works">
+                <Link to={isAuthenticated ? "/pricing" : "/auth/signup"}>
                   <Button variant="outline" size="lg" className="btn-icon w-75">
-                    See How It Works
+                    {isAuthenticated ? "Pricing Plans" : "Sign Up"}
                     <ArrowRight size={16} />
                   </Button>
                 </Link>

@@ -1,8 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import React from 'react';
+import React from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabase";
+
+interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  plan: string;
+  role: string;
+  created_at: string;
+}
 
 interface SubscriptionInfo {
   plan: string;
@@ -10,123 +21,231 @@ interface SubscriptionInfo {
   remainingPrompts: number;
   totalPrompts?: number;
   status: "active" | "cancelled" | "expired";
-  nextBillingAmount?: number;
+  monthlyUsed: number;
+  planLabel: string;
 }
 
 export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
 
   // Modal states
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  // Email form
-  const [currentEmail, setCurrentEmail] = useState("user@example.com"); // mock
-  const [newEmail, setNewEmail] = useState("");
-
-  // Password form
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
-  // Delete confirmation
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    // Mock data for preview
-    const mockData: SubscriptionInfo = {
-      plan: "Monthly",
-      renewalDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-      remainingPrompts: 87,
-      totalPrompts: 100,
-      status: "active",
-      nextBillingAmount: 20,
+    const fetchData = async () => {
+      if (!user?.id) {
+        setError("You must be signed in to view the dashboard.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setError(null);
+
+        // Fetch user profile from public.users
+        // First try with maybeSingle() to handle potential duplicates
+        const { data: profileData, error: profileError } = await supabase
+          .from("users")
+          .select("id, full_name, email, phone, plan, role, created_at")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error("Profile fetch error:", profileError);
+          // If we get a coercion error, it means there are duplicates
+          if (profileError.message.includes("coerce")) {
+            throw new Error("Duplicate user records found in database. Contact support or check CHECK_DUPLICATES.md guide.");
+          }
+          throw new Error(`Failed to load profile: ${profileError.message}`);
+        }
+
+        if (!profileData) {
+          throw new Error("User profile not found. Please ensure your account is set up in the users table.");
+        }
+
+        setProfile(profileData);
+
+        // Normalize plan
+        const normalizePlan = (plan: string | null): "free" | "pro" | "ultimate" => {
+          if (!plan || plan === "free") return "free";
+          if (plan === "t1" || plan === "pro") return "pro";
+          if (plan === "t2" || plan === "ultimate") return "ultimate";
+          return "free";
+        };
+
+        const planKey = normalizePlan(profileData.plan ?? "free");
+        const planLabel =
+          planKey === "free" ? "Free" : planKey === "pro" ? "Pro" : "Ultimate";
+
+        // Plan quotas
+        const planQuota: Record<"free" | "pro" | "ultimate", number | null> = {
+          free: null, // null = unlimited
+          pro: 300,
+          ultimate: 600,
+        };
+
+        // Fetch monthly usage from api_costs table using user_id
+        let monthlyUsed = 0;
+        const now = new Date();
+        const startOfMonth = new Date(
+          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+        );
+
+        const { count, error: countError } = await supabase
+          .from("api_costs")
+          .select("id", { count: "exact", head: true })
+          .eq("user_phone", profileData.phone?.trim() || "")
+          .gte("created_at", startOfMonth.toISOString());
+
+        if (countError) {
+          console.warn("Failed to fetch usage count:", countError);
+          monthlyUsed = 0;
+        } else {
+          monthlyUsed = count ?? 0;
+        }
+
+        const totalPrompts = planQuota[planKey];
+        const remainingPrompts =
+          totalPrompts !== null ? Math.max(0, totalPrompts - monthlyUsed) : null;
+
+        // Calculate renewal date (approximately 30 days from creation)
+        const createdDate = new Date(profileData.created_at);
+        const renewalDate = new Date(
+          createdDate.getTime() + 30 * 24 * 60 * 60 * 1000
+        );
+
+        const sub: SubscriptionInfo = {
+          plan: planLabel,
+          planLabel,
+          renewalDate: renewalDate.toISOString(),
+          remainingPrompts: remainingPrompts ?? 0,
+          totalPrompts: totalPrompts ?? undefined,
+          status: "active",
+          monthlyUsed,
+        };
+
+        setSubscription(sub);
+      } catch (e: any) {
+        console.error("Dashboard fetch error:", e);
+        setError(e?.message ?? "Failed to load your data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
-    setSubscription(mockData);
-    setLoading(false);
-  }, []);
 
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      alert("New passwords do not match.");
-      return;
-    }
-    // Mock API call
-    console.log("Change password:", { oldPassword, newPassword });
-    alert("Password changed successfully (demo).");
-    setShowPasswordModal(false);
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-  };
+    void fetchData();
+  }, [user?.id]);
 
-  const handleEmailChange = (e: React.FormEvent) => {
+  const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail) {
-      alert("Please enter a new email.");
-      return;
-    }
-    // Mock API call
-    console.log("Change email:", { newEmail });
-    setCurrentEmail(newEmail);
-    alert("Email updated successfully (demo).");
-    setShowEmailModal(false);
-    setNewEmail("");
-  };
 
-  const handleDeleteAccount = (e: React.FormEvent) => {
-    e.preventDefault();
     if (deleteConfirmation !== "DELETE") {
-      alert('Type "DELETE" to confirm.');
+      alert('Please type "DELETE" to confirm.');
       return;
     }
-    // Mock API call
-    console.log("Delete account");
-    alert("Account deleted (demo). Redirecting...");
-    localStorage.removeItem("token");
-    navigate("/");
+
+    setIsDeleting(true);
+
+    try {
+      if (!user?.id) {
+        throw new Error("User not found");
+      }
+
+      // Delete from public.users table
+      console.log("🗑️ Deleting account...");
+      const { error: deleteError } = await supabase
+        .from("users")
+        .delete()
+        .eq("id", user.id);
+
+      if (deleteError) {
+        throw new Error(`Failed to delete profile: ${deleteError.message}`);
+      }
+
+      console.log("✅ Profile deleted successfully");
+
+      // Sign out and redirect
+      await signOut();
+      navigate("/auth/signin");
+    } catch (err: any) {
+      console.error("Delete account error:", err);
+      alert(err?.message ?? "Failed to delete account. Please contact support.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth/signin");
+    try {
+      await signOut();
+      navigate("/auth/signin");
+    } catch (err) {
+      console.error("Sign out error:", err);
+    }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+          <p className="text-slate-600">Loading your dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <svg
+              className="mx-auto h-12 w-12 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4v2m0 4v2M5.707 4.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-14-14zm0 0a1 1 0 010-1.414L8.586 2a1 1 0 011.414 0l10 10a1 1 0 010 1.414l-10 10a1 1 0 01-1.414-1.414L14.586 12 5.707 3.121z"
+              />
+            </svg>
+          </div>
+          <p className="text-red-600 mb-4 font-medium">{error}</p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!subscription) {
+  if (!subscription || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-slate-600 mb-4">No active subscription found.</p>
+      <div className="min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="text-center max-w-md">
+          <p className="text-slate-600 mb-4">No subscription data found.</p>
           <button
             onClick={() => navigate("/pricing")}
             className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700"
@@ -139,7 +258,7 @@ export default function UserDashboard() {
   }
 
   const renewalDate = new Date(subscription.renewalDate);
-  const formattedRenewalDate = renewalDate.toLocaleDateString(undefined, {
+  const formattedRenewalDate = renewalDate.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -149,367 +268,426 @@ export default function UserDashboard() {
     (renewalDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
 
+  // Calculate usage percentage
+  const usagePercentage =
+    subscription.totalPrompts !== undefined
+      ? (subscription.monthlyUsed / subscription.totalPrompts) * 100
+      : 0;
+
   return (
-    <div className="pt-40 min-h-screen bg-white patternbg pb-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pt-24 pb-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl font-bold text-slate-900">Your Dashboard</h1>
-          <p className="text-slate-600 mt-2">Manage your subscription and view your usage</p>
+          <h1 className="text-4xl font-bold text-slate-900 mb-2">Your Dashboard</h1>
+          <p className="text-lg text-slate-600">
+            Welcome back, {profile.full_name || "User"}
+          </p>
         </motion.div>
 
-        {/* Subscription card – same as before */}
+        {/* Main Subscription Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100"
+          className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden mb-8"
         >
-          <div className="bg-linear-to-r from-brand-600 to-brand-700 px-6 py-4">
-            <h2 className="text-xl font-semibold text-white">Subscription Details</h2>
+          <div className="bg-gradient-to-r from-brand-50 to-slate-50 px-6 sm:px-8 py-6 border-b border-slate-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">
+                  Current Plan
+                </p>
+                <h2 className="text-3xl font-bold text-slate-900 mt-1">
+                  {subscription.plan}
+                </h2>
+              </div>
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  subscription.status === "active"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {subscription.status.charAt(0).toUpperCase() +
+                  subscription.status.slice(1)}
+              </span>
+            </div>
           </div>
-          <div className="p-6 space-y-6">
-            <div className="flex flex-wrap justify-between items-center gap-4">
-              <div>
-                <p className="text-sm text-slate-500">Current Plan</p>
-                <p className="text-2xl font-bold text-slate-900">{subscription.plan}</p>
-              </div>
-              <div>
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    subscription.status === "active"
-                      ? "bg-green-100 text-green-700"
-                      : subscription.status === "cancelled"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
-                </span>
-              </div>
-            </div>
 
-            <div className="border-t border-slate-100 pt-6">
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-sm text-slate-500">Remaining Prompts</p>
-                <p className="text-sm font-medium text-slate-700">
-                  {subscription.remainingPrompts} / {subscription.totalPrompts ?? "∞"}
-                </p>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2.5">
-                <div
-                  className="bg-brand-600 h-2.5 rounded-full"
-                  style={{
-                    width: subscription.totalPrompts
-                      ? `${(subscription.remainingPrompts / subscription.totalPrompts) * 100}%`
-                      : "100%",
-                  }}
-                ></div>
-              </div>
-              {subscription.remainingPrompts === 0 && (
-                <p className="text-sm text-red-500 mt-2">
-                  You have used all your prompts.{" "}
-                  <a href="/pricing" className="underline">
-                    Upgrade
-                  </a>{" "}
-                  to get more.
-                </p>
-              )}
-            </div>
-
-            <div className="border-t border-slate-100 pt-6">
-              <div className="flex flex-wrap justify-between gap-4">
+          <div className="p-6 sm:p-8 space-y-6">
+            {/* Usage Section */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
                 <div>
-                  <p className="text-sm text-slate-500">Renewal Date</p>
-                  <p className="text-base font-medium text-slate-900">{formattedRenewalDate}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Days Left</p>
-                  <p className="text-base font-medium text-slate-900">
-                    {daysUntilRenewal > 0 ? `${daysUntilRenewal} days` : "Expired"}
+                  <p className="text-sm font-medium text-slate-700">Monthly Usage</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {new Date().toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
-                {subscription.nextBillingAmount && (
-                  <div>
-                    <p className="text-sm text-slate-500">Next Billing Amount</p>
-                    <p className="text-base font-medium text-slate-900">
-                      ${subscription.nextBillingAmount}
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-slate-900">
+                    {subscription.monthlyUsed}
+                  </p>
+                  {subscription.totalPrompts !== undefined && (
+                    <p className="text-sm text-slate-600">
+                      of {subscription.totalPrompts} available
+                    </p>
+                  )}
+                  {subscription.totalPrompts === undefined && (
+                    <p className="text-sm text-slate-600">of ∞ available</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="relative">
+                <div className="flex h-3 bg-slate-200 rounded-full overflow-hidden">
+                  {subscription.totalPrompts !== undefined ? (
+                    <div
+                      className="bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(100, usagePercentage)}%`,
+                      }}
+                    ></div>
+                  ) : (
+                    <div className="w-0"></div>
+                  )}
+                </div>
+                {subscription.totalPrompts !== undefined && (
+                  <p className="text-xs text-slate-500 mt-2">
+                    {usagePercentage.toFixed(1)}% of monthly quota used
+                  </p>
+                )}
+              </div>
+
+              {/* Warning Messages */}
+              {subscription.totalPrompts !== undefined &&
+                subscription.remainingPrompts === 0 && (
+                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-700 font-medium">
+                      ⚠️ You've reached your monthly limit
+                    </p>
+                    <p className="text-xs text-red-600 mt-1">
+                      Your usage will reset on{" "}
+                      <strong>
+                        {new Date(
+                          new Date().getFullYear(),
+                          new Date().getMonth() + 1,
+                          1
+                        ).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </strong>
                     </p>
                   </div>
                 )}
+
+              {subscription.totalPrompts !== undefined &&
+                subscription.remainingPrompts > 0 &&
+                subscription.remainingPrompts <= 50 && (
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-700 font-medium">
+                      💡 Running low on prompts
+                    </p>
+                    <p className="text-xs text-amber-600 mt-1">
+                      You have {subscription.remainingPrompts} prompts remaining.{" "}
+                      <button
+                        onClick={() => navigate("/pricing")}
+                        className="font-semibold underline hover:no-underline"
+                      >
+                        Upgrade now
+                      </button>
+                    </p>
+                  </div>
+                )}
+            </div>
+
+            {/* Renewal Info */}
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+              <div>
+                <p className="text-sm text-slate-600">Renewal Date</p>
+                <p className="text-lg font-semibold text-slate-900 mt-1">
+                  {formattedRenewalDate}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-600">Days Remaining</p>
+                <p
+                  className={`text-lg font-semibold mt-1 ${
+                    daysUntilRenewal > 0
+                      ? "text-slate-900"
+                      : "text-red-600"
+                  }`}
+                >
+                  {daysUntilRenewal > 0 ? `${daysUntilRenewal} days` : "Expired"}
+                </p>
               </div>
             </div>
 
-            <div className="border-t border-slate-100 pt-6 flex flex-wrap gap-4">
+            {/* Action Buttons */}
+            <div className="pt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/pricing")}
-                className="px-4 py-2 bg-brand-600 text-slate-700 rounded-lg hover:bg-brand-700 transition-colors"
+                className="px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
               >
                 Manage Subscription
               </button>
               <button
-                onClick={() => navigate("/faq")}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                onClick={() => navigate("/")}
+                className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
               >
-                Help & Support
+                Back to Home
               </button>
             </div>
           </div>
         </motion.div>
 
+        {/* Info Cards */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
         >
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-            <h3 className="font-semibold text-slate-900 mb-3">How it works</h3>
-            <p className="text-sm text-slate-600">
-              Each message you send to Al Madmoon consumes one prompt. You can upgrade your plan at any time.
-            </p>
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <svg
+                  className="w-6 h-6 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">How It Works</h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Each message you send consumes one prompt from your monthly quota.
+                  Usage resets on the 1st of each month.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-100">
-            <h3 className="font-semibold text-slate-900 mb-3">Need more prompts?</h3>
-            <p className="text-sm text-slate-600">
-              Upgrade to a higher tier or purchase additional prompts separately.
-            </p>
-            <button
-              onClick={() => navigate("/pricing")}
-              className="mt-4 text-brand-600 text-sm font-medium hover:underline"
-            >
-              View plans →
-            </button>
+
+          <div className="bg-white rounded-xl shadow border border-slate-200 p-6">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <svg
+                  className="w-6 h-6 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-900">Need More?</h3>
+                <p className="text-sm text-slate-600 mt-1">
+                  Upgrade to Pro or Ultimate for higher monthly limits and exclusive features.
+                </p>
+                <button
+                  onClick={() => navigate("/pricing")}
+                  className="mt-3 text-brand-600 text-sm font-semibold hover:text-brand-700"
+                >
+                  View all plans →
+                </button>
+              </div>
+            </div>
           </div>
         </motion.div>
 
-        {/* Settings Section */}
+        {/* Account Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8"
+          className="space-y-6 mb-8"
         >
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h2 className="text-lg font-semibold text-slate-900">Account Settings</h2>
-              <p className="text-sm text-slate-500">Manage your account preferences</p>
+          {/* Profile Info */}
+          <div className="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+            <div className="px-6 sm:px-8 py-4 border-b border-slate-200 bg-slate-50">
+              <h2 className="text-lg font-semibold text-slate-900">Account Information</h2>
+              <p className="text-sm text-slate-600 mt-1">Your profile details</p>
             </div>
-            <div className="p-6 space-y-4">
-              {/* Change Password */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="p-6 sm:p-8 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <p className="font-medium text-slate-900">Change Password</p>
-                  <p className="text-sm text-slate-500">Update your password to keep your account secure</p>
+                  <p className="text-sm text-slate-600">Full Name</p>
+                  <p className="text-base font-medium text-slate-900 mt-1">
+                    {profile.full_name || "Not set"}
+                  </p>
                 </div>
-                <button
-                  onClick={() => setShowPasswordModal(true)}
-                  className="px-4 py-2 text-sm border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Update
-                </button>
-              </div>
-
-              {/* Change Email with current email visible */}
-              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="font-medium text-slate-900">Email Address</p>
-                  <p className="text-sm text-slate-500">Current email: {currentEmail}</p>
+                  <p className="text-sm text-slate-600">Email</p>
+                  <p className="text-base font-medium text-slate-900 mt-1 break-all">
+                    {profile.email || "Not set"}
+                  </p>
                 </div>
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="px-4 py-2 text-sm border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Update
-                </button>
+                <div>
+                  <p className="text-sm text-slate-600">Phone</p>
+                  <p className="text-base font-medium text-slate-900 mt-1">
+                    {profile.phone || "Not set"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Account Role</p>
+                  <p className="text-base font-medium text-slate-900 mt-1 capitalize">
+                    {profile.role || "User"}
+                  </p>
+                </div>
               </div>
+            </div>
+          </div>
 
-              {/* Notification Preferences */}
-
-
+          {/* Settings Section */}
+          <div className="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
+            <div className="px-6 sm:px-8 py-4 border-b border-slate-200 bg-slate-50">
+              <h2 className="text-lg font-semibold text-slate-900">Account Settings</h2>
+              <p className="text-sm text-slate-600 mt-1">Manage your account</p>
+            </div>
+            <div className="p-6 sm:p-8 space-y-4">
               {/* Delete Account */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4 border-b border-slate-200 last:border-b-0">
                 <div>
-                  <p className="font-medium text-slate-900">Delete Account</p>
-                  <p className="text-sm text-slate-500">Permanently delete your account and all data</p>
+                  <p className="font-semibold text-slate-900">Delete Account</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Permanently delete your account and all associated data
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="px-4 py-2 text-sm border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
-          className="mt-6 mb-16"
-        >
-          <div className="bg-slate-50 rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-slate-900">Session</h3>
-              <p className="text-sm text-slate-500">Sign out from this device.</p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="px-4 py-2 bg-red-600 text-slate-700 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Change Password Modal */}
-      {showPasswordModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Change Password</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
-                <input
-                  type="password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-brand-600 text-black rounded-lg hover:bg-brand-700"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Change Email Modal */}
-      {showEmailModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-4">Change Email Address</h2>
-            <form onSubmit={handleEmailChange} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Current Email</label>
-                <input
-                  type="email"
-                  value={currentEmail}
-                  disabled
-                  className="w-full px-4 py-2 border border-slate-200 bg-slate-50 rounded-lg text-slate-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">New Email</label>
-                <input
-                  type="email"
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="Enter new email address"
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowEmailModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-brand-600 text-black rounded-lg hover:bg-brand-700"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Account Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h2 className="text-xl font-semibold text-slate-900 mb-2">Delete Account</h2>
-            <p className="text-slate-600 mb-4">Are you sure you want to delete your account? This action is permanent and cannot be undone.</p>
-            <form onSubmit={handleDeleteAccount} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Type <span className="font-mono font-bold">DELETE</span> to confirm
-                </label>
-                <input
-                  type="text"
-                  value={deleteConfirmation}
-                  onChange={(e) => setDeleteConfirmation(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="DELETE"
-                />
-              </div>
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowDeleteModal(false)}
-                  className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-red-600 text-black rounded-lg hover:bg-red-700"
+                  className="px-4 py-2 text-sm border border-red-300 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors font-medium whitespace-nowrap"
                 >
                   Delete Account
                 </button>
               </div>
-            </form>
+
+              {/* Sign Out */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4">
+                <div>
+                  <p className="font-semibold text-slate-900">Sign Out</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Sign out from this device
+                  </p>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm whitespace-nowrap"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </div>
           </div>
+        </motion.div>
+      </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8"
+          >
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+              <svg
+                className="w-6 h-6 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-semibold text-slate-900 mb-2 text-center">
+              Delete Account
+            </h2>
+            <p className="text-slate-600 text-center mb-6">
+              This action is <strong>permanent</strong> and cannot be undone. All your data
+              will be deleted.
+            </p>
+
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Type <span className="font-mono font-bold text-red-600">DELETE</span> to
+                  confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value.toUpperCase())}
+                  placeholder="DELETE"
+                  disabled={isDeleting}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-colors disabled:bg-slate-100 disabled:cursor-not-allowed"
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeleteConfirmation("");
+                  }}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    isDeleting || deleteConfirmation !== "DELETE"
+                  }
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete Account"
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
         </div>
       )}
-
     </div>
   );
 }

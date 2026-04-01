@@ -161,16 +161,11 @@ export default function SignUp() {
       if (signInError) {
         setErrorMessage(
           signInError.message ||
-            "Account created, but automatic sign-in failed. Please sign in manually.",
+          "Account created, but automatic sign-in failed. Please sign in manually.",
         );
         return;
       }
 
-      const redirectPath = searchParams.get("redirect");
-      const safeRedirectPath =
-        redirectPath && redirectPath.startsWith("/") ? redirectPath : null;
-      const targetPath =
-        safeRedirectPath ?? getDashboardPathForRole(data?.role ?? "client");
       setSuccessMessage("Account created successfully.");
       setFormData({
         name: "",
@@ -181,7 +176,7 @@ export default function SignUp() {
         confirmPassword: "",
       });
       setAcceptedTerms(false);
-      navigate(targetPath);
+      navigate("/pricing");
     } catch (invokeError) {
       setIsSubmitting(false);
       const message =

@@ -76,7 +76,7 @@ export function Layout() {
                   </Button>
                 </Link>
 
-                <Link to="/onboarding">
+                <Link to="/auth/signup">
                   <Button variant="primary" className="icon-gap rounded-full">
                     <LogIn size={16} />
                     Get Started

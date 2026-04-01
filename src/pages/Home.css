@@ -164,7 +164,7 @@
     color: transparent;
     background-clip: text;
     -webkit-background-clip: text;
-    background-image: linear-gradient(to right, var(--color-brand-600), var(--color-brand-400));
+    background-image: linear-gradient(to right, var(--color-brand-400), var(--color-brand-600));
 }
 
 .hero-subtitle {
@@ -1142,8 +1142,9 @@
     border-color: rgba(255, 255, 255, 0.8);
 }
 
-/* Fix "Start on WhatsApp" button visibility in hero */
-.hero-background .hero-actions a:first-child button {
+/* Fix hero first CTA when it's outline/secondary (do not affect primary) */
+.hero-background .hero-actions a:first-child button.btn-outline,
+.hero-background .hero-actions a:first-child button.btn-secondary {
     background-color: rgba(255, 255, 255, 0.4) !important;
     border-color: rgba(255, 255, 255, 0.4) !important;
     color: #fff !important;
@@ -1152,7 +1153,8 @@
     transition: background 0.25s, border 0.25s, transform 0.15s;
 }
 
-.hero-background .hero-actions a:first-child button:hover {
+.hero-background .hero-actions a:first-child button.btn-outline:hover,
+.hero-background .hero-actions a:first-child button.btn-secondary:hover {
     background-color: rgba(255, 255, 255, 0.5) !important;
     border-color: rgba(255, 255, 255, 0.7) !important;
     transform: scale(1.02);
