@@ -85,8 +85,9 @@ export default function UserDashboard() {
           planKey === "free" ? "Free" : planKey === "pro" ? "Pro" : "Ultimate";
 
         // Plan quotas
-        const planQuota: Record<"free" | "pro" | "ultimate", number | null> = {
-          free: null, // null = unlimited
+        // Message quotas per month by plan
+        const planQuota: Record<"free" | "pro" | "ultimate", number> = {
+          free: 3,
           pro: 300,
           ultimate: 600,
         };
@@ -112,8 +113,7 @@ export default function UserDashboard() {
         }
 
         const totalPrompts = planQuota[planKey];
-        const remainingPrompts =
-          totalPrompts !== null ? Math.max(0, totalPrompts - monthlyUsed) : null;
+        const remainingPrompts = Math.max(0, totalPrompts - monthlyUsed);
 
         // Calculate renewal date (approximately 30 days from creation)
         const createdDate = new Date(profileData.created_at);
@@ -125,8 +125,8 @@ export default function UserDashboard() {
           plan: planLabel,
           planLabel,
           renewalDate: renewalDate.toISOString(),
-          remainingPrompts: remainingPrompts ?? 0,
-          totalPrompts: totalPrompts ?? undefined,
+          remainingPrompts,
+          totalPrompts,
           status: "active",
           monthlyUsed,
         };
@@ -275,7 +275,7 @@ export default function UserDashboard() {
       : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pt-24 pb-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 pt-24 pb-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <motion.div
@@ -297,7 +297,7 @@ export default function UserDashboard() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden mb-8"
         >
-          <div className="bg-gradient-to-r from-brand-50 to-slate-50 px-6 sm:px-8 py-6 border-b border-slate-200">
+          <div className="bg-linear-to-r from-brand-50 to-slate-50 px-6 sm:px-8 py-6 border-b border-slate-200">
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-slate-600 uppercase tracking-wide">
@@ -353,7 +353,7 @@ export default function UserDashboard() {
                 <div className="flex h-3 bg-slate-200 rounded-full overflow-hidden">
                   {subscription.totalPrompts !== undefined ? (
                     <div
-                      className="bg-gradient-to-r from-brand-500 to-brand-600 rounded-full transition-all duration-500"
+                      className="bg-linear-to-r from-red-300 to-red-600 rounded-full transition-all duration-600"
                       style={{
                         width: `${Math.min(100, usagePercentage)}%`,
                       }}
@@ -438,7 +438,7 @@ export default function UserDashboard() {
             <div className="pt-4 flex flex-wrap gap-3">
               <button
                 onClick={() => navigate("/pricing")}
-                className="px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
+                className="px-5 py-2.5 bg-brand-600 text-black rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
               >
                 Manage Subscription
               </button>
@@ -672,7 +672,7 @@ export default function UserDashboard() {
                   disabled={
                     isDeleting || deleteConfirmation !== "DELETE"
                   }
-                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-black rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isDeleting ? (
                     <>
