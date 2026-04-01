@@ -35,7 +35,7 @@ function useLemonSqueezy(onSuccess) {
 
   useEffect(() => {
     if (document.querySelector('script[src="https://app.lemonsqueezy.com/js/lemon.js"]')) {
-      window.createLemonSqueezy?.();
+      //window.createLemonSqueezy?.();
       setReady(true);
       return;
     }
@@ -43,18 +43,26 @@ function useLemonSqueezy(onSuccess) {
     script.src = "https://app.lemonsqueezy.com/js/lemon.js";
     script.defer = true;
     script.onload = () => {
-      window.createLemonSqueezy?.();
+      // @ts-ignore
       window.LemonSqueezy?.Setup({
         eventHandler: (e) => {
           if (e.event === "Checkout.Success") onSuccess();
         },
       });
-      setReady(true);
     };
-    document.body.appendChild(script);
-  }, [onSuccess]);
-
-  return ready;
+      script.onload = () => {
+        // @ts-ignore
+        window.LemonSqueezy?.Setup({
+          eventHandler: (e) => {
+            if (e.event === "Checkout.Success") onSuccess();
+          },
+        });
+        setReady(true);
+      };
+      document.body.appendChild(script);
+    }, [onSuccess]);
+  
+    return ready;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -120,7 +128,8 @@ export default function Paywall() {
   const handleLemonSqueezy = () => {
     setMethod("ls");
     const url = isAnnual ? plan.lsAnnualUrl : plan.lsMonthlyUrl;
-    window.LemonSqueezy?.Url.Open(url);
+    // @ts-ignore: LemonSqueezy might not be typed on window
+    (window as any).LemonSqueezy?.Url?.Open(url);
   };
 
   const handleWhish = async () => {
