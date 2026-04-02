@@ -92,12 +92,12 @@ export default function partnerReferrals() {
         let ownCode: string | null = null;
         const ownProfile = await supabase
           .from('users')
-          .select('partner_code')
+          .select('affiliate_code')
           .eq('id', user.id)
           .maybeSingle();
         if (!ownProfile.error) {
-          const profile = ownProfile.data as { partner_code?: string | null } | null;
-          ownCode = String(profile?.partner_code ?? '')
+          const profile = ownProfile.data as { affiliate_code?: string | null } | null;
+          ownCode = String(profile?.affiliate_code ?? '')
             .trim()
             .toUpperCase();
           if (!ownCode) ownCode = null;

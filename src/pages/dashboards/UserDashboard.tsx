@@ -595,7 +595,7 @@ export default function UserDashboard() {
                 </div>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm whitespace-nowrap"
+                  className="px-4 py-2 bg-slate-900 text-black rounded-lg hover:bg-slate-800 transition-colors font-medium text-sm whitespace-nowrap"
                 >
                   Sign Out
                 </button>

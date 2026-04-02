@@ -18,6 +18,11 @@ export interface partnerFormData {
   fullName: string;
   email: string;
   whatsappNumber: string;
+  phoneCountryCode: string;
+  password: string;
+  confirmPassword: string;
+  acceptedTerms: boolean;
+  affiliateCode: string;
   website: string;
   socialProfiles: string;
   audienceSize: string;
@@ -309,7 +314,7 @@ export default function BecomePartner() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Link to="/partner/apply" className="af-btn af-btn--primary af-btn--lg">
+            <Link to="/become-a-partner/apply" className="af-btn af-btn--primary af-btn--lg">
               Start Now <ArrowRight size={18} />
             </Link>
           </motion.div>
@@ -435,7 +440,7 @@ export default function BecomePartner() {
           <p className="af-cta-section__sub">
             Apply in 5 minutes. Get your link instantly. Start earning immediately.
           </p>
-          <Link to="/partner/apply" className="af-btn af-btn--primary af-btn--xl">
+          <Link to="/become-a-partner/apply" className="af-btn af-btn--primary af-btn--xl">
             Get Started <ArrowRight size={20} />
           </Link>
         </AnimatedSection>
@@ -503,7 +508,7 @@ export default function BecomePartner() {
           <p className="af-cta-section__sub">
             Apply in 5 minutes. Get your link instantly. Start earning immediately.
           </p>
-          <Link to="/partner/apply" className="af-btn af-btn--primary af-btn--xl">
+          <Link to="/become-a-partner/apply" className="af-btn af-btn--primary af-btn--xl">
             Get Commission Now <ArrowRight size={20} />
           </Link>
           <p className="af-cta-section__fine">

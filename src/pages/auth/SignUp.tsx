@@ -166,6 +166,37 @@ export default function SignUp() {
         return;
       }
 
+      // Persist referral code to public.users.ref_code after auth user exists
+      try {
+        if (referralCodeToSave) {
+          const {
+            data: { user: currentUser },
+          } = await supabase.auth.getUser();
+          const currentUserId = currentUser?.id;
+          if (currentUserId) {
+            await supabase
+              .from("users")
+              .update({ ref_code: referralCodeToSave })
+              .eq("id", currentUserId);
+
+            // Also resolve the partner by affiliate_code and set is_referred
+            const { data: partnerProfile, error: partnerErr } = await supabase
+              .from("users")
+              .select("id")
+              .eq("affiliate_code", referralCodeToSave)
+              .maybeSingle();
+            if (!partnerErr && partnerProfile?.id) {
+              await supabase
+                .from("users")
+                .update({ is_referred: partnerProfile.id })
+                .eq("id", currentUserId);
+            }
+          }
+        }
+      } catch {
+        // Non-blocking; ignore write failure here
+      }
+
       setSuccessMessage("Account created successfully.");
       setFormData({
         name: "",

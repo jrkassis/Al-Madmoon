@@ -30,6 +30,8 @@ import PartnerSettings from "./pages/partner/Settings";
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import Logout from "../src/pages/auth/Logout";
 import BecomePartner from "./pages/onboarding-partners/BecomePartner";
+import PartnerOnboarding from "./pages/onboarding-partners/PartnerOnboarding";
+import PartnerSuccess from "./pages/onboarding-partners/PartnerSuccess";
 
 export default function App() {
   return (
@@ -46,39 +48,42 @@ export default function App() {
           <Route path="become-a-partner" element={<BecomePartner />} />
           <Route path="*" element={<ErrorPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
+          {/* Partner onboarding - apply form */}
+        <Route path="/become-a-partner/apply" element={<PartnerOnboarding />} />
+        <Route path="/become-a-partner/success" element={<PartnerSuccess />} />
 
-        <Route
-          path="/partner"
-          element={
-            <ProtectedRoute allowedRoles={["partner"]}>
-              <PartnerReferrals />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner/referrals"
-          element={
-            <ProtectedRoute allowedRoles={["partner"]}>
-              <PartnerReferrals />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner/withdraw"
-          element={
-            <ProtectedRoute allowedRoles={["partner"]}>
-              <PartnerWithdraw />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner/settings"
-          element={
-            <ProtectedRoute allowedRoles={["partner"]}>
-              <PartnerSettings />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/partner"
+            element={
+              <ProtectedRoute allowedRoles={["partner"]}>
+                <PartnerReferrals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/referrals"
+            element={
+              <ProtectedRoute allowedRoles={["partner"]}>
+                <PartnerReferrals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/withdraw"
+            element={
+              <ProtectedRoute allowedRoles={["partner"]}>
+                <PartnerWithdraw />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partner/settings"
+            element={
+              <ProtectedRoute allowedRoles={["partner"]}>
+                <PartnerSettings />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin"
             element={
@@ -139,7 +144,6 @@ export default function App() {
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/support" element={<SupportPage />} />
-
 
         <Route
           path="/logout"
