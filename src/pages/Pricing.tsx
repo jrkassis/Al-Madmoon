@@ -33,7 +33,7 @@ export default function Pricing() {
           { label: "Highest Quality recommendations Daily (Signals)", available: false },
           { label: "Wider Sports Coverage + Priority Updates", available: false },
         ],
-        badge: "Most Popular",
+        badge: "",
       },
       {
         id: "ultimate",
@@ -116,7 +116,7 @@ export default function Pricing() {
           const price = computePriceLabel(plan.monthlyPrice, (plan as any).annualPrice);
           return (
             <div key={plan.id} className="pricing-card small">
-              <div className="pricing-badge">{plan.badge}</div>
+              {plan.badge && <div className="pricing-badge">{plan.badge}</div>}
 
               <div className="pricing-card-header">
                 <div className="pricing-icon">{plan.icon}</div>

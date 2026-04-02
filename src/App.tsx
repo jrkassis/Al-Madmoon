@@ -10,7 +10,7 @@ import ErrorPage from "./pages/ErrorPage";
 import AdminMessages from "./pages/admin/AdminMessages";
 import { PrivacyPage } from "./pages/PrivacyPage";
 import { TermsPage } from "./pages/TermsPage";
-import { SupportPage } from "./pages/SupportPage";
+
 // Auth pages
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
@@ -143,7 +143,6 @@ export default function App() {
         {/* Dashboard routes - they have their own layout (DashboardLayout) */}
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
-        <Route path="/support" element={<SupportPage />} />
 
         <Route
           path="/logout"

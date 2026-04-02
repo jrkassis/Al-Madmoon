@@ -186,7 +186,7 @@ export default function Paywall() {
           >
             <div className="pw-header">
               <Link to="/pricing" className="pw-back">
-                <ArrowLeft size={14} /> Back to pricing
+                <ArrowLeft size={14} /> Back
               </Link>
 
               {/* Plan summary pill */}
@@ -205,9 +205,11 @@ export default function Paywall() {
 
               {/* Lemon Squeezy */}
               <button
-                className={`pw-method ${activeMethod === "ls" ? "pw-method--active" : ""} ${!lsReady ? "pw-method--disabled" : ""}`}
+                //className={`pw-method ${activeMethod === "ls" ? "pw-method--active" : ""} ${!lsReady ? "pw-method--disabled" : ""}`}
+                className={`pw-method pw-method--disabled`}
                 onClick={handleLemonSqueezy}
-                disabled={!lsReady}
+                // disabled={!lsReady}
+                disabled
               >
                 <span className="pw-method__icon pw-method__icon--ls">
                   <CreditCard size={20} />
@@ -234,9 +236,9 @@ export default function Paywall() {
                   <span className="pw-method__name">Whish Money</span>
                   <span className="pw-method__desc">Pay instantly with your Whish wallet balance</span>
                 </span>
-                <span className="pw-method__tag pw-method__tag--ls">
+                {/* <span className="pw-method__tag pw-method__tag--ls">
                   {whishLoading ? <Loader2 size={13} className="pw-spin" /> : "Local"}
-                </span>
+                </span> */}
               </button>
             </div>
 
