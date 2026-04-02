@@ -183,6 +183,15 @@ export default function AdminAnalytics() {
           <span className="text-xs text-slate-400">Last updated: {new Date().toLocaleTimeString()}</span>
         </div>
 
+        {/* ── Revenue ── */}
+        <SectionTitle>Revenue</SectionTitle>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-10">
+          <KpiCard label="Est. MRR" value={`$${d.estimatedMRR.toFixed(2)}`} sub="Monthly recurring" accent={C.emerald} />
+          <KpiCard label="Est. ARR" value={`$${d.estimatedARR.toFixed(2)}`} sub="Annualised" accent={C.blue} />
+          <KpiCard label="ARPU" value={`$${d.arpu.toFixed(2)}`} sub="Avg revenue / paid user" accent={C.violet} />
+          <KpiCard label="Gross Margin" value={`${d.grossMarginPct.toFixed(1)}%`} sub="MRR − cost this month" accent={d.grossMarginPct > 50 ? C.emerald : C.rose} />
+        </div>
+
         {/* ── Growth ── */}
         <SectionTitle>Growth</SectionTitle>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">
@@ -191,15 +200,6 @@ export default function AdminAnalytics() {
           <KpiCard label="Paid Users" value={String(d.paidUsers)} sub={`T1: ${d.t1Users} · T2: ${d.t2Users}`} accent={C.violet} />
           <KpiCard label="Conversion Rate" value={`${d.conversionRate.toFixed(1)}%`} sub="Free → paid" accent={C.amber} />
           <KpiCard label="Daily Active Users" value={String(d.dailyActiveUsers)} sub={`Power users: ${d.powerUsers}`} accent={C.rose} />
-        </div>
-
-        {/* ── Revenue ── */}
-        <SectionTitle>Revenue</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-10">
-          <KpiCard label="Est. MRR" value={`$${d.estimatedMRR.toFixed(2)}`} sub="Monthly recurring" accent={C.emerald} />
-          <KpiCard label="Est. ARR" value={`$${d.estimatedARR.toFixed(2)}`} sub="Annualised" accent={C.blue} />
-          <KpiCard label="ARPU" value={`$${d.arpu.toFixed(2)}`} sub="Avg revenue / paid user" accent={C.violet} />
-          <KpiCard label="Gross Margin" value={`${d.grossMarginPct.toFixed(1)}%`} sub="MRR − cost this month" accent={d.grossMarginPct > 50 ? C.emerald : C.rose} />
         </div>
 
         {/* ── API Costs ── */}

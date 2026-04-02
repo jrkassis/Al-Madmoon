@@ -296,7 +296,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             </div>
           </nav>
         </div>
-        <main className="p-4 md:pt-20 mt-16">{children}</main>
+        <main className="p-4 md:pt-20 mt-20">{children}</main>
       </div>
     </div>
   );
