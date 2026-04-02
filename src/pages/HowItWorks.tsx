@@ -184,7 +184,7 @@ export default function HowItWorks() {
         <a href="/onboarding" rel="noopener noreferrer">
           <Button variant="ghost" size="lg" className="btn-icon cta-btn">
             <MessageCircle size={16} />
-            Start on WhatsApp
+            Start for free
           </Button>
         </a>
       </motion.div>

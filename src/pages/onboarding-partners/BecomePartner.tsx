@@ -404,7 +404,7 @@ export default function BecomePartner() {
       </section>
 
       {/* ── EARNINGS CALCULATOR ──────────────────────────────────────────── */}
-      <section className="af-section af-section--brand">
+      <section className="af-section-5 af-section--brand">
         <div className="af-container af-container--narrow">
           <AnimatedSection className="af-section-header af-section-header--light">
             <p className="af-section-eyebrow af-section-eyebrow--light">Earnings calculator</p>

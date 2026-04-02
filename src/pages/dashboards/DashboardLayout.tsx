@@ -262,17 +262,41 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64 pt-15">
-        <div className="flex items-center justify-between px-4 py-3 ">
-          {/* MOBILE HAMBURGER */}
-          <button
-            className="lg:hidden text-blue-400"
-            onClick={() => setSidebarOpen(true)}
-          >
-            See all pages
-          </button>
+      <div className="lg:pl-64 pt-15 mt-3">
+        {/* Mobile top navbar (tabs) */}
+        {/* Blur everything above the tab bar on mobile */}
+        <div className="lg:hidden fixed top-0 left-0 right-0 h-20 z-20 pointer-events-none backdrop-blur bg-white/80" />
+        <div className="lg:hidden fixed top-20 left-0 right-0 z-30 bg-white/80 backdrop-blur border-b border-slate-200">
+          <nav className="flex items-center gap-2 overflow-x-auto px-4 py-3 no-scrollbar">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`whitespace-nowrap inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-slate-200 text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              );
+            })}
+            <div className="ml-auto flex items-center">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="whitespace-nowrap inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors bg-slate-100 text-slate-700 hover:bg-slate-200"
+              >
+                Sign out
+              </button>
+            </div>
+          </nav>
         </div>
-        <main className="p-4 md:pt-20 ">{children}</main>
+        <main className="p-4 md:pt-20 mt-16">{children}</main>
       </div>
     </div>
   );

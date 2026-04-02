@@ -159,9 +159,9 @@ export default function partnerReferrals() {
 
   return (
     <DashboardLayout role="partner">
-      <div className="max-w-10/12 mx-auto px-6">
+      <div className="sm:max-w-10/12 max-w-max mx-auto px-0 sm:px-6">
         <h1 className="text-2xl font-bold text-slate-900 mb-6">Referral Analytics</h1>
-
+      <div className="mb-6"></div>
         {error && (
           <div className="glass-panel p-4 mb-4 text-sm text-red-600">{error}</div>
         )}
@@ -183,9 +183,9 @@ export default function partnerReferrals() {
               Copy URL
             </button>
           </div>
-          <p className="text-xs text-slate-500 mt-2 break-all">
+          {/* <p className="text-xs text-slate-500 mt-2 break-all">
             {partnerCode ? referralUrl : 'Add your referral code in your profile to enable URL copy.'}
-          </p>
+          </p> */}
           {copyNotice && <p className="text-xs text-slate-500 mt-1">{copyNotice}</p>}
         </div>
 

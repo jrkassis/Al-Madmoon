@@ -345,7 +345,7 @@ export default function SignUp() {
       </div>
 
       {/* Right Side - Sign Up Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-14 lg:mt-0">
         <div className="w-full max-w-md">
           {/* White Card Container */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-15 patternbg">

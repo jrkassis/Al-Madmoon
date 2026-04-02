@@ -11,8 +11,17 @@
   padding: 0 24px;
 }
 
+.af-container-5 {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 96px 24px;
+}
+
 @media screen and (max-width: 768px) {
   .af-container {
+    padding: 0 0px;
+  }
+  .af-container-5 {
     padding: 0 0px;
   }
 }
@@ -23,6 +32,14 @@
 
 .af-section {
   padding: 96px 0;
+}
+.af-section-5 {
+  padding: 96px 0;
+}
+@media (max-width: 768px) {
+  .af-section-5 {
+    padding: 64px 0;
+  }
 }
 
 .af-section--white   { background: #ffffff; }
@@ -47,6 +64,12 @@
 .af-section-header {
   text-align: center;
   margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .af-section-header {
+    margin-bottom: 64px;
+  }
 }
 
 .af-section-eyebrow {
@@ -912,5 +935,5 @@
 
 @media (max-width: 768px) {
   .af-cta-section__title { font-size: 32px; }
-  .af-section { padding: 72px 0; }
+  .af-section { padding: 72px 5%; }
 }

@@ -119,7 +119,7 @@ export default function SignIn() {
       </div>
 
       {/* Left Side - Sign In Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 relative z-10 mt-14 lg:mt-0">
         <div className="w-full max-w-md ">
           {/* White Card Container */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-10 patternbg">
@@ -149,6 +149,7 @@ export default function SignIn() {
                     type="text"
                     id="identifier"
                     name="identifier"
+                    placeholder=""
                     value={formData.identifier}
                     onChange={handleChange}
                     required

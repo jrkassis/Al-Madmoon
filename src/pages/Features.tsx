@@ -217,7 +217,7 @@ export default function Features() {
         <a href="https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F" target="_blank" rel="noopener noreferrer">
           <Button variant="ghost" size="lg" className="btn-icon btn-shadow" style={{ display: 'inline-flex' }}>
             <MessageCircle size={20} />
-            Start on WhatsApp
+            Start for free
           </Button>
         </a>
       </motion.div>

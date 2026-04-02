@@ -176,7 +176,7 @@ export default function AdminAnalytics() {
 
   return (
     <DashboardLayout role="admin">
-      <div className="max-w-10/12 mx-auto px-6">
+      <div className="sm:max-w-10/12 max-w-max mx-auto px-0 sm:px-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Analytics</h1>

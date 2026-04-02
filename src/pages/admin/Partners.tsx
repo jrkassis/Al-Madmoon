@@ -208,7 +208,7 @@ export default function AdminPartners() {
 
   return (
     <DashboardLayout role="admin">
-      <div className="max-w-10/12 mx-auto px-6">
+      <div className="sm:max-w-10/12 max-w-max mx-auto px-0 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             partners
