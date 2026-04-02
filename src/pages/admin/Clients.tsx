@@ -8,7 +8,7 @@ type UserRow = {
   full_name: string | null;
   phone: string | null;
   plan: string | null;
-  role: 'admin' | 'client' | 'affiliate' | null;
+  role: 'admin' | 'client' | 'partner' | null;
   created_at: string;
 };
 
@@ -18,7 +18,7 @@ type ClientView = {
   contact: string;
   plan: string;
   rawPlan: string | null;
-  role: 'admin' | 'client' | 'affiliate';
+  role: 'admin' | 'client' | 'partner';
   joined: string;
 };
 
@@ -26,7 +26,7 @@ type UserForm = {
   full_name: string;
   phone: string;
   plan: string;
-  role: 'admin' | 'client' | 'affiliate';
+  role: 'admin' | 'client' | 'partner';
 };
 
 function normalizePlanKey(plan: string | null): 'free' | 'pro' | 'ultimate' {
@@ -44,8 +44,8 @@ function formatPlan(plan: string | null): string {
   return 'Ultimate';
 }
 
-function normalizeRole(role: UserRow['role']): 'admin' | 'client' | 'affiliate' {
-  if (role === 'admin' || role === 'affiliate') return role;
+function normalizeRole(role: UserRow['role']): 'admin' | 'client' | 'partner' {
+  if (role === 'admin' || role === 'partner') return role;
   return 'client';
 }
 
@@ -53,7 +53,7 @@ export default function AdminClients() {
   const PAGE_SIZE = 10;
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'client' | 'affiliate'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'client' | 'partner'>('all');
   const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'ultimate'>('all');
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -252,12 +252,12 @@ export default function AdminClients() {
               className="px-3 py-2 rounded-full border border-slate-200 text-sm bg-white"
               value={roleFilter}
               onChange={(e) =>
-                setRoleFilter(e.target.value as 'all' | 'admin' | 'client' | 'affiliate')
+                setRoleFilter(e.target.value as 'all' | 'admin' | 'client' | 'partner')
               }
             >
               <option value="all">All roles</option>
               <option value="client">client</option>
-              <option value="affiliate">affiliate</option>
+              <option value="partner">partner</option>
               <option value="admin">admin</option>
             </select>
             <select
@@ -311,7 +311,7 @@ export default function AdminClients() {
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
                           client.role === 'admin'
                             ? 'bg-violet-50 text-violet-700'
-                            : client.role === 'affiliate'
+                            : client.role === 'partner'
                             ? 'bg-amber-50 text-amber-700'
                             : 'bg-blue-50 text-blue-700'
                         }`}
@@ -445,12 +445,12 @@ export default function AdminClients() {
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
-                        role: e.target.value as 'admin' | 'client' | 'affiliate',
+                        role: e.target.value as 'admin' | 'client' | 'partner',
                       }))
                     }
                   >
                     <option value="client">client</option>
-                    <option value="affiliate">affiliate</option>
+                    <option value="partner">partner</option>
                     <option value="admin">admin</option>
                   </select>
                 </div>
