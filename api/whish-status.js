@@ -10,6 +10,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  // Guard: required environment variables
+  if (!process.env.WHISH_CHANNEL || !process.env.WHISH_SECRET) {
+    console.error("[whish-status] Missing WHISH_CHANNEL or WHISH_SECRET in environment");
+    return res.status(500).json({
+      error: "Payment processor credentials are not configured.",
+    });
+  }
+
   const { externalId } = req.body;
 
   if (!externalId) {
@@ -38,6 +46,11 @@ export default async function handler(req, res) {
     const data = await whishRes.json();
 
     if (!data.status) {
+      console.warn("[whish-status] Whish error", {
+        httpStatus: whishRes.status,
+        code: data.code,
+        dialog: data.dialog,
+      });
       return res.status(502).json({
         error: "Whish API returned failure",
         code: data.code,

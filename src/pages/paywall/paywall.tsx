@@ -145,7 +145,8 @@ export default function Paywall() {
       const data = await res.json();
 
       if (!res.ok || !data.collectUrl) {
-        throw new Error(data.error ?? "Failed to start Whish payment.");
+        const dialogMsg = data?.dialog?.message || data?.error;
+        throw new Error(dialogMsg ?? "Failed to start Whish payment.");
       }
 
       startPolling(externalId);
