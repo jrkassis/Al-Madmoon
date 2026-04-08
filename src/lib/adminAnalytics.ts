@@ -67,7 +67,9 @@ export type AdminAnalytics = {
 // ---------------------------------------------------------------------------
 const PLAN_PRICE: Record<string, number> = {
   t1: 19.99,
+  pro: 19.99,
   t2: 34.99,
+  ultimate: 34.99,
 };
 
 // ---------------------------------------------------------------------------
@@ -260,16 +262,54 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
   const dailyActiveUsers = users?.filter((u) => u.last_message_date === todayStr).length ?? 0;
   const powerUsers = users?.filter((u) => (u.total_messages ?? 0) >= 20).length ?? 0;
 
-  // ── 3. Revenue ─────────────────────────────────────────────────────────────
-  const estimatedMRR = (users ?? []).reduce((s, u) => s + (PLAN_PRICE[u.plan] ?? 0), 0);
-  const estimatedARR = estimatedMRR * 12;
-  const arpu = paidUsers > 0 ? estimatedMRR / paidUsers : 0;
+  // ── 3. Revenue (from successful payments) ──────────────────────────────────
+  const { data: payments, error: paymentsError } = await supabase
+    .from('payments')
+    .select('user_id, amount, billing, status, created_at');
+  if (paymentsError) throw paymentsError;
 
-  // Revenue growth series — approximate by counting paid users per day
-  const revenueGrowthSeries: DailySeries[] = userGrowthSeries.map((pt) => {
-    // rough: paid ratio * MRR proportional to cumulative users
-    const ratio = totalUsers > 0 ? paidUsers / totalUsers : 0;
-    return { date: pt.date, value: parseFloat((pt.value * ratio * arpu).toFixed(2)) };
+  const successfulPayments = (payments ?? []).filter(
+    (p) => String((p as any).status ?? '').toLowerCase() === 'success'
+  );
+
+  // Monthly-equivalent revenue lets monthly + annual billing coexist in MRR.
+  const monthlyEquivalentOf = (row: any): number => {
+    const amount = parseCurrency(row?.amount);
+    const billing = String(row?.billing ?? 'monthly').toLowerCase();
+    if (billing === 'annual' || billing === 'yearly') return amount / 12;
+    return amount;
+  };
+
+  const successfulThisMonth = successfulPayments.filter((p) => {
+    const created = (p as any).created_at;
+    if (!created) return false;
+    return new Date(created) >= startOfMonth;
+  });
+
+  const estimatedMRR = successfulThisMonth.reduce((sum, p) => sum + monthlyEquivalentOf(p), 0);
+  const estimatedARR = estimatedMRR * 12;
+
+  const paidUsersThisMonth = new Set(
+    successfulThisMonth
+      .map((p) => String((p as any).user_id ?? '').trim())
+      .filter(Boolean)
+  ).size;
+  const arpu = paidUsersThisMonth > 0 ? estimatedMRR / paidUsersThisMonth : 0;
+
+  // Revenue growth series (last 30d) based on successful payments by day.
+  const revenueByDay: Record<string, number> = {};
+  for (const p of successfulPayments) {
+    const created = (p as any).created_at;
+    if (!created) continue;
+    const d = isoDate(new Date(created));
+    if (d >= thirtyDaysAgo) {
+      revenueByDay[d] = (revenueByDay[d] ?? 0) + monthlyEquivalentOf(p);
+    }
+  }
+  let cumulativeRevenue = 0;
+  const revenueGrowthSeries: DailySeries[] = days.map((d) => {
+    cumulativeRevenue += revenueByDay[d] ?? 0;
+    return { date: d, value: parseFloat(cumulativeRevenue.toFixed(2)) };
   });
 
   // ── 4. API Costs ───────────────────────────────────────────────────────────
@@ -304,8 +344,35 @@ export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
     ? ((costThisMonth - costLastMonth) / costLastMonth) * 100
     : costThisMonth > 0 ? 100 : 0;
 
+  // Affiliate commission expense this month:
+  // use commission credits created when referred payments succeed.
+  // withdraw_done is wallet settlement, not a new commission expense.
+  let affiliateCommissionThisMonth = 0;
+  try {
+    const { data: commissionRows, error: commissionErr } = await supabase
+      .from('partner_wallet_ledger')
+      .select('amount, entry_type, source, created_at')
+      .eq('entry_type', 'credit')
+      .eq('source', 'payment_commission')
+      .gte('created_at', startOfMonth.toISOString());
+    if (commissionErr) {
+      const isMissing =
+        commissionErr.code === '42P01' ||
+        commissionErr.message.toLowerCase().includes('could not find the table');
+      if (!isMissing) throw commissionErr;
+    } else {
+      affiliateCommissionThisMonth = (commissionRows ?? []).reduce(
+        (sum, row: any) => sum + parseCurrency(row.amount),
+        0
+      );
+    }
+  } catch {
+    affiliateCommissionThisMonth = 0;
+  }
+
+  const grossMarginNumerator = estimatedMRR - costThisMonth - affiliateCommissionThisMonth;
   const grossMarginPct = estimatedMRR > 0
-    ? ((estimatedMRR - costThisMonth) / estimatedMRR) * 100
+    ? (grossMarginNumerator / estimatedMRR) * 100
     : 0;
 
   // Daily cost series (last 30d)
