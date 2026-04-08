@@ -31,7 +31,7 @@ interface LinkItem {
 
 const whatsappLink: LinkItem = {
   id: 'whatsapp',
-  title: 'Get Started on WhatsApp',
+  title: 'Start for free',
   url: 'https://wa.me/79027611?text=How%20can%20I%20get%20started%20with%20Al%20Madmoon%3F',
   icon: MessageCircle,
   description: ''
