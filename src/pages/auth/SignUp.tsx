@@ -1,6 +1,6 @@
 import { Button } from "../../components/ui/Button";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useRef, useState, ChangeEvent, FormEvent } from "react";
 import { supabase } from "../../lib/supabase";
 import { CreditCard, Shield, Zap } from "lucide-react"; // added
 
@@ -14,6 +14,12 @@ export default function SignUp() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    phone?: string;
+  }>({});
+  const emailInputRef = useRef<HTMLInputElement | null>(null);
+  const phoneInputRef = useRef<HTMLInputElement | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,8 +30,20 @@ export default function SignUp() {
   });
   const navigate = useNavigate();
 
+  const focusFieldWithError = (field: "email" | "phone", message: string) => {
+    setFieldErrors((prev) => ({ ...prev, [field]: message }));
+    if (field === "email") {
+      emailInputRef.current?.focus();
+      return;
+    }
+    phoneInputRef.current?.focus();
+  };
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === "email" || name === "phone") {
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
     if (name === 'referralCode') {
       const sanitizedReferralCode = value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6);
       setFormData(prev => ({ ...prev, [name]: sanitizedReferralCode }));
@@ -45,9 +63,18 @@ export default function SignUp() {
     localPhone: string,
   ) => {
     const digitsOnlyCountryCode = selectedCountryCode.replace(/\D/g, "");
-    const digitsOnlyPhone = localPhone.replace(/\D/g, "").replace(/^0+/, "");
+    let digitsOnlyPhone = localPhone.replace(/\D/g, "").replace(/^0+/, "");
 
     if (!digitsOnlyCountryCode || !digitsOnlyPhone) {
+      return "";
+    }
+
+    // Prevent storing duplicated country code when users type it in the local number input.
+    if (digitsOnlyPhone.startsWith(digitsOnlyCountryCode)) {
+      digitsOnlyPhone = digitsOnlyPhone.slice(digitsOnlyCountryCode.length);
+    }
+
+    if (!digitsOnlyPhone) {
       return "";
     }
 
@@ -96,6 +123,19 @@ export default function SignUp() {
     return "/partner";
   };
 
+  const applyDuplicateFieldError = (message: string) => {
+    const lowered = message.toLowerCase();
+    if (lowered.includes("email") && (lowered.includes("already") || lowered.includes("exists"))) {
+      focusFieldWithError("email", "This email is already in use.");
+      return true;
+    }
+    if (lowered.includes("phone") && (lowered.includes("already") || lowered.includes("exists"))) {
+      focusFieldWithError("phone", "This phone number is already in use.");
+      return true;
+    }
+    return false;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -105,6 +145,7 @@ export default function SignUp() {
 
     setErrorMessage("");
     setSuccessMessage("");
+    setFieldErrors({});
     setIsSubmitting(true);
     const phoneToSave = normalizePhoneNumber(countryCode, formData.phone);
     const referralCodeToSave = isReferralCodeValid
@@ -124,9 +165,49 @@ export default function SignUp() {
     }
 
     try {
+      const trimmedEmail = formData.email.trim();
+
+      const { data: existingEmail, error: existingEmailError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("email", trimmedEmail)
+        .maybeSingle();
+
+      if (existingEmailError) {
+        setErrorMessage(existingEmailError.message || "Could not validate email.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (existingEmail?.id) {
+        setErrorMessage("This email is already in use.");
+        focusFieldWithError("email", "This email is already in use.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { data: existingPhone, error: existingPhoneError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("phone", phoneToSave)
+        .maybeSingle();
+
+      if (existingPhoneError) {
+        setErrorMessage(existingPhoneError.message || "Could not validate phone number.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (existingPhone?.id) {
+        setErrorMessage("This phone number is already in use.");
+        focusFieldWithError("phone", "This phone number is already in use.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("signup-user", {
         body: {
-          email: formData.email.trim(),
+          email: trimmedEmail,
           password: formData.password,
           full_name: formData.name.trim(),
           phone: phoneToSave,
@@ -138,6 +219,7 @@ export default function SignUp() {
 
       if (error) {
         const isNetworkError = error.name === "FunctionsFetchError";
+        applyDuplicateFieldError(error.message || "");
         setErrorMessage(
           isNetworkError
             ? "Could not reach signup function. Check deployment name, CORS, and project URL."
@@ -147,6 +229,7 @@ export default function SignUp() {
       }
 
       if (!data?.ok) {
+        applyDuplicateFieldError(String(data?.error || ""));
         setErrorMessage(
           data?.error || "Could not create account. Please try again.",
         );
@@ -208,13 +291,38 @@ export default function SignUp() {
       });
       setAcceptedTerms(false);
       navigate("/pricing");
-    } catch (invokeError) {
+    } catch (invokeError: unknown) {
       setIsSubmitting(false);
-      const message =
-        invokeError instanceof Error
-          ? invokeError.message
-          : "Failed to send a request to the Edge Function.";
-      setErrorMessage(message);
+      let parsedMessage = "Failed to send a request to the Edge Function.";
+
+      if (invokeError instanceof Error) {
+        parsedMessage = invokeError.message || parsedMessage;
+      }
+
+      // FunctionsHttpError keeps the actual response body in "context".
+      const errorWithContext = invokeError as {
+        context?: { json?: () => Promise<{ error?: string }>; text?: () => Promise<string> };
+      };
+      if (errorWithContext?.context?.json) {
+        try {
+          const payload = await errorWithContext.context.json();
+          if (payload?.error) {
+            parsedMessage = payload.error;
+          }
+        } catch {
+          if (errorWithContext?.context?.text) {
+            try {
+              const textPayload = await errorWithContext.context.text();
+              if (textPayload) parsedMessage = textPayload;
+            } catch {
+              // Keep default parsed message
+            }
+          }
+        }
+      }
+
+      applyDuplicateFieldError(parsedMessage);
+      setErrorMessage(parsedMessage);
       return;
     }
   };
@@ -410,10 +518,15 @@ export default function SignUp() {
                     type="email"
                     id="email"
                     name="email"
+                    ref={emailInputRef}
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
+                    className={`w-full px-4 py-3 pl-4 bg-slate-50 border-2 rounded-xl focus:outline-none focus:ring-2 text-slate-900 placeholder-slate-400 transition-all duration-300 ${
+                      fieldErrors.email
+                        ? "border-red-500 focus:ring-red-400 hover:border-red-500"
+                        : "border-slate-200 focus:ring-sky-400 focus:border-transparent hover:border-slate-300"
+                    }`}
                     placeholder="you@example.com"
                   />
                   {/* Email Icon SVG */}
@@ -432,6 +545,9 @@ export default function SignUp() {
                   </svg>
                 </div>
               </div>
+              {fieldErrors.email && (
+                <p className="mt-2 text-xs text-red-600">{fieldErrors.email}</p>
+              )}
 
               {/* Phone Number Field */}
               <div className="relative">
@@ -459,10 +575,15 @@ export default function SignUp() {
                       type="tel"
                       id="phone"
                       name="phone"
+                      ref={phoneInputRef}
                       value={formData.phone}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 pl-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent text-slate-900 placeholder-slate-400 transition-all duration-300 hover:border-slate-300"
+                      className={`w-full px-4 py-3 pl-4 bg-slate-50 border-2 rounded-xl focus:outline-none focus:ring-2 text-slate-900 placeholder-slate-400 transition-all duration-300 ${
+                        fieldErrors.phone
+                          ? "border-red-500 focus:ring-red-400 hover:border-red-500"
+                          : "border-slate-200 focus:ring-sky-400 focus:border-transparent hover:border-slate-300"
+                      }`}
                       placeholder="03 123 456"
                     />
                     <svg
@@ -484,6 +605,9 @@ export default function SignUp() {
                   <p className="mt-2 text-xs text-slate-500">
                     Saved as: {normalizedPhone}
                   </p>
+                )}
+                {fieldErrors.phone && (
+                  <p className="mt-2 text-xs text-red-600">{fieldErrors.phone}</p>
                 )}
               </div>
 

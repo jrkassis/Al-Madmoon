@@ -262,7 +262,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="lg:pl-64 pt-15 mt-3">
+      <div className="lg:pl-64 pt-15 mt-0">
         {/* Mobile top navbar (tabs) */}
         {/* Blur everything above the tab bar on mobile */}
         <div className="lg:hidden fixed top-0 left-0 right-0 h-20 z-20 pointer-events-none backdrop-blur bg-white/80" />
@@ -296,7 +296,7 @@ export function DashboardLayout({ children, role }: DashboardLayoutProps) {
             </div>
           </nav>
         </div>
-        <main className="p-4 md:pt-20 mt-20">{children}</main>
+        <main className="p-4 md:pt-0 mt-20">{children}</main>
       </div>
     </div>
   );

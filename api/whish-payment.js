@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     successCallbackUrl: `${originSite}/api/whish-callback?status=success&externalId=${externalId}`,
     failureCallbackUrl: `${originSite}/api/whish-callback?status=failure&externalId=${externalId}`,
     // Redirect the user to their dashboard after successful payment
-    successRedirectUrl: `${originSite}/dashboard`,
+    successRedirectUrl: `${originSite}/dashboard?payment=success`,
     failureRedirectUrl: `${originSite}/paywall?payment=failure`,
   };
 

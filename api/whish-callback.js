@@ -10,20 +10,22 @@ export default async function handler(req, res) {
     }
   
     const { status, externalId } = req.query;
+    const normalizedStatus = String(status ?? "").trim().toLowerCase();
   
-    console.log("[whish-callback] Received:", { status, externalId });
+    console.log("[whish-callback] Received:", { status, normalizedStatus, externalId });
   
-    if (status === "success") {
+    if (normalizedStatus === "success" || normalizedStatus === "succeeded" || normalizedStatus === "completed") {
       // Best-effort: mark payment/subscription as active in Supabase if configured
       try {
         if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
           const { createClient } = await import("@supabase/supabase-js");
           const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-          await supabase.from("payments").upsert({
+          const { error: upsertErr } = await supabase.from("payments").upsert({
             external_id: String(externalId),
             status: "success",
             updated_at: new Date().toISOString(),
           }, { onConflict: "external_id" });
+          if (upsertErr) throw upsertErr;
           // Optionally also flip a subscriptions table if you have one:
           // await supabase.from("subscriptions").update({ active: true, activated_at: new Date().toISOString() }).eq("external_id", externalId);
 
@@ -68,16 +70,17 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true, status: "success" });
     }
   
-    if (status === "failure") {
+    if (normalizedStatus === "failure" || normalizedStatus === "failed" || normalizedStatus === "declined" || normalizedStatus === "cancelled" || normalizedStatus === "canceled") {
       try {
         if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
           const { createClient } = await import("@supabase/supabase-js");
           const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-          await supabase.from("payments").upsert({
+          const { error: upsertErr } = await supabase.from("payments").upsert({
             external_id: String(externalId),
             status: "failed",
             updated_at: new Date().toISOString(),
           }, { onConflict: "external_id" });
+          if (upsertErr) throw upsertErr;
         }
       } catch (e) {
         console.warn("[whish-callback] Supabase update skipped:", e?.message ?? e);

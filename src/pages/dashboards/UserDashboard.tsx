@@ -37,6 +37,7 @@ export default function UserDashboard() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,6 +143,30 @@ export default function UserDashboard() {
 
     void fetchData();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const paymentFromQuery = params.get("payment");
+    const paymentFromStorage = window.localStorage.getItem("payment_success") === "1";
+    const shouldShow = paymentFromQuery === "success" || paymentFromStorage;
+
+    if (!shouldShow) return;
+
+    setShowPaymentSuccess(true);
+    window.localStorage.removeItem("payment_success");
+
+    if (paymentFromQuery === "success") {
+      params.delete("payment");
+      const nextQuery = params.toString();
+      const cleanUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+
+    const timeoutId = window.setTimeout(() => setShowPaymentSuccess(false), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,10 +298,33 @@ export default function UserDashboard() {
     subscription.totalPrompts !== undefined
       ? (subscription.monthlyUsed / subscription.totalPrompts) * 100
       : 0;
+  const isFreePlan = subscription.planLabel.toLowerCase() === "free";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-slate-100 pt-24 pb-12 px-4 sm:px-6">
+    <div className="min-h-screen patternbg bg-linear-to-br from-slate-50 to-slate-100 pt-24 pb-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
+        {showPaymentSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 shadow-sm"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium">
+                Payment successful. Welcome aboard and enjoy your new plan!
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowPaymentSuccess(false)}
+                className="text-emerald-700 hover:text-emerald-900 text-sm font-semibold"
+              >
+                Dismiss
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -308,14 +356,13 @@ export default function UserDashboard() {
                 </h2>
               </div>
               <span
-                className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  subscription.status === "active"
+                className={`px-4 py-2 rounded-full text-sm font-semibold ${subscription.status === "active"
                     ? "bg-green-100 text-green-700"
                     : "bg-amber-100 text-amber-700"
-                }`}
+                  }`}
               >
                 {subscription.status.charAt(0).toUpperCase() +
-                  subscription.status.slice(1)}
+                  subscription.status.slice(1)} 
               </span>
             </div>
           </div>
@@ -412,36 +459,47 @@ export default function UserDashboard() {
                 )}
             </div>
 
-            {/* Renewal Info */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-              <div>
-                <p className="text-sm text-slate-600">Renewal Date</p>
-                <p className="text-lg font-semibold text-slate-900 mt-1">
-                  {formattedRenewalDate}
-                </p>
+            {/* Renewal Info (hidden for free plan) */}
+            {!isFreePlan && (
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+                <div>
+                  <p className="text-sm text-slate-600">Renewal Date</p>
+                  <p className="text-lg font-semibold text-slate-900 mt-1">
+                    {formattedRenewalDate}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600">Days Remaining</p>
+                  <p
+                    className={`text-lg font-semibold mt-1 ${daysUntilRenewal > 0
+                        ? "text-slate-900"
+                        : "text-red-600"
+                      }`}
+                  >
+                    {daysUntilRenewal > 0 ? `${daysUntilRenewal} days` : "Expired"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-slate-600">Days Remaining</p>
-                <p
-                  className={`text-lg font-semibold mt-1 ${
-                    daysUntilRenewal > 0
-                      ? "text-slate-900"
-                      : "text-red-600"
-                  }`}
-                >
-                  {daysUntilRenewal > 0 ? `${daysUntilRenewal} days` : "Expired"}
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
             <div className="pt-4 flex flex-wrap gap-3">
-              <button
-                onClick={() => navigate("/pricing")}
-                className="px-5 py-2.5 bg-brand-600 text-black rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
-              >
-                Manage Subscription
-              </button>
+              {!isFreePlan && (
+                <button
+                  onClick={() => navigate("/pricing")}
+                  className="px-5 py-2.5 bg-brand-600 text-black rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
+                >
+                  Manage Subscription
+                </button>
+              )}
+              {isFreePlan && (
+                <button
+                  onClick={() => navigate("/pricing")}
+                  className="px-5 py-2.5 border border-brand-300 text-brand-700 rounded-lg hover:bg-brand-50 transition-colors font-medium text-sm"
+                >
+                  Upgrade
+                </button>
+              )}
               <button
                 onClick={() => navigate("/")}
                 className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium text-sm"
@@ -537,25 +595,25 @@ export default function UserDashboard() {
                 <div>
                   <p className="text-sm text-slate-600">Full Name</p>
                   <p className="text-base font-medium text-slate-900 mt-1">
-                    {profile.full_name || "Not set"}
+                    <strong>{profile.full_name || "Not set"}</strong>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600">Email</p>
                   <p className="text-base font-medium text-slate-900 mt-1 break-all">
-                    {profile.email || "Not set"}
+                    <strong>{profile.email || "Not set"}</strong>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600">Phone</p>
                   <p className="text-base font-medium text-slate-900 mt-1">
-                    {profile.phone || "Not set"}
+                    <strong>{profile.phone || "Not set"}</strong>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600">Account Role</p>
                   <p className="text-base font-medium text-slate-900 mt-1 capitalize">
-                    {profile.role || "User"}
+                    <strong>{profile.role || "User"}</strong>
                   </p>
                 </div>
               </div>

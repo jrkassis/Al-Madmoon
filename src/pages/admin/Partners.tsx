@@ -3,7 +3,7 @@ import { DashboardLayout } from '../dashboards/DashboardLayout';
 import { Button } from '../../components/ui/Button';
 import { supabase } from '../../lib/supabase';
 
-type ReferralFilter = 'all' | 'none' | '1-9' | '10+';
+type ReferralFilter = 'all' | 'none' | '1-9' | '10+' | '50+' | '100+';
 
 type partnerRow = {
   id: string;
@@ -12,6 +12,10 @@ type partnerRow = {
   created_at: string;
   partner_code?: string | null;
   referrals: number;
+  tier: 'none' | 'bronze' | 'silver' | 'gold';
+  tierRate: number;
+  overridePercent: number | null;
+  effectivePercent: number;
 };
 
 type partnerForm = {
@@ -20,8 +24,38 @@ type partnerForm = {
   partner_code: string;
 };
 
-const COMMISSION_KEY = 'partner_commission_percent';
-const DEFAULT_COMMISSION_PERCENT = 30;
+type WithdrawRequestRow = {
+  id: string;
+  user_id: string;
+  amount: number;
+  payment_method: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string | null;
+  users?: {
+    full_name: string | null;
+    phone: string | null;
+  } | null;
+};
+
+const PARTNER_OVERRIDE_KEY_PREFIX = 'partner_commission_override:';
+
+function getTierByReferrals(totalReferrals: number): {
+  tier: 'none' | 'bronze' | 'silver' | 'gold';
+  percent: number;
+} {
+  if (totalReferrals >= 100) return { tier: 'gold', percent: 15 };
+  if (totalReferrals >= 50) return { tier: 'silver', percent: 12.5 };
+  if (totalReferrals >= 10) return { tier: 'bronze', percent: 10 };
+  return { tier: 'none', percent: 0 };
+}
+
+function getTierLabel(tier: 'none' | 'bronze' | 'silver' | 'gold') {
+  if (tier === 'gold') return 'Gold';
+  if (tier === 'silver') return 'Silver';
+  if (tier === 'bronze') return 'Bronze';
+  return 'None';
+}
 
 export default function AdminPartners() {
   const PAGE_SIZE = 10;
@@ -31,9 +65,10 @@ export default function AdminPartners() {
   const [partners, setpartners] = useState<partnerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
-  const [commissionSaving, setCommissionSaving] = useState(false);
-  const [commissionNotice, setCommissionNotice] = useState<string | null>(null);
+  const [overrideSavingById, setOverrideSavingById] = useState<Record<string, boolean>>({});
+  const [overrideDraftById, setOverrideDraftById] = useState<Record<string, string>>({});
+  const [withdrawRequests, setWithdrawRequests] = useState<WithdrawRequestRow[]>([]);
+  const [withdrawStatusSavingById, setWithdrawStatusSavingById] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState<partnerForm>({
@@ -59,12 +94,71 @@ export default function AdminPartners() {
       created_at: string;
     }>;
 
-    const normalized = partnersData.map((a) => ({
-      ...a,
-      referrals: 0,
-    }));
+    const referredUsersQuery = await supabase
+      .from('users')
+      .select('is_referred, plan')
+      .not('is_referred', 'is', null);
+    if (referredUsersQuery.error) throw referredUsersQuery.error;
+
+    const referralCounts = new Map<string, number>();
+    const referredRows = (referredUsersQuery.data ?? []) as Array<{ is_referred?: string | null; plan?: string | null }>;
+    for (const row of referredRows) {
+      const isPaidReferral = Boolean(row.plan && row.plan !== 'free');
+      if (!isPaidReferral) continue;
+      const partnerId = String(row.is_referred ?? '').trim();
+      if (!partnerId) continue;
+      referralCounts.set(partnerId, (referralCounts.get(partnerId) ?? 0) + 1);
+    }
+
+    const overrideSettingsQuery = await supabase
+      .from('app_settings')
+      .select('key, value')
+      .like('key', `${PARTNER_OVERRIDE_KEY_PREFIX}%`);
+    if (overrideSettingsQuery.error) throw overrideSettingsQuery.error;
+
+    const overridesByPartner = new Map<string, number>();
+    const overrideRows = (overrideSettingsQuery.data ?? []) as Array<{ key: string; value: string | null }>;
+    for (const row of overrideRows) {
+      const partnerId = String(row.key ?? '').replace(PARTNER_OVERRIDE_KEY_PREFIX, '');
+      const parsed = Number(row.value);
+      if (partnerId && Number.isFinite(parsed) && parsed >= 0 && parsed <= 100) {
+        overridesByPartner.set(partnerId, parsed);
+      }
+    }
+
+    const normalized = partnersData.map((a) => {
+      const referrals = referralCounts.get(a.id) ?? 0;
+      const tierInfo = getTierByReferrals(referrals);
+      const overridePercent = overridesByPartner.get(a.id) ?? null;
+      const effectivePercent = overridePercent ?? tierInfo.percent;
+      return {
+        ...a,
+        referrals,
+        tier: tierInfo.tier,
+        tierRate: tierInfo.percent,
+        overridePercent,
+        effectivePercent,
+      };
+    });
 
     setpartners(normalized);
+    setOverrideDraftById(
+      Object.fromEntries(
+        normalized.map((p) => [p.id, p.overridePercent == null ? '' : String(p.overridePercent)])
+      )
+    );
+
+    const withdrawQuery = await supabase
+      .from('withdraw_requests')
+      .select('id, user_id, amount, payment_method, status, created_at, updated_at, users(full_name, phone)')
+      .order('created_at', { ascending: false });
+    if (withdrawQuery.error) {
+      throw new Error(
+        'Withdraw requests table is not ready yet. Please create "withdraw_requests" in Supabase.'
+      );
+    }
+    setWithdrawRequests((withdrawQuery.data ?? []) as WithdrawRequestRow[]);
+
     setLoading(false);
   };
 
@@ -81,59 +175,6 @@ export default function AdminPartners() {
       mounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    const loadCommissionPercent = async () => {
-      try {
-        const { data, error: settingsError } = await supabase
-          .from('app_settings')
-          .select('value')
-          .eq('key', COMMISSION_KEY)
-          .maybeSingle();
-        if (!settingsError && data?.value != null) {
-          const parsed = Number(data.value);
-          if (Number.isFinite(parsed) && parsed > 0 && parsed <= 100) {
-            setCommissionPercent(parsed);
-            localStorage.setItem(COMMISSION_KEY, String(parsed));
-            return;
-          }
-        }
-      } catch {
-        // Ignore and fallback to local storage.
-      }
-
-      const local = Number(localStorage.getItem(COMMISSION_KEY));
-      if (Number.isFinite(local) && local > 0 && local <= 100) {
-        setCommissionPercent(local);
-      } else {
-        setCommissionPercent(DEFAULT_COMMISSION_PERCENT);
-      }
-    };
-
-    void loadCommissionPercent();
-  }, []);
-
-  const saveCommissionPercent = async () => {
-    const normalized = Math.min(100, Math.max(1, Number(commissionPercent) || DEFAULT_COMMISSION_PERCENT));
-    try {
-      setCommissionSaving(true);
-      setCommissionNotice(null);
-      const { error: upsertError } = await supabase
-        .from('app_settings')
-        .upsert({ key: COMMISSION_KEY, value: String(normalized) }, { onConflict: 'key' });
-      if (upsertError) throw upsertError;
-      setCommissionPercent(normalized);
-      localStorage.setItem(COMMISSION_KEY, String(normalized));
-      setCommissionNotice('Commission updated and saved.');
-    } catch {
-      // Fallback persistence if app_settings table is unavailable.
-      localStorage.setItem(COMMISSION_KEY, String(normalized));
-      setCommissionPercent(normalized);
-      setCommissionNotice('Saved locally in this browser. Create app_settings table for global sync.');
-    } finally {
-      setCommissionSaving(false);
-    }
-  };
 
   const openCreateModal = () => {
     setForm({ full_name: '', phone: '', partner_code: '' });
@@ -176,6 +217,11 @@ export default function AdminPartners() {
         name: a.full_name?.trim() || `partner ${a.id.slice(0, 8)}`,
         contact: a.phone || '-',
         referrals: a.referrals,
+        tier: a.tier,
+        tierLabel: getTierLabel(a.tier),
+        tierRate: a.tierRate,
+        effectivePercent: a.effectivePercent,
+        overridePercent: a.overridePercent,
         joined: new Date(a.created_at).toISOString().split('T')[0],
       })),
     [partners]
@@ -188,6 +234,8 @@ export default function AdminPartners() {
       if (referralFilter === 'none') return a.referrals === 0;
       if (referralFilter === '1-9') return a.referrals >= 1 && a.referrals <= 9;
       if (referralFilter === '10+') return a.referrals >= 10;
+      if (referralFilter === '50+') return a.referrals >= 50;
+      if (referralFilter === '100+') return a.referrals >= 100;
       return true;
     });
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -205,6 +253,58 @@ export default function AdminPartners() {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  const savePartnerOverride = async (partnerId: string) => {
+    const raw = (overrideDraftById[partnerId] ?? '').trim();
+    const key = `${PARTNER_OVERRIDE_KEY_PREFIX}${partnerId}`;
+    try {
+      setOverrideSavingById((prev) => ({ ...prev, [partnerId]: true }));
+      setError(null);
+      if (raw === '') {
+        const { error: delError } = await supabase
+          .from('app_settings')
+          .delete()
+          .eq('key', key);
+        if (delError) throw delError;
+      } else {
+        const parsed = Number(raw);
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+          throw new Error('Override must be a number between 0 and 100.');
+        }
+        const { error: upsertError } = await supabase
+          .from('app_settings')
+          .upsert({ key, value: String(parsed) }, { onConflict: 'key' });
+        if (upsertError) throw upsertError;
+      }
+      await loadpartners();
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to save partner override.');
+    } finally {
+      setOverrideSavingById((prev) => ({ ...prev, [partnerId]: false }));
+    }
+  };
+
+  const updateWithdrawStatus = async (
+    requestId: string,
+    nextStatus: 'pending' | 'in_process' | 'done' | 'rejected'
+  ) => {
+    try {
+      setWithdrawStatusSavingById((prev) => ({ ...prev, [requestId]: true }));
+      const { error: upErr } = await supabase
+        .from('withdraw_requests')
+        .update({
+          status: nextStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', requestId);
+      if (upErr) throw upErr;
+      await loadpartners();
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to update withdrawal status.');
+    } finally {
+      setWithdrawStatusSavingById((prev) => ({ ...prev, [requestId]: false }));
+    }
+  };
 
   return (
     <DashboardLayout role="admin">
@@ -235,34 +335,13 @@ export default function AdminPartners() {
             <option value="none">0 referrals</option>
             <option value="1-9">1-9 referrals</option>
             <option value="10+">10+ referrals</option>
+            <option value="50+">50+ referrals</option>
+            <option value="100+">100+ referrals</option>
           </select>
           <Button variant="primary" className="whitespace-nowrap" onClick={openCreateModal}>
             Add partner
           </Button>
         </div>
-
-        <div className="glass-panel p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">partner commission</p>
-            <p className="text-xs text-slate-500">Used by partner referral analytics.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={1}
-              max={100}
-              step={1}
-              value={commissionPercent}
-              onChange={(e) => setCommissionPercent(Number(e.target.value))}
-              className="w-24 rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-            <span className="text-sm text-slate-500">%</span>
-            <Button variant="primary" onClick={saveCommissionPercent} disabled={commissionSaving}>
-              {commissionSaving ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        </div>
-        {commissionNotice && <p className="text-xs text-slate-500 mb-4">{commissionNotice}</p>}
 
         <div className="glass-panel overflow-visible">
           {loading && (
@@ -279,6 +358,9 @@ export default function AdminPartners() {
                     <th className="text-left p-4 font-semibold text-slate-600">Name</th>
                     <th className="text-left p-4 font-semibold text-slate-600">Contact</th>
                     <th className="text-left p-4 font-semibold text-slate-600">Referrals</th>
+                    <th className="text-left p-4 font-semibold text-slate-600">Tier</th>
+                    <th className="text-left p-4 font-semibold text-slate-600">Commission</th>
+                    <th className="text-left p-4 font-semibold text-slate-600">Override %</th>
                     <th className="text-left p-4 font-semibold text-slate-600">Joined</th>
                   </tr>
                 </thead>
@@ -288,12 +370,45 @@ export default function AdminPartners() {
                       <td className="p-4 font-medium text-slate-900">{a.name}</td>
                       <td className="p-4 text-slate-600">{a.contact}</td>
                       <td className="p-4 text-slate-600">{a.referrals}</td>
+                      <td className="p-4 text-slate-600">
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                          {a.tierLabel}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-600">
+                        <span className="font-semibold text-slate-900">{a.effectivePercent}%</span>
+                        <span className="text-xs text-slate-500 ml-2">(tier: {a.tierRate}%)</span>
+                      </td>
+                      <td className="p-4 text-slate-600">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min={0}
+                            max={100}
+                            step={0.1}
+                            value={overrideDraftById[a.id] ?? ''}
+                            onChange={(e) =>
+                              setOverrideDraftById((prev) => ({ ...prev, [a.id]: e.target.value }))
+                            }
+                            placeholder="Auto"
+                            className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-xs"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => savePartnerOverride(a.id)}
+                            disabled={Boolean(overrideSavingById[a.id])}
+                          >
+                            {overrideSavingById[a.id] ? '...' : 'Save'}
+                          </Button>
+                        </div>
+                      </td>
                       <td className="p-4 text-slate-600">{a.joined}</td>
                     </tr>
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="p-6 text-center text-slate-500">
+                      <td colSpan={7} className="p-6 text-center text-slate-500">
                         No partners found.
                       </td>
                     </tr>
@@ -327,6 +442,70 @@ export default function AdminPartners() {
               </div>
             </div>
           )}
+        </div>
+
+        <div className="glass-panel overflow-visible mt-6">
+          <div className="p-4 border-b border-slate-100">
+            <h3 className="font-semibold text-slate-900">Withdraw requests</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="text-left p-4 font-semibold text-slate-600">Partner</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Amount</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Method</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Date</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Status</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawRequests.map((w) => (
+                  <tr key={w.id} className="border-b border-slate-100 last:border-0">
+                    <td className="p-4 text-slate-700">
+                      {w.users?.full_name?.trim() || w.users?.phone || w.user_id.slice(0, 8)}
+                    </td>
+                    <td className="p-4 text-slate-700">${Number(w.amount).toFixed(2)}</td>
+                    <td className="p-4 text-slate-600">{w.payment_method || '-'}</td>
+                    <td className="p-4 text-slate-600">
+                      {new Date(w.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="p-4 text-slate-600">
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                        {w.status}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <select
+                        value={w.status}
+                        onChange={(e) =>
+                          updateWithdrawStatus(
+                            w.id,
+                            e.target.value as 'pending' | 'in_process' | 'done' | 'rejected'
+                          )
+                        }
+                        disabled={Boolean(withdrawStatusSavingById[w.id])}
+                        className="px-2 py-1 rounded-lg border border-slate-200 text-xs bg-white"
+                      >
+                        <option value="pending">pending</option>
+                        <option value="in_process">in_process</option>
+                        <option value="done">done</option>
+                        <option value="rejected">rejected</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+                {!loading && withdrawRequests.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-500">
+                      No withdraw requests found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       {isModalOpen && (

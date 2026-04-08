@@ -20,18 +20,82 @@ type ReferralRow = {
 
 const COMMISSION_KEY = 'partner_commission_percent';
 const DEFAULT_COMMISSION_PERCENT = 30;
+const PARTNER_OVERRIDE_KEY_PREFIX = 'partner_commission_override:';
 const PLAN_PRICE: Record<string, number> = {
   t1: 19.99,
   t2: 34.99,
+  pro: 19.99,
+  ultimate: 34.99,
 };
+
+const TIER_BENEFITS = [
+  {
+    id: 'bronze',
+    name: 'Bronze',
+    referrals: 10,
+    commission: 10,
+    perks: [
+      'Free Pro Account',
+      '10% commission on every referral',
+      'Access to creatives library',
+    ],
+  },
+  {
+    id: 'silver',
+    name: 'Silver',
+    referrals: 50,
+    commission: 12.5,
+    perks: [
+      'Free Ultimate Account',
+      '12.5% commission on every referral',
+      'Access to full creatives library',
+      'Early access to new features',
+    ],
+  },
+  {
+    id: 'gold',
+    name: 'Gold',
+    referrals: 100,
+    commission: 15,
+    perks: [
+      'Free Ultimate Account',
+      '15% commission on every referral',
+      'Access to full creatives library',
+      'Attend exclusive partner events',
+      'Custom benefits: trips, merch & more',
+    ],
+  },
+] as const;
+
+function getTierByReferrals(totalReferrals: number): {
+  tier: 'none' | 'bronze' | 'silver' | 'gold';
+  percent: number;
+} {
+  if (totalReferrals >= 100) return { tier: 'gold', percent: 15 };
+  if (totalReferrals >= 50) return { tier: 'silver', percent: 12.5 };
+  if (totalReferrals >= 10) return { tier: 'bronze', percent: 10 };
+  return { tier: 'none', percent: 0 };
+}
+
+function getTierLabel(tier: 'none' | 'bronze' | 'silver' | 'gold') {
+  if (tier === 'gold') return 'Gold';
+  if (tier === 'silver') return 'Silver';
+  if (tier === 'bronze') return 'Bronze';
+  return 'None';
+}
 
 export default function partnerReferrals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rows, setRows] = useState<ReferralRow[]>([]);
   const [commissionPercent, setCommissionPercent] = useState<number>(DEFAULT_COMMISSION_PERCENT);
+  const [tierLabel, setTierLabel] = useState<string>('None');
+  const [tierPercent, setTierPercent] = useState<number>(0);
+  const [effectiveCommissionPercent, setEffectiveCommissionPercent] = useState<number>(0);
+  const [hasOverride, setHasOverride] = useState<boolean>(false);
   const [partnerCode, setpartnerCode] = useState<string>('');
   const [copyNotice, setCopyNotice] = useState<string | null>(null);
+  const [walletAvailable, setWalletAvailable] = useState<number | null>(null);
 
   const referralUrl = partnerCode
     ? `${window.location.origin}/auth/signup?ref=${encodeURIComponent(partnerCode)}`
@@ -55,7 +119,7 @@ export default function partnerReferrals() {
         setLoading(true);
         setError(null);
 
-        let effectiveCommissionPercent = DEFAULT_COMMISSION_PERCENT;
+        let defaultCommissionPercent = DEFAULT_COMMISSION_PERCENT;
         try {
           const { data, error: settingsError } = await supabase
             .from('app_settings')
@@ -65,21 +129,21 @@ export default function partnerReferrals() {
           if (!settingsError && data?.value != null) {
             const parsed = Number(data.value);
             if (Number.isFinite(parsed) && parsed > 0 && parsed <= 100) {
-              effectiveCommissionPercent = parsed;
+              defaultCommissionPercent = parsed;
             }
           } else {
             const local = Number(localStorage.getItem(COMMISSION_KEY));
             if (Number.isFinite(local) && local > 0 && local <= 100) {
-              effectiveCommissionPercent = local;
+              defaultCommissionPercent = local;
             }
           }
         } catch {
           const local = Number(localStorage.getItem(COMMISSION_KEY));
           if (Number.isFinite(local) && local > 0 && local <= 100) {
-            effectiveCommissionPercent = local;
+            defaultCommissionPercent = local;
           }
         }
-        setCommissionPercent(effectiveCommissionPercent);
+        setCommissionPercent(defaultCommissionPercent);
 
         const {
           data: { user },
@@ -87,6 +151,31 @@ export default function partnerReferrals() {
         } = await supabase.auth.getUser();
         if (authError) throw authError;
         if (!user) throw new Error('You must be signed in to view referrals.');
+
+        // Wallet source of truth (credits - debits). Falls back to null if table/function isn't ready yet.
+        try {
+          const balRpc = await supabase.rpc('partner_wallet_balance', { p_user_id: user.id });
+          if (!balRpc.error && balRpc.data != null) {
+            const parsed = Number(balRpc.data);
+            if (Number.isFinite(parsed)) {
+              setWalletAvailable(parsed);
+            }
+          } else {
+            const ledgerRows = await supabase
+              .from('partner_wallet_ledger')
+              .select('entry_type, amount')
+              .eq('user_id', user.id);
+            if (!ledgerRows.error) {
+              const available = (ledgerRows.data ?? []).reduce((sum: number, r: any) => {
+                const amount = Number(r.amount || 0);
+                return String(r.entry_type) === 'debit' ? sum - amount : sum + amount;
+              }, 0);
+              setWalletAvailable(available);
+            }
+          }
+        } catch {
+          // Keep existing computed fallback below.
+        }
 
         // Resolve partner code from profile if available.
         let ownCode: string | null = null;
@@ -119,11 +208,37 @@ export default function partnerReferrals() {
         };
 
         const referredUsers = allUsers.filter((u) => u.id !== user.id).filter(matchespartner);
+        const paidReferredUsers = referredUsers.filter((u) => Boolean(u.plan && u.plan !== 'free'));
+        const totalPaidReferrals = paidReferredUsers.length;
+        const tierInfo = getTierByReferrals(totalPaidReferrals);
+
+        let overridePercent: number | null = null;
+        try {
+          const { data: overrideData, error: overrideError } = await supabase
+            .from('app_settings')
+            .select('value')
+            .eq('key', `${PARTNER_OVERRIDE_KEY_PREFIX}${user.id}`)
+            .maybeSingle();
+          if (!overrideError && overrideData?.value != null) {
+            const parsed = Number(overrideData.value);
+            if (Number.isFinite(parsed) && parsed >= 0 && parsed <= 100) {
+              overridePercent = parsed;
+            }
+          }
+        } catch {
+          // Ignore and fallback to tier.
+        }
+
+        const appliedPercent = overridePercent ?? tierInfo.percent;
+        setTierLabel(getTierLabel(tierInfo.tier));
+        setTierPercent(tierInfo.percent);
+        setEffectiveCommissionPercent(appliedPercent);
+        setHasOverride(overridePercent != null);
 
         const mapped: ReferralRow[] = referredUsers.map((u) => {
           const isConverted = Boolean(u.plan && u.plan !== 'free');
           const planPrice = PLAN_PRICE[String(u.plan ?? '')] ?? 0;
-          const commission = isConverted ? (planPrice * effectiveCommissionPercent) / 100 : 0;
+          const commission = isConverted ? (planPrice * appliedPercent) / 100 : 0;
           return {
             id: u.id,
             name: u.full_name?.trim() || `User ${u.id.slice(0, 8)}`,
@@ -147,15 +262,53 @@ export default function partnerReferrals() {
   const stats = useMemo(() => {
     const signups = rows.length;
     const conversions = rows.filter((r) => r.status === 'Paid').length;
-    const totalCommission = rows.reduce((sum, r) => sum + r.commission, 0);
+    const computedCommission = rows.reduce((sum, r) => sum + r.commission, 0);
+    const totalCommission = walletAvailable != null ? walletAvailable : computedCommission;
     return {
-      // No click tracking table yet; use signup count as dynamic proxy.
       clicks: signups,
       signups,
       conversions,
       totalCommission,
     };
-  }, [rows]);
+  }, [rows, walletAvailable]);
+
+  const tierProgress = useMemo(() => {
+    const referrals = stats.conversions;
+    const currentTier = getTierByReferrals(referrals).tier;
+    const nextTier =
+      referrals >= 100
+        ? null
+        : referrals >= 50
+        ? { label: 'Gold', target: 100, from: 50 }
+        : referrals >= 10
+        ? { label: 'Silver', target: 50, from: 10 }
+        : { label: 'Bronze', target: 10, from: 0 };
+
+    if (!nextTier) {
+      return {
+        referrals,
+        currentTier,
+        progressPercent: 100,
+        left: 0,
+        nextTierLabel: null as string | null,
+        helperText: 'You are at the highest tier.',
+      };
+    }
+
+    const stageSpan = Math.max(1, nextTier.target - nextTier.from);
+    const progressed = Math.max(0, referrals - nextTier.from);
+    const progressPercent = Math.min(100, (progressed / stageSpan) * 100);
+    const left = Math.max(0, nextTier.target - referrals);
+
+    return {
+      referrals,
+      currentTier,
+      progressPercent,
+      left,
+      nextTierLabel: nextTier.label,
+      helperText: `${left} paid referral${left === 1 ? '' : 's'} left to reach ${nextTier.label}.`,
+    };
+  }, [stats.signups]);
 
   return (
     <DashboardLayout role="partner">
@@ -190,7 +343,7 @@ export default function partnerReferrals() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="glass-panel p-4">
             <p className="text-sm text-slate-500">Clicks</p>
             <p className="text-2xl font-bold text-slate-900">
@@ -214,7 +367,90 @@ export default function partnerReferrals() {
             <p className="text-2xl font-bold text-brand-600">
               {loading ? '...' : `$${stats.totalCommission.toFixed(2)}`}
             </p>
-            <p className="text-xs text-slate-400 mt-1">{commissionPercent}% rate</p>
+            <p className="text-xs text-slate-400 mt-1">
+              {loading ? '...' : `${effectiveCommissionPercent}% rate`}
+            </p>
+          </div>
+          <div className="glass-panel p-4">
+            <p className="text-sm text-slate-500">Current Tier</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {loading
+                ? '...'
+                : hasOverride
+                ? `Custom (${effectiveCommissionPercent}%)`
+                : tierLabel}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
+              {loading
+                ? '...'
+                : hasOverride
+                ? 'A custom commission rate is applied.'
+                : `${tierPercent}% base tier rate`}
+            </p>
+          </div>
+     
+        </div>
+
+        <div className="glass-panel p-4 mb-6">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-sm font-semibold text-slate-900">Tier Progress</p>
+            <p className="text-xs text-slate-500">
+              {loading
+                ? '...'
+                : tierProgress.nextTierLabel
+                ? `Next: ${tierProgress.nextTierLabel}`
+                : 'Max tier reached'}
+            </p>
+          </div>
+          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                tierProgress.currentTier === 'gold'
+                  ? 'bg-linear-to-r from-amber-400 to-yellow-500'
+                  : tierProgress.currentTier === 'silver'
+                  ? 'bg-linear-to-r from-slate-300 to-slate-500'
+                  : tierProgress.currentTier === 'bronze'
+                  ? 'bg-linear-to-r from-orange-300 to-orange-500'
+                  : 'bg-linear-to-r from-sky-300 to-brand-500'
+              }`}
+              style={{ width: `${loading ? 0 : tierProgress.progressPercent}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+            <span>{loading ? '...' : `${tierProgress.referrals} paid referrals`}</span>
+            <span>{loading ? '...' : `${tierProgress.progressPercent.toFixed(1)}%`}</span>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            {loading ? '...' : tierProgress.helperText}
+          </p>
+
+          <div className="mt-4 flex justify-center">
+            <details className="w-full max-w-xl group">
+              <summary className="mx-auto w-fit cursor-pointer list-none rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                Tier benefits
+              </summary>
+              <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+                <div className="space-y-4">
+                  {TIER_BENEFITS.map((tier) => (
+                    <div key={tier.id} className="rounded-lg border border-slate-100 p-3">
+                      <div className="flex items-center justify-between gap-3 mb-2">
+                        <p className="text-sm font-semibold text-slate-900">{tier.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {tier.referrals}+ referrals - {tier.commission}%
+                        </p>
+                      </div>
+                      <ul className="space-y-1">
+                        {tier.perks.map((perk) => (
+                          <li key={`${tier.id}-${perk}`} className="text-xs text-slate-600">
+                            - {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
           </div>
         </div>
 

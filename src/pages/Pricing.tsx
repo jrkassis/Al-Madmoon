@@ -23,14 +23,13 @@ export default function Pricing() {
         name: "Pro",
         icon: <Zap size={24} />,
         monthlyPrice: 19.99,
-        annualPrice: 189.99, // discounted annual price
+        annualPrice: 189.99,
         features: [
           { label: "Limited Access", available: true },
           { label: "300 AI Betting Queries", available: true },
           { label: "Match Analysis & Win Probabilities", available: true },
           { label: "All Sports Coverage", available: false },
           { label: "Access to our Most Advanced AI Model", available: false },
-          { label: "Highest Quality recommendations Daily (Signals)", available: false },
           { label: "Wider Sports Coverage + Priority Updates", available: false },
         ],
         badge: "",
@@ -40,12 +39,11 @@ export default function Pricing() {
         name: "Ultimate",
         icon: <Crown size={24} />,
         monthlyPrice: 34.99,
-        annualPrice: 334.99, // discounted annual price
+        annualPrice: 334.99,
         features: [
           { label: "Full Access", available: true },
           { label: "Up to 600+ AI Betting Queries", available: true },
           { label: "Access to our most Advanced AI Model", available: true },
-          { label: "Highest Quality recommendations Daily (Signals)", available: true },
           { label: "Advanced Match Analysis & Probabilities", available: true },
           { label: "Widest Sports Coverage + Priority Updates", available: true },
           { label: "Deep Personalization", available: true },
@@ -74,7 +72,7 @@ export default function Pricing() {
       ? `/paywall?plan=${planId}&billing=${billing}`
       : `/auth/signup?redirect=${encodeURIComponent(`/paywall?plan=${planId}&billing=${billing}`)}`;
 
-    
+
   const ctaLabel = isAuthenticated ? "Upgrade" : "Subscribe";
 
   return (
@@ -183,7 +181,7 @@ export default function Pricing() {
               </Link>
 
               <p className="pricing-payment-note">
-                Payment accepted via Whish Money or Stripe.
+                Payment accepted via Whish Money
               </p>
             </div>
           );
@@ -196,8 +194,7 @@ export default function Pricing() {
           <div className="faq-item">
             <h4 className="faq-q">How do I pay?</h4>
             <p className="faq-a">
-              We accept payments via Whish Money and Stripe. Once you message us
-              on WhatsApp to subscribe, we will provide the payment details.
+              You can see all our plans on the pricing page. Choose the plan you want and click on the upgrade button. We accept payments via Whish Money.
             </p>
           </div>
           <div className="faq-item">

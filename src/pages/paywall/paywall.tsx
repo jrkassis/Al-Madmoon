@@ -104,8 +104,9 @@ export default function Paywall() {
         if (s === "success") {
           stopPolling();
           setStep("success");
+          window.localStorage.setItem("payment_success", "1");
           // Auto-redirect to dashboard shortly after success
-          setTimeout(() => navigate("/dashboard"), 1200);
+          setTimeout(() => navigate("/dashboard?payment=success"), 1200);
         }
         if (s === "failed") { stopPolling(); setStep("failed"); }
       } catch {

@@ -89,7 +89,6 @@ const TIERS = [
       "Free Ultimate Account",
       "15% commission on every referral",
       "Access to full creatives library",
-      "Dedicated account manager",
       "Attend exclusive partner events",
       "Custom benefits: trips, merch & more",
     ],

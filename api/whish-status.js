@@ -9,6 +9,13 @@ function digitsOnlyPhone(value) {
   return String(value ?? "").replace(/\D/g, "");
 }
 
+function normalizePaymentStatus(value) {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (["success", "succeeded", "completed", "paid"].includes(raw)) return "success";
+  if (["failed", "failure", "declined", "cancelled", "canceled"].includes(raw)) return "failed";
+  return "pending";
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -63,8 +70,10 @@ export default async function handler(req, res) {
     }
 
     // collectStatus: "success" | "failed" | "pending"
+    const normalizedCollectStatus = normalizePaymentStatus(data?.data?.collectStatus);
     const response = {
-      collectStatus: data.data.collectStatus,
+      collectStatus: normalizedCollectStatus,
+      rawCollectStatus: data?.data?.collectStatus ?? null,
       payerPhoneNumber: data.data.payerPhoneNumber,
     };
 
@@ -102,16 +111,17 @@ export default async function handler(req, res) {
           matchedUserId = existingPayment?.user_id ?? null;
         }
 
-        await supabase.from("payments").upsert({
+        const { error: upsertError } = await supabase.from("payments").upsert({
           external_id: String(externalId),
-          status: data.data.collectStatus,
+          status: normalizedCollectStatus,
           payer_phone: payerPhone,
           user_id: matchedUserId,
           updated_at: new Date().toISOString(),
         }, { onConflict: "external_id" });
+        if (upsertError) throw upsertError;
 
         // If payment succeeded, update the right user's plan using user_id first, phone as fallback.
-        if (data.data.collectStatus === "success") {
+        if (normalizedCollectStatus === "success") {
           const { data: payRow } = await supabase
             .from("payments")
             .select("plan,user_id,payer_phone")
