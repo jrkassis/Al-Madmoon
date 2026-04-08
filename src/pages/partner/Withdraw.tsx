@@ -154,10 +154,6 @@ export default function PartnerWithdraw() {
       setError(null);
       setNotice(null);
 
-      if (!isWithdrawDay) {
-        throw new Error('Withdraws are processed only on the 14th and 28th of each month.');
-      }
-
       const numericAmount = Number(amount);
       if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
         throw new Error('Please enter a valid withdrawal amount.');
@@ -201,7 +197,7 @@ export default function PartnerWithdraw() {
       {notice && <div className="glass-panel p-4 mb-4 text-sm text-emerald-700">{notice}</div>}
       {!isWithdrawDay && (
         <div className="glass-panel p-4 mb-4 text-sm text-amber-700">
-          Withdraws are processed only on the 14th and 28th of each month.
+          You can request a withdrawal anytime. Requests are processed on the 14th and 28th of each month.
         </div>
       )}
 

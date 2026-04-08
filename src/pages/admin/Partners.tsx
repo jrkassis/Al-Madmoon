@@ -32,10 +32,8 @@ type WithdrawRequestRow = {
   status: string;
   created_at: string;
   updated_at: string | null;
-  users?: {
-    full_name: string | null;
-    phone: string | null;
-  } | null;
+  partner_name?: string | null;
+  partner_phone?: string | null;
 };
 
 const PARTNER_OVERRIDE_KEY_PREFIX = 'partner_commission_override:';
@@ -150,14 +148,32 @@ export default function AdminPartners() {
 
     const withdrawQuery = await supabase
       .from('withdraw_requests')
-      .select('id, user_id, amount, payment_method, status, created_at, updated_at, users(full_name, phone)')
+      .select('id, user_id, amount, payment_method, status, created_at, updated_at')
       .order('created_at', { ascending: false });
     if (withdrawQuery.error) {
       throw new Error(
         'Withdraw requests table is not ready yet. Please create "withdraw_requests" in Supabase.'
       );
     }
-    setWithdrawRequests((withdrawQuery.data ?? []) as WithdrawRequestRow[]);
+    const partnerById = new Map(
+      partnersData.map((p) => [
+        p.id,
+        {
+          full_name: p.full_name,
+          phone: p.phone,
+        },
+      ])
+    );
+
+    const mappedWithdraws = ((withdrawQuery.data ?? []) as WithdrawRequestRow[]).map((w) => {
+      const partner = partnerById.get(w.user_id);
+      return {
+        ...w,
+        partner_name: partner?.full_name ?? null,
+        partner_phone: partner?.phone ?? null,
+      };
+    });
+    setWithdrawRequests(mappedWithdraws);
 
     setLoading(false);
   };
@@ -464,7 +480,7 @@ export default function AdminPartners() {
                 {withdrawRequests.map((w) => (
                   <tr key={w.id} className="border-b border-slate-100 last:border-0">
                     <td className="p-4 text-slate-700">
-                      {w.users?.full_name?.trim() || w.users?.phone || w.user_id.slice(0, 8)}
+                      {w.partner_name?.trim() || w.partner_phone || w.user_id.slice(0, 8)}
                     </td>
                     <td className="p-4 text-slate-700">${Number(w.amount).toFixed(2)}</td>
                     <td className="p-4 text-slate-600">{w.payment_method || '-'}</td>
