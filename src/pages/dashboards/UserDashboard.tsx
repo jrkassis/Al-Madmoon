@@ -148,6 +148,7 @@ export default function UserDashboard() {
     if (typeof window === "undefined") return;
 
     const params = new URLSearchParams(window.location.search);
+    const externalId = params.get("externalId");
     const paymentFromQuery = params.get("payment");
     const paymentFromStorage = window.localStorage.getItem("payment_success") === "1";
     const shouldShow = paymentFromQuery === "success" || paymentFromStorage;
@@ -159,6 +160,7 @@ export default function UserDashboard() {
 
     if (paymentFromQuery === "success") {
       params.delete("payment");
+      params.delete("externalId");
       const nextQuery = params.toString();
       const cleanUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
       window.history.replaceState({}, "", cleanUrl);
@@ -166,6 +168,42 @@ export default function UserDashboard() {
 
     const timeoutId = window.setTimeout(() => setShowPaymentSuccess(false), 5000);
     return () => window.clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const paymentFromQuery = params.get("payment");
+    const externalId = params.get("externalId");
+    if (paymentFromQuery !== "success" || !externalId) return;
+
+    let cancelled = false;
+    const syncStatus = async () => {
+      for (let i = 0; i < 5; i++) {
+        try {
+          const res = await fetch("/api/whish-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ externalId }),
+          });
+          const data = await res.json();
+          const status = String(data?.collectStatus ?? "").toLowerCase();
+          if (status === "success" || status === "failed") {
+            if (!cancelled) {
+              window.location.reload();
+            }
+            return;
+          }
+        } catch {
+          // keep retrying briefly
+        }
+        await new Promise((r) => setTimeout(r, 1800));
+      }
+    };
+    void syncStatus();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleDeleteAccount = async (e: React.FormEvent) => {
