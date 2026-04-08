@@ -42,6 +42,7 @@ export default async function handler(req, res) {
     process.env.WHISH_WEBSITE_URL || originSite;
 
   try {
+    console.log("[whish-status] Poll start", { externalId: String(externalId) });
     const whishRes = await fetch(`${BASE_URL}/payment/collect/status`, {
       method: "POST",
       headers: {
@@ -55,6 +56,13 @@ export default async function handler(req, res) {
     });
 
     const data = await whishRes.json();
+    console.log("[whish-status] Whish response", {
+      externalId: String(externalId),
+      httpStatus: whishRes.status,
+      apiStatus: data?.status,
+      rawCollectStatus: data?.data?.collectStatus ?? null,
+      hasPayerPhone: Boolean(data?.data?.payerPhoneNumber),
+    });
 
     if (!data.status) {
       console.warn("[whish-status] Whish error", {
@@ -119,6 +127,11 @@ export default async function handler(req, res) {
           updated_at: new Date().toISOString(),
         }, { onConflict: "external_id" });
         if (upsertError) throw upsertError;
+        console.log("[whish-status] Payments upsert ok", {
+          externalId: String(externalId),
+          normalizedCollectStatus,
+          matchedUserId,
+        });
 
         // If payment succeeded, update the right user's plan using user_id first, phone as fallback.
         if (normalizedCollectStatus === "success") {
@@ -129,26 +142,36 @@ export default async function handler(req, res) {
             .single();
           if (payRow?.plan) {
             if (payRow.user_id) {
-              await supabase
+              const { error: uErr } = await supabase
                 .from("users")
                 .update({ plan: payRow.plan })
                 .eq("id", payRow.user_id);
+              if (uErr) throw uErr;
             } else if (payRow.payer_phone) {
               const payPhone = digitsOnlyPhone(payRow.payer_phone);
               const payPhoneCandidates = [
                 payPhone,
                 payPhone.replace(/^0+/, ""),
               ].filter(Boolean);
-              await supabase
+              const { error: uErr } = await supabase
                 .from("users")
                 .update({ plan: payRow.plan })
                 .in("phone", [...new Set(payPhoneCandidates)]);
+              if (uErr) throw uErr;
             }
+            console.log("[whish-status] User plan update attempted", {
+              externalId: String(externalId),
+              plan: payRow.plan,
+              hasUserId: Boolean(payRow.user_id),
+            });
           }
         }
       }
     } catch (e) {
-      console.warn("[whish-status] Supabase logging skipped:", e?.message ?? e);
+      console.warn("[whish-status] Supabase update failed", {
+        externalId: String(externalId),
+        error: e?.message ?? e,
+      });
     }
 
     return res.status(200).json(response);

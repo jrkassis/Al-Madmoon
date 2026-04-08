@@ -179,6 +179,13 @@ export default function UserDashboard() {
 
     let cancelled = false;
     const syncStatus = async () => {
+      // Force local callback fallback first (useful when external callbacks to localhost are not reachable).
+      try {
+        await fetch(`/api/whish-callback?status=success&externalId=${encodeURIComponent(externalId)}`);
+      } catch {
+        // Non-blocking; continue polling fallback.
+      }
+
       for (let i = 0; i < 5; i++) {
         try {
           const res = await fetch("/api/whish-status", {

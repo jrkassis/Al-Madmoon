@@ -26,6 +26,10 @@ export default async function handler(req, res) {
             updated_at: new Date().toISOString(),
           }, { onConflict: "external_id" });
           if (upsertErr) throw upsertErr;
+          console.log("[whish-callback] Payments upsert success", {
+            externalId: String(externalId),
+            status: "success",
+          });
           // Optionally also flip a subscriptions table if you have one:
           // await supabase.from("subscriptions").update({ active: true, activated_at: new Date().toISOString() }).eq("external_id", externalId);
 
@@ -46,6 +50,13 @@ export default async function handler(req, res) {
               body: JSON.stringify({ externalId, currency: "USD" }),
             });
             const data = await resp.json();
+            console.log("[whish-callback] Status lookup response", {
+              externalId: String(externalId),
+              httpStatus: resp.status,
+              apiStatus: data?.status,
+              rawCollectStatus: data?.data?.collectStatus ?? null,
+              hasPayerPhone: Boolean(data?.data?.payerPhoneNumber),
+            });
             if (data?.status && data?.data?.payerPhoneNumber) {
               const { data: payRow } = await supabase
                 .from("payments")
@@ -57,14 +68,24 @@ export default async function handler(req, res) {
                   .from("users")
                   .update({ plan: payRow.plan })
                   .eq("phone", data.data.payerPhoneNumber);
+                console.log("[whish-callback] User plan update by phone attempted", {
+                  externalId: String(externalId),
+                  plan: payRow.plan,
+                });
               }
             }
           } catch (e) {
-            console.warn("[whish-callback] Could not update user plan from status:", e?.message ?? e);
+            console.warn("[whish-callback] Could not update user plan from status:", {
+              externalId: String(externalId),
+              error: e?.message ?? e,
+            });
           }
         }
       } catch (e) {
-        console.warn("[whish-callback] Supabase update skipped:", e?.message ?? e);
+        console.warn("[whish-callback] Supabase update skipped:", {
+          externalId: String(externalId),
+          error: e?.message ?? e,
+        });
       }
       console.log(`[whish-callback] SUCCESS — externalId=${externalId}`);
       return res.status(200).json({ received: true, status: "success" });
@@ -81,9 +102,16 @@ export default async function handler(req, res) {
             updated_at: new Date().toISOString(),
           }, { onConflict: "external_id" });
           if (upsertErr) throw upsertErr;
+          console.log("[whish-callback] Payments upsert success", {
+            externalId: String(externalId),
+            status: "failed",
+          });
         }
       } catch (e) {
-        console.warn("[whish-callback] Supabase update skipped:", e?.message ?? e);
+        console.warn("[whish-callback] Supabase update skipped:", {
+          externalId: String(externalId),
+          error: e?.message ?? e,
+        });
       }
       console.warn(`[whish-callback] FAILURE — externalId=${externalId}`);
       return res.status(200).json({ received: true, status: "failure" });

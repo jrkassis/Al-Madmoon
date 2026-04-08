@@ -31,6 +31,13 @@ export default async function handler(req, res) {
   }
 
   const { plan, billing = "monthly", externalId, userId, userPhone } = req.body;
+  console.log("[whish-payment] Create session start", {
+    externalId: String(externalId ?? ""),
+    plan,
+    billing,
+    hasUserId: Boolean(userId),
+    hasUserPhone: Boolean(userPhone),
+  });
 
   if (!plan || !PLANS[plan]) {
     return res.status(400).json({ error: "Invalid plan. Must be 'pro' or 'ultimate'." });
@@ -80,9 +87,15 @@ export default async function handler(req, res) {
           payer_phone: userPhone ? String(userPhone) : null,
           created_at: new Date().toISOString(),
         }, { onConflict: "external_id" });
+        console.log("[whish-payment] Pending payment upsert ok", {
+          externalId: String(externalId),
+        });
       }
     } catch (e) {
-      console.warn("[whish-payment] Supabase logging skipped:", e?.message ?? e);
+      console.warn("[whish-payment] Supabase logging skipped:", {
+        externalId: String(externalId),
+        error: e?.message ?? e,
+      });
     }
 
     const whishRes = await fetch(`${BASE_URL}/payment/whish`, {
@@ -113,6 +126,10 @@ export default async function handler(req, res) {
       });
     }
 
+    console.log("[whish-payment] Whish session created", {
+      externalId: String(externalId),
+      hasCollectUrl: Boolean(data?.data?.collectUrl),
+    });
     return res.status(200).json({ collectUrl: data.data.collectUrl });
   } catch (err) {
     console.error("[whish-payment] Error:", err);
