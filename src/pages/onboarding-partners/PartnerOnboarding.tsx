@@ -274,8 +274,7 @@ export default function PartnerOnboarding() {
 
             if (error) throw error;
 
-            // Success! Navigate to confirmation page
-            navigate("/become-a-partner/success", { state: { partnerName: formData.fullName } });
+            navigate("/partner", { state: { partnerName: formData.fullName } });
         } catch (error) {
             console.error("Submission error:", error);
             setErrors({
