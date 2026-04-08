@@ -169,8 +169,12 @@ export default function Paywall() {
       startPolling(externalId);
       setStep("whish-waiting");
 
-      // Open Whish in the same tab (most reliable, avoids popup blockers)
-      window.location.href = data.collectUrl;
+      // Keep this page alive for polling by opening Whish in a new tab.
+      // If popup is blocked, fallback to same-tab redirect.
+      const opened = window.open(data.collectUrl, "_blank", "noopener,noreferrer");
+      if (!opened) {
+        window.location.href = data.collectUrl;
+      }
     } catch (err) {
       setError(err.message ?? "Unexpected error. Please try again.");
     } finally {
