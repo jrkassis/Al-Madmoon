@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const { plan, billing = "monthly", externalId } = req.body;
+  const { plan, billing = "monthly", externalId, userId, userPhone } = req.body;
 
   if (!plan || !PLANS[plan]) {
     return res.status(400).json({ error: "Invalid plan. Must be 'pro' or 'ultimate'." });
@@ -76,6 +76,8 @@ export default async function handler(req, res) {
           invoice,
           plan,
           billing,
+          user_id: userId || null,
+          payer_phone: userPhone ? String(userPhone) : null,
           created_at: new Date().toISOString(),
         }, { onConflict: "external_id" });
       }

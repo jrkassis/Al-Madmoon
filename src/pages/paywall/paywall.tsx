@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { CreditCard, Wallet, ArrowLeft, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { supabase } from "../../lib/supabase";
 
 // ─── Plan config ──────────────────────────────────────────────────────────────
 // Replace the 4 lsUrl values with your real Lemon Squeezy checkout URLs.
@@ -137,10 +138,25 @@ export default function Paywall() {
     const externalId = generateExternalId();
 
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const userId = user?.id ?? null;
+
+      let userPhone = null;
+      if (userId) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("phone")
+          .eq("id", userId)
+          .maybeSingle();
+        userPhone = profile?.phone ?? null;
+      }
+
       const res = await fetch("/api/whish-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planKey, billing, externalId }),
+        body: JSON.stringify({ plan: planKey, billing, externalId, userId, userPhone }),
       });
       const data = await res.json();
 

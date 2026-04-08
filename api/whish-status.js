@@ -5,6 +5,10 @@
 const BASE_URL =
   process.env.WHISH_BASE_URL || "https://api.sandbox.whish.money/itel-service/api";
 
+function digitsOnlyPhone(value) {
+  return String(value ?? "").replace(/\D/g, "");
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -69,25 +73,67 @@ export default async function handler(req, res) {
       if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
         const { createClient } = await import("@supabase/supabase-js");
         const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-        const upsertRes = await supabase.from("payments").upsert({
+        const payerPhoneRaw = data?.data?.payerPhoneNumber ?? null;
+        const payerPhone = digitsOnlyPhone(payerPhoneRaw) || null;
+
+        let matchedUserId = null;
+        if (payerPhone) {
+          const phoneCandidates = [
+            payerPhone,
+            payerPhone.replace(/^0+/, ""),
+          ].filter(Boolean);
+          const uniquePhoneCandidates = [...new Set(phoneCandidates)];
+
+          const { data: byPhoneUser } = await supabase
+            .from("users")
+            .select("id")
+            .in("phone", uniquePhoneCandidates)
+            .limit(1)
+            .maybeSingle();
+          matchedUserId = byPhoneUser?.id ?? null;
+        }
+
+        if (!matchedUserId) {
+          const { data: existingPayment } = await supabase
+            .from("payments")
+            .select("user_id")
+            .eq("external_id", String(externalId))
+            .maybeSingle();
+          matchedUserId = existingPayment?.user_id ?? null;
+        }
+
+        await supabase.from("payments").upsert({
           external_id: String(externalId),
           status: data.data.collectStatus,
-          payer_phone: data.data.payerPhoneNumber ?? null,
+          payer_phone: payerPhone,
+          user_id: matchedUserId,
           updated_at: new Date().toISOString(),
         }, { onConflict: "external_id" });
 
-        // If payment succeeded and we know the payer phone, update user's plan from the stored payment row
-        if (data.data.collectStatus === "success" && data.data.payerPhoneNumber) {
+        // If payment succeeded, update the right user's plan using user_id first, phone as fallback.
+        if (data.data.collectStatus === "success") {
           const { data: payRow } = await supabase
             .from("payments")
-            .select("plan")
+            .select("plan,user_id,payer_phone")
             .eq("external_id", String(externalId))
             .single();
           if (payRow?.plan) {
-            await supabase
-              .from("users")
-              .update({ plan: payRow.plan })
-              .eq("phone", data.data.payerPhoneNumber);
+            if (payRow.user_id) {
+              await supabase
+                .from("users")
+                .update({ plan: payRow.plan })
+                .eq("id", payRow.user_id);
+            } else if (payRow.payer_phone) {
+              const payPhone = digitsOnlyPhone(payRow.payer_phone);
+              const payPhoneCandidates = [
+                payPhone,
+                payPhone.replace(/^0+/, ""),
+              ].filter(Boolean);
+              await supabase
+                .from("users")
+                .update({ plan: payRow.plan })
+                .in("phone", [...new Set(payPhoneCandidates)]);
+            }
           }
         }
       }
