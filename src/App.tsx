@@ -46,7 +46,6 @@ export default function App() {
           <Route path="contact" element={<Contact />} />
           <Route path="links" element={<Links />} />
           <Route path="become-a-partner" element={<BecomePartner />} />
-          <Route path="*" element={<ErrorPage />} />
           <Route path="/auth/signin" element={<SignIn />} />
           {/* Partner onboarding - apply form */}
         <Route path="/become-a-partner/apply" element={<PartnerOnboarding />} />
@@ -132,6 +131,7 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<ErrorPage />} />
         </Route>
 
         {/* Auth routes - no layout */}

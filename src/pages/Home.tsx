@@ -674,12 +674,12 @@ export default function Home() {
               <br />
             </motion.p>
             <motion.div variants={itemVariants}>
-              <a href="/onboarding" rel="noopener noreferrer">
+              <Link to="/auth/signup">
                 <Button variant="ghost" size="lg" className="btn-icon cta-btn">
                   <MessageCircle size={16} />
                   Start for free
                 </Button>
-              </a>
+              </Link>
             </motion.div>
           </div>
         </motion.div>

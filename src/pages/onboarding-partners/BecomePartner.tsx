@@ -511,7 +511,7 @@ export default function BecomePartner() {
             Get Commission Now <ArrowRight size={20} />
           </Link>
           <p className="af-cta-section__fine">
-              Already a partner? <Link to="/partner/login" className="af-cta-section__link">Sign in to your dashboard</Link>
+              Already a partner? <Link to="/auth/signin" className="af-cta-section__link">Sign in to your dashboard</Link>
           </p>
         </AnimatedSection>
       </section>

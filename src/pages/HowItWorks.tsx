@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { Button } from "../components/ui/Button";
 import {
   MessageCircle,
@@ -181,12 +182,12 @@ export default function HowItWorks() {
       </motion.div>
 
       <motion.div variants={fadeIn} className="hiw-cta">
-        <a href="/onboarding" rel="noopener noreferrer">
+        <Link to="/auth/signup">
           <Button variant="ghost" size="lg" className="btn-icon cta-btn">
             <MessageCircle size={16} />
             Start for free
           </Button>
-        </a>
+        </Link>
       </motion.div>
     </motion.div>
   );

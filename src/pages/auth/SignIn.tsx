@@ -291,7 +291,7 @@ export default function SignIn() {
               </Link>
               <span>•</span>
               <Link
-                to="/support"
+                to="/contact"
                 className="hover:text-slate-700 transition-colors"
               >
                 Support

@@ -162,7 +162,7 @@ export function Layout() {
                       </Button>
                     </Link>
 
-                    <Link to="/onboarding">
+                    <Link to="/auth/signup">
                       <Button variant="primary" className="w-full icon-gap">
                         <LogIn size={18} />
                         Get Started
