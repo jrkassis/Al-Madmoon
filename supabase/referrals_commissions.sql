@@ -142,20 +142,34 @@ end $$;
 -- Admin/service role should perform inserts/updates.
 
 -- 7) Attach referral utility to be called at signup
-create or replace function public.attach_referral(p_ref_code text, p_referred_user uuid)
+drop function if exists public.attach_referral(text, uuid);
+create function public.attach_referral(p_affiliate_code text, p_referred_user uuid)
 returns void
 language plpgsql
 security definer
+set search_path = public
 as $$
 declare
   v_referrer uuid;
   v_existing uuid;
+  v_code text;
 begin
-  if p_ref_code is null or length(trim(p_ref_code)) = 0 then
+  v_code := upper(trim(coalesce(p_affiliate_code, '')));
+  if v_code = '' then
     return;
   end if;
 
-  select id into v_referrer from public.users where upper(trim(ref_code)) = upper(trim(p_ref_code)) limit 1;
+  -- Source of truth for partner referral code is affiliate_code.
+  -- Keep ref_code fallback for legacy data.
+  select id
+  into v_referrer
+  from public.users
+  where role = 'partner'
+    and (
+      upper(trim(coalesce(affiliate_code, ''))) = v_code
+      or upper(trim(coalesce(ref_code, ''))) = v_code
+    )
+  limit 1;
   if v_referrer is null then
     return;
   end if;
@@ -172,10 +186,18 @@ begin
   end if;
 
   insert into public.referrals (referrer_user_id, referred_user_id, referral_code, status)
-  values (v_referrer, p_referred_user, upper(trim(p_ref_code)), 'pending');
+  values (v_referrer, p_referred_user, v_code, 'pending');
 
   -- also write helper pointer into users table for legacy UI
-  update public.users set is_referred = v_referrer where id = p_referred_user and coalesce(is_referred,'') = '';
+  update public.users
+  set
+    is_referred = v_referrer,
+    ref_code = case
+      when coalesce(trim(ref_code), '') = '' then v_code
+      else ref_code
+    end
+  where id = p_referred_user
+    and is_referred is null;
 end;
 $$;
 

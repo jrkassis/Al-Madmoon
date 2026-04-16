@@ -169,12 +169,23 @@ export default function AdminClients() {
     try {
       setSaving(true);
       setError(null);
+      // Remove dependent payments first to satisfy FK constraints.
+      const { error: paymentsDeleteError } = await supabase
+        .from('payments')
+        .delete()
+        .eq('user_id', id);
+      if (paymentsDeleteError) throw paymentsDeleteError;
+
       const { error: deleteError } = await supabase.from('users').delete().eq('id', id);
       if (deleteError) throw deleteError;
       setMenuOpenFor(null);
       await loadUsers();
     } catch (e: any) {
-      setError(e?.message ?? 'Failed to delete user');
+      if (e?.code === '23503') {
+        setError('Cannot delete this user because linked records still exist.');
+      } else {
+        setError(e?.message ?? 'Failed to delete user');
+      }
     } finally {
       setSaving(false);
     }

@@ -188,7 +188,7 @@ export default function SignUp() {
 
       const { data: existingPhone, error: existingPhoneError } = await supabase
         .from("users")
-        .select("id")
+        .select("id, email")
         .eq("phone", phoneToSave)
         .maybeSingle();
 
@@ -198,41 +198,67 @@ export default function SignUp() {
         return;
       }
 
-      if (existingPhone?.id) {
+      if (existingPhone?.id && existingPhone.email) {
         setErrorMessage("This phone number is already in use.");
         focusFieldWithError("phone", "This phone number is already in use.");
         setIsSubmitting(false);
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("signup-user", {
-        body: {
-          email: trimmedEmail,
-          password: formData.password,
-          full_name: formData.name.trim(),
-          phone: phoneToSave,
-          ref_code: referralCodeToSave,
-        },
-      });
+      const signupPayload = {
+        email: trimmedEmail,
+        password: formData.password,
+        full_name: formData.name.trim(),
+        phone: phoneToSave,
+        ref_code: referralCodeToSave,
+      };
 
-      setIsSubmitting(false);
+      let signupOk = false;
+      let signupErrorMessage = "";
+      let shouldFallbackToEdge = false;
 
-      if (error) {
-        const isNetworkError = error.name === "FunctionsFetchError";
-        applyDuplicateFieldError(error.message || "");
-        setErrorMessage(
-          isNetworkError
-            ? "Could not reach signup function. Check deployment name, CORS, and project URL."
-            : error.message || "Could not create account. Please try again.",
-        );
-        return;
+      // Prefer local/serverless API route. In local dev this can be unavailable
+      // if the separate dev API server is not running, so we fallback to the
+      // Supabase edge function.
+      try {
+        const response = await fetch("/api/signup-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(signupPayload),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data?.ok) {
+          signupOk = true;
+        } else if (response.status >= 500) {
+          // Local API route is unavailable/broken in this environment.
+          // Try Supabase edge function before failing the signup.
+          shouldFallbackToEdge = true;
+        } else {
+          signupErrorMessage = String(data?.error || "Could not create account. Please try again.");
+        }
+      } catch {
+        // Fallback to edge function below.
+        shouldFallbackToEdge = true;
       }
 
-      if (!data?.ok) {
-        applyDuplicateFieldError(String(data?.error || ""));
-        setErrorMessage(
-          data?.error || "Could not create account. Please try again.",
-        );
+      if (!signupOk && shouldFallbackToEdge) {
+        const { data: fnData, error: fnError } = await supabase.functions.invoke("signup-user", {
+          body: signupPayload,
+        });
+        if (!fnError && fnData?.ok) {
+          signupOk = true;
+        } else {
+          signupErrorMessage = String(
+            fnError?.message || fnData?.error || "Could not create account. Please try again."
+          );
+        }
+      }
+
+      setIsSubmitting(false);
+      if (!signupOk) {
+        const message = signupErrorMessage || "Could not create account. Please try again.";
+        applyDuplicateFieldError(message);
+        setErrorMessage(message);
         return;
       }
 
@@ -249,36 +275,7 @@ export default function SignUp() {
         return;
       }
 
-      // Persist referral code to public.users.ref_code after auth user exists
-      try {
-        if (referralCodeToSave) {
-          const {
-            data: { user: currentUser },
-          } = await supabase.auth.getUser();
-          const currentUserId = currentUser?.id;
-          if (currentUserId) {
-            await supabase
-              .from("users")
-              .update({ ref_code: referralCodeToSave })
-              .eq("id", currentUserId);
-
-            // Also resolve the partner by affiliate_code and set is_referred
-            const { data: partnerProfile, error: partnerErr } = await supabase
-              .from("users")
-              .select("id")
-              .eq("affiliate_code", referralCodeToSave)
-              .maybeSingle();
-            if (!partnerErr && partnerProfile?.id) {
-              await supabase
-                .from("users")
-                .update({ is_referred: partnerProfile.id })
-                .eq("id", currentUserId);
-            }
-          }
-        }
-      } catch {
-        // Non-blocking; ignore write failure here
-      }
+      // Referral attribution is handled on the server-side signup path.
 
       setSuccessMessage("Account created successfully.");
       setFormData({
@@ -293,7 +290,7 @@ export default function SignUp() {
       navigate("/pricing");
     } catch (invokeError: unknown) {
       setIsSubmitting(false);
-      let parsedMessage = "Failed to send a request to the Edge Function.";
+      let parsedMessage = "Failed to send signup request.";
 
       if (invokeError instanceof Error) {
         parsedMessage = invokeError.message || parsedMessage;
