@@ -336,7 +336,7 @@ export default function AdminAnalytics() {
                     <td className="py-3">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                          className="w-6 h-6 rounded-full flex items-center justify-center text-black text-xs font-bold shrink-0"
                           style={{ background: PLAN_COLORS[u.plan ?? 'free'] }}
                         >
                           {(u.full_name ?? u.phone ?? u.id).charAt(0).toUpperCase()}
@@ -348,7 +348,7 @@ export default function AdminAnalytics() {
                     </td>
                     <td className="py-3">
                       <span
-                        className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold uppercase"
+                        className="px-2 py-0.5 rounded-full text-black text-[10px] font-semibold uppercase"
                         style={{ background: PLAN_COLORS[u.plan ?? 'free'] }}
                       >
                         {u.plan ?? 'free'}

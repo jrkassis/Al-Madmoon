@@ -10,6 +10,7 @@ type UserRow = {
   plan: string | null;
   role: 'admin' | 'client' | 'partner' | null;
   created_at: string;
+  total_messages?: number;
 };
 
 type ClientView = {
@@ -20,6 +21,7 @@ type ClientView = {
   rawPlan: string | null;
   role: 'admin' | 'client' | 'partner';
   joined: string;
+  queries: number;
 };
 
 type UserForm = {
@@ -75,7 +77,7 @@ export default function AdminClients() {
     setLoading(true);
     const { data, error: fetchError } = await supabase
       .from('users')
-      .select('id, full_name, phone, plan, role, created_at')
+      .select('id, full_name, phone, plan, role, created_at, total_messages')
       .order('created_at', { ascending: false });
     if (fetchError) throw fetchError;
     setUsers((data as UserRow[]) ?? []);
@@ -201,6 +203,7 @@ export default function AdminClients() {
         rawPlan: normalizePlanKey(u.plan),
         role: normalizeRole(u.role),
         joined: new Date(u.created_at).toISOString().split('T')[0],
+        queries: u.total_messages ?? 0,
       })),
     [users]
   );
@@ -303,6 +306,7 @@ export default function AdminClients() {
                   <th className="text-left p-4 font-semibold text-slate-600">Contact</th>
                   <th className="text-left p-4 font-semibold text-slate-600">Plan</th>
                   <th className="text-left p-4 font-semibold text-slate-600">Role</th>
+                  <th className="text-left p-4 font-semibold text-slate-600">Queries</th>
                   <th className="text-left p-4 font-semibold text-slate-600">Joined</th>
                   <th className="text-left p-4 font-semibold text-slate-600"></th>
                 </tr>
@@ -330,6 +334,7 @@ export default function AdminClients() {
                         {client.role}
                       </span>
                     </td>
+                    <td className="p-4 text-slate-600">{client.queries}</td>
                     <td className="p-4 text-slate-600">{client.joined}</td>
                     <td className="p-4">
                       <Button
@@ -352,7 +357,7 @@ export default function AdminClients() {
                 ))}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-slate-500">
+                    <td colSpan={7} className="p-6 text-center text-slate-500">
                       No clients found.
                     </td>
                   </tr>
