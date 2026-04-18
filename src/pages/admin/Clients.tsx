@@ -396,7 +396,7 @@ export default function AdminClients() {
       {menuOpenFor && menuPos && (
         <div
           className="fixed w-32 rounded-lg border border-slate-200 bg-white shadow-md z-1000"
-          style={{ top: `${menuPos.top}px`, left: `${menuPos.left}px` }}
+          style={{ top: `${menuPos.top / 2}px`, left: `${menuPos.left}px` }}
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -416,8 +416,8 @@ export default function AdminClients() {
         </div>
       )}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-xl bg-white shadow-xl border border-slate-200 p-5">
+        <div className="fixed inset-0 z-9999 bg-black/30 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-md bg-white rounded-xl shadow-xl border border-slate-200 p-5 my-auto">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               {editingUserId ? 'Edit User' : 'Create User'}
             </h2>
