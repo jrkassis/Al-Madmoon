@@ -13,6 +13,7 @@ interface UserProfile {
   plan: string;
   role: string;
   created_at: string;
+  total_messages?: number;
 }
 
 interface SubscriptionInfo {
@@ -54,7 +55,7 @@ export default function UserDashboard() {
         // First try with maybeSingle() to handle potential duplicates
         const { data: profileData, error: profileError } = await supabase
           .from("users")
-          .select("id, full_name, email, phone, plan, role, created_at")
+          .select("id, full_name, email, phone, plan, role, created_at, total_messages")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -93,38 +94,81 @@ export default function UserDashboard() {
           ultimate: 600,
         };
 
-        // Fetch monthly usage from api_costs table using user_id
-        let monthlyUsed = 0;
+        // Usage is driven by users.total_messages
+        const monthlyUsed = profileData.total_messages ?? 0;
         const now = new Date();
-        const startOfMonth = new Date(
-          Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
-        );
+        let effectivePlanKey = planKey;
+        let renewalDate: Date;
+        let billingCycle: "monthly" | "annual" = "monthly";
 
-        const { count, error: countError } = await supabase
-          .from("api_costs")
-          .select("id", { count: "exact", head: true })
-          .eq("user_phone", profileData.phone?.trim() || "")
-          .gte("created_at", startOfMonth.toISOString());
+        if (planKey !== "free") {
+          try {
+            const { data: latestPayment, error: paymentError } = await supabase
+              .from("payments")
+              .select("billing, created_at")
+              .eq("user_id", user.id)
+              .eq("status", "success")
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
 
-        if (countError) {
-          console.warn("Failed to fetch usage count:", countError);
-          monthlyUsed = 0;
+            if (paymentError) {
+              throw paymentError;
+            }
+
+            const billingValue = String(latestPayment?.billing ?? "monthly").toLowerCase();
+            billingCycle =
+              billingValue === "annual" || billingValue === "yearly"
+                ? "annual"
+                : "monthly";
+
+            const startDate = latestPayment?.created_at
+              ? new Date(latestPayment.created_at)
+              : new Date(profileData.created_at);
+
+            renewalDate = new Date(startDate);
+            if (billingCycle === "annual") {
+              renewalDate.setUTCFullYear(renewalDate.getUTCFullYear() + 1);
+            } else {
+              renewalDate.setUTCMonth(renewalDate.getUTCMonth() + 1);
+            }
+          } catch (paymentLookupError) {
+            console.warn("Failed to read payment billing cycle, falling back to monthly:", paymentLookupError);
+            renewalDate = new Date(profileData.created_at);
+            renewalDate.setUTCMonth(renewalDate.getUTCMonth() + 1);
+          }
+
+          // Keep existing behavior: once subscription period ends, downgrade to free.
+          if (now >= renewalDate) {
+            try {
+              const { error: downgradeError } = await supabase
+                .from("users")
+                .update({ plan: "free" })
+                .eq("id", user.id);
+              if (downgradeError) throw downgradeError;
+              effectivePlanKey = "free";
+              setProfile({ ...profileData, plan: "free" });
+            } catch (downgradeErr) {
+              console.warn("Failed to auto-downgrade expired plan:", downgradeErr);
+            }
+          }
         } else {
-          monthlyUsed = count ?? 0;
+          renewalDate = new Date(profileData.created_at);
+          renewalDate.setUTCMonth(renewalDate.getUTCMonth() + 1);
         }
 
-        const totalPrompts = planQuota[planKey];
+        const effectivePlanLabel =
+          effectivePlanKey === "free"
+            ? "Free"
+            : effectivePlanKey === "pro"
+              ? "Pro"
+              : "Ultimate";
+        const totalPrompts = planQuota[effectivePlanKey];
         const remainingPrompts = Math.max(0, totalPrompts - monthlyUsed);
 
-        // Calculate renewal date (approximately 30 days from creation)
-        const createdDate = new Date(profileData.created_at);
-        const renewalDate = new Date(
-          createdDate.getTime() + 30 * 24 * 60 * 60 * 1000
-        );
-
         const sub: SubscriptionInfo = {
-          plan: planLabel,
-          planLabel,
+          plan: effectivePlanLabel,
+          planLabel: effectivePlanLabel,
           renewalDate: renewalDate.toISOString(),
           remainingPrompts,
           totalPrompts,
