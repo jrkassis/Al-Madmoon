@@ -14,7 +14,7 @@ const fadeIn = {
 
 export default function Pricing() {
   const { isAuthenticated } = useAuth();
-  const [billing, setBilling] = useState<"monthly" | "annual">("annual");
+  const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
   const plans = useMemo(
     () => [
@@ -88,6 +88,22 @@ export default function Pricing() {
         <motion.p variants={fadeIn} className="pricing-subtitle">
           Choose a plan and start getting AI-powered betting insights sent to your WhatsApp.
         </motion.p>
+        <motion.div
+          variants={fadeIn}
+          style={{
+            marginTop: "1rem",
+            marginBottom: "0.75rem",
+            fontWeight: 900,
+            fontSize: "clamp(1.75rem, 5vw, 3.25rem)",
+            letterSpacing: "0.02em",
+            lineHeight: 1.2,
+            textTransform: "uppercase",
+            color: "var(--color-brand-700)",
+            textAlign: "center",
+          }}
+        >
+          LIMITED TIME OFFER 20% OFF
+        </motion.div>
 
         <motion.div variants={fadeIn} className={`billing-toggle ${billing === "annual" ? "annual-selected" : ""}`} role="tablist" aria-label="Billing period">
           <button
@@ -122,6 +138,11 @@ export default function Pricing() {
               </div>
 
               <div className={billing === "annual" ? "pricing-amount-wrapper-2" : "pricing-amount-wrapper"}>
+                {billing === "monthly" && (
+                  <span className="original-annual" style={{ textDecoration: "line-through" }}>
+                    {plan.id === "ultimate" ? "$42.00" : "$25.00"}
+                  </span>
+                )}
                 {billing === "annual" && price.originalAnnual && (
                   <span className="original-annual">{price.originalAnnual}</span>
                 )}
